@@ -1,9 +1,11 @@
 package com.hamoyeah.contents.Entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -13,9 +15,9 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public class BaseTime {
     @CreatedDate
+    @Column(updatable = false)
     private LocalDateTime created_at;
-    @CreatedDate
-    private LocalDateTime reviewed_at;
-    @CreatedDate
-    private LocalDateTime paid_at;
+
+    @LastModifiedDate
+    private LocalDateTime modified_at;
 }
