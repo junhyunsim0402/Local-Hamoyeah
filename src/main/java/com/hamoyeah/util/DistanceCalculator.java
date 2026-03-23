@@ -17,10 +17,9 @@ public class DistanceCalculator {
     }   // 두 위치 사이의 거리를 구하는 함수
 
     public Map<String,Integer> countInRange(double userLat,double userLng){
-        // 유저가 찍은 지점을 기준으로 반경 500m안에 cctv, 가로동의 개수를 반환하는 함수
         Map<String,Integer> result=new HashMap<>();
-        int cctvCount=0; int streeLightCount=0;
-        result.put("cctv",cctvCount); result.put("streetLight",streeLightCount);
+        int cctvCount=0; int streetLightCount=0;
+        result.put("cctv",cctvCount); result.put("streetLight",streetLightCount);
         return result;
-    }
+    }// 유저가 찍은 지점을 기준으로 반경 500m안에 cctv, 가로동의 개수를 반환하는 함수
 }
