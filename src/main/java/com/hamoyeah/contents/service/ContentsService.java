@@ -6,6 +6,7 @@ import com.hamoyeah.contents.repository.CategoryRepository;
 import com.hamoyeah.contents.repository.ContentsRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -19,6 +20,9 @@ public class ContentsService {
     private final ContentsRepository contentsRepository;
     private final CategoryRepository categoryRepository;
     private final WebClient webClient = WebClient.builder().build();
+
+    @Value("${api.service.key}")
+    private String serviceKey;
 
     public void  contentApi(String baseUrl, int categoryId){
 
@@ -58,6 +62,48 @@ public class ContentsService {
         }
     }
 
+    public void dataApi(String baseUrl, int categoryId){
+        String checkUrl = baseUrl + "?page=1&perPage=1&serviceKey=" + serviceKey;
+        Map<String, Object> checkRes = webClient.get()
+                .uri(checkUrl)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
+        int totalCount = Integer.parseInt(String.valueOf(checkRes.get("totalCount")));
+
+        String finalUrl = baseUrl + "?page=1&perPage=" + totalCount + "&serviceKey="+serviceKey;
+        Map<String, Object> response = webClient.get()
+                .uri(finalUrl)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
+        List<Map<String, Object>> dataList = (List<Map<String, Object>>) response.get("data");
+
+        CategoryEntity category = categoryRepository.findById(categoryId).orElseThrow();
+
+        if (dataList != null) {
+            for (Map<String, Object> item : dataList) {
+                String title = getTitleFromJson(item);
+                String address = getAddressFromJson(item);
+                String type = String.valueOf(item.getOrDefault("종류", "공공미술/작품"));
+
+                if (!contentsRepository.existsByContentTitle(title)) {
+                    ContentsEntity entity = ContentsEntity.builder()
+                            .contentTitle(title)
+                            .contentDes(type)
+                            .address(address)
+                            .latitude(0.0)
+                            .longitude(0.0)
+                            .category(category)
+                            .build();
+                    contentsRepository.save(entity);
+                }
+            }
+        }
+    }
+
+
+
     private void saveOneItem(Map<String, Object> item, CategoryEntity category){
         String title = String.valueOf(item.get("name"));
 
@@ -92,5 +138,20 @@ public class ContentsService {
             System.out.println("숫자 변환 실패: " + value);
             return 0.0;
         }
+    }
+
+    private String getTitleFromJson(Map<String, Object> item) {
+        if (item.containsKey("시설명")) return String.valueOf(item.get("시설명"));
+        if (item.containsKey("작품명")) return String.valueOf(item.get("작품명"));
+        if (item.containsKey("공공미술 명")) return String.valueOf(item.get("공공미술 명")); // 공공미술용
+        return "이름 없음";
+    }
+
+    private String getAddressFromJson(Map<String, Object> item) {
+        if (item.containsKey("새주소") && item.get("새주소") != null) return String.valueOf(item.get("새주소"));
+        if (item.containsKey("지번주소")) return String.valueOf(item.get("지번주소"));
+        if (item.containsKey("건축물주소")) return String.valueOf(item.get("건축물주소")); // 건축물 미술용
+        if (item.containsKey("보유(전시) 장소")) return String.valueOf(item.get("보유(전시) 장소")); // 공공미술용
+        return "주소 없음";
     }
 }
