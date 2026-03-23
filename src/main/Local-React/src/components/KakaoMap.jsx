@@ -5,7 +5,7 @@ function KakaoMap() {       // 함수 시작
 
     useEffect(() => {       // 함수 시작
         const script = document.createElement("script");        // scipt를 만들고
-        script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_KEY}&autoload=false`;
+        script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_KEY}&autoload=false`; // 연결할 스크립트 url
         script.onload = () => {         // script가 전부 실행되면 실행할 코드 시작
             window.kakao.maps.load(() => {  // 맵을 띄움
                 navigator.geolocation.getCurrentPosition(   // 브라우저의 GPS 기능 실행, 사용자한테 위치 권한 팝업 띄움
@@ -17,14 +17,54 @@ function KakaoMap() {       // 함수 시작
                             center: new window.kakao.maps.LatLng(lat, lng), // 현재 GPS의 위도 경도를 화면 가운데
                             level: 3,                                       // 화면 확대 레벨
                         };
-                        new window.kakao.maps.Map(mapRef.current, options); // 맵 화면 띄으기
+                        const map = new window.kakao.maps.Map(mapRef.current, options); // 맵 화면 띄울변수
+                        const makerPosition = new window.kakao.maps.LatLng(lat, lng);     // 현재 위치의 마커 위치 설정
+                        const maker = new window.kakao.maps.Marker({                      // 지도에 마커 생성
+                            position: makerPosition
+                        });
+                        maker.setMap(map);      // 지도에 마커 표시
+                        let clickMaker = null;    // 클릭 마커 선언(처음은 없음)
+                        window.kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
+                            const lat = mouseEvent.latLng.getLat(); // 클릭한 위도
+                            const lng = mouseEvent.latLng.getLng(); // 클릭한 경도
+
+                            if (clickMaker) { clickMaker.setMap(null); }        // 기존 클릭 마커 제거
+
+                            clickMaker = new window.kakao.maps.Marker({
+                                position: new window.kakao.maps.LatLng(lat, lng),   // 새 마커 생성
+                            });
+                            clickMaker.setMap(map);
+
+                            console.log("클릭한 위치 - 위도:", lat, "경도:", lng);  // test용 위도 경도 확인차 콘솔 출력
+                        });
                     },
                     () => {         // GPS실패 했을 경우의 코드 시작( 진주 시청을 기본값 )
                         const options = {       // 지도 옵션 실행
                             center: new window.kakao.maps.LatLng(35.1798, 128.1076),
                             level: 3,
                         };
-                        new window.kakao.maps.Map(mapRef.current, options);
+                        const map = new window.kakao.maps.Map(mapRef.current, options);
+                        const markerPosition = new window.kakao.maps.LatLng(35.1798, 128.1076);
+                        const marker = new window.kakao.maps.Marker({
+                            position: markerPosition,
+                        });
+                        marker.setMap(map);
+                        let clickMaker = null;    // 클릭 마커 선언(처음은 없음)
+                        window.kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
+                            const lat = mouseEvent.latLng.getLat(); // 클릭한 위도
+                            const lng = mouseEvent.latLng.getLng(); // 클릭한 경도
+
+                            // 기존 클릭 마커 제거
+                            if (clickMaker) { clickMaker.setMap(null); }
+
+                            // 새 마커 생성
+                            clickMaker = new window.kakao.maps.Marker({
+                                position: new window.kakao.maps.LatLng(lat, lng),
+                            });
+                            clickMaker.setMap(map);
+
+                            console.log("클릭한 위치 - 위도:", lat, "경도:", lng);
+                        });
                     }
                 );
             });
