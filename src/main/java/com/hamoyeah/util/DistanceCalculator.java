@@ -1,10 +1,29 @@
 package com.hamoyeah.util;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class DistanceCalculator {
     public double distance(double lat1,double lat2,double lng1,double lng2){
-        return 3.14;
+        double bottom=Math.abs(lat1-lat2);  // 절댓값으로 음수 방지
+        double height=Math.abs(lng1-lng2);
+
+        double hypotenuse=Math.sqrt(bottom*bottom+height*height);   // 빗변의 길이 Math.sqrt는 제곱근 함수
+
+        return hypotenuse;
+    }   // 두 위치 사이의 거리를 구하는 함수
+
+    public Map<String,Integer> countInRange(double userLat, HttpServletRequest request){
+        // 유저가 찍은 지점을 기준으로 반경 500m안에 cctv, 가로동의 개수를 반환하는 함수
+        Map<String,Integer> result=new HashMap<>();
+        int cctvCount=0; int streeLightCount=0;
+        request.getRemoteUser();    // 사용자 IP 주소 얻기
+
+        result.put("cctv",cctvCount); result.put("streetLight",streeLightCount);
+        return result;
     }
 }
