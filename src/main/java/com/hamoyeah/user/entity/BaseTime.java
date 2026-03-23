@@ -1,4 +1,4 @@
-package com.hamoyeah.Entity;
+package com.hamoyeah.user.entity;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;

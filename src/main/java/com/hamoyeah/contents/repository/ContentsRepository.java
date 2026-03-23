@@ -1,4 +1,4 @@
-package com.hamoyeah.repository;
+package com.hamoyeah.contents.repository;
 
 import org.springframework.stereotype.Repository;
 

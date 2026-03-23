@@ -1,4 +1,4 @@
-package com.hamoyeah.service;
+package com.hamoyeah.contents.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.hamoyeah.dto;
+package com.hamoyeah.safety.dto;
 
 import lombok.Data;
 import lombok.Builder;

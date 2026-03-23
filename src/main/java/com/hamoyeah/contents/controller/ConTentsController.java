@@ -1,4 +1,4 @@
-package com.hamoyeah.controller;
+package com.hamoyeah.contents.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;

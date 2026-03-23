@@ -1,8 +1,8 @@
-package com.hamoyeah.controller;
+package com.hamoyeah.safety.controller;
 
-import com.hamoyeah.dto.SafetyRequestDto;
-import com.hamoyeah.dto.SafetyResponseDto;
-import com.hamoyeah.service.SafetyService;
+import com.hamoyeah.safety.dto.SafetyRequestDto;
+import com.hamoyeah.safety.dto.SafetyResponseDto;
+import com.hamoyeah.safety.service.SafetyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
