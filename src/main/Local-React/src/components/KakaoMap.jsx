@@ -24,7 +24,7 @@ function KakaoMap() {       // 함수 시작
                         });
                         maker.setMap(map);      // 지도에 마커 표시
                         let clickMaker = null;    // 클릭 마커 선언(처음은 없음)
-                        window.kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
+                        window.kakao.maps.event.addListener(map, 'click', async (mouseEvent) => {
                             const lat = mouseEvent.latLng.getLat(); // 클릭한 위도
                             const lng = mouseEvent.latLng.getLng(); // 클릭한 경도
 
@@ -34,6 +34,22 @@ function KakaoMap() {       // 함수 시작
                                 position: new window.kakao.maps.LatLng(lat, lng),   // 새 마커 생성
                             });
                             clickMaker.setMap(map);
+
+                            const response = await fetch("http://localhost:8080/api/safety/", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({
+                                    lat: lat,
+                                    lng: lng,
+                                    radius: 500,    // 반경 500m
+                                }),
+                            });     
+                            // http://localhost:8080/api/safety/에 POST매핑으로 헤더에 콘텐츠 타입을 json타입으로 하고 전달은 위도,경도, 그에따른 반경 500로 전달
+                            const data = await response.json();
+                            console.log("결과",data);
+
 
                             console.log("클릭한 위치 - 위도:", lat, "경도:", lng);  // test용 위도 경도 확인차 콘솔 출력
                         });
