@@ -24,25 +24,26 @@ public class ContentsService {
     @Value("${api.service.key}")
     private String serviceKey;
 
-    public void  contentApi(String baseUrl, int categoryId){
+    // 진주시 관광, 축제, 문화재 가져오는 메소드
+    public void  contentApi(String baseUrl, int categoryId){ // 베이스 주소, 저장할 카테고리 id 매개변수
 
-        CategoryEntity category = categoryRepository.findById(categoryId)
+        CategoryEntity category = categoryRepository.findById(categoryId) // 카테고리 id가 존재하는지 찾기
                 .orElseThrow(() -> new RuntimeException("카테고리 번호 [" + categoryId + "]가 DB에 존재하지 않습니다."));
 
-        String firstUri = baseUrl + "?page=1&pageunit=10";
+        String firstUri = baseUrl + "?page=1&pageunit=10"; // 초기 url 설정 베이스 주소 + 페이지, 페이지당 칼럼 수
         Map<String, Object> firstResponse = webClient.get()
                 .uri(firstUri)
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
 
-        if (firstResponse == null || !"OK".equals(firstResponse.get("status"))) {
+        if (firstResponse == null || !"OK".equals(firstResponse.get("status"))) { // 첫 응답이 없거나 응답 값에서 상태가 ok가 아니면
             System.out.println("첫 페이지 호출 실패");
             return;
         }
-        int totalPages = (int) firstResponse.get("page_count");
+        int totalPages = (int) firstResponse.get("page_count"); // 각 api 마다 totalpage가 다르므로 첫번째 응답에서 전체 페이지 카운트를 가져옴
 
-        for(int currentPage = 1; currentPage <= totalPages; currentPage++){
+        for(int currentPage = 1; currentPage <= totalPages; currentPage++){ // 전체 페이지 카운트 만큼 반복
             String targetUri = baseUrl+"?page="+currentPage+"&pageunit=10";
 
             Map<String, Object> response = webClient.get()
@@ -51,7 +52,7 @@ public class ContentsService {
                     .bodyToMono(Map.class)
                     .block();
 
-            List<Map<String, Object>> results = (List<Map<String, Object>>) response.get("results");
+            List<Map<String, Object>> results = (List<Map<String, Object>>) response.get("results"); // 결과부분 : 필요한 부분
 
             if(results != null){
                 for (Map<String, Object> item : results){
@@ -62,24 +63,25 @@ public class ContentsService {
         }
     }
 
+    // 진주시 공공체육시설, 공공미술, 건축물 미술 가져오는 메소드
     public void dataApi(String baseUrl, int categoryId){
-        String checkUrl = baseUrl + "?page=1&perPage=1&serviceKey=" + serviceKey;
+        String checkUrl = baseUrl + "?page=1&perPage=1&serviceKey=" + serviceKey; // 처음에 잘 가져와 지는지 확인하는 과정
         Map<String, Object> checkRes = webClient.get()
                 .uri(checkUrl)
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
-        int totalCount = Integer.parseInt(String.valueOf(checkRes.get("totalCount")));
+        int totalCount = Integer.parseInt(String.valueOf(checkRes.get("totalCount"))); // 전체 레코드 수 가져오기
 
-        String finalUrl = baseUrl + "?page=1&perPage=" + totalCount + "&serviceKey="+serviceKey;
+        String finalUrl = baseUrl + "?page=1&perPage=" + totalCount + "&serviceKey="+serviceKey; // 전체 레코드를 한꺼번에 가져오기
         Map<String, Object> response = webClient.get()
                 .uri(finalUrl)
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
-        List<Map<String, Object>> dataList = (List<Map<String, Object>>) response.get("data");
+        List<Map<String, Object>> dataList = (List<Map<String, Object>>) response.get("data"); // data 부분이 필요한 부분이므로 가져와서 저장
 
-        CategoryEntity category = categoryRepository.findById(categoryId).orElseThrow();
+        CategoryEntity category = categoryRepository.findById(categoryId).orElseThrow(); // 존재하는 카테고리 번호인지 확인
 
         if (dataList != null) {
             for (Map<String, Object> item : dataList) {
