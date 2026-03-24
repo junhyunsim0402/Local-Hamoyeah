@@ -17,4 +17,20 @@ public enum AirStation {
         this.lat = lat;
         this.lon = lon;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public Double getLat() {
+        return lat;
+    }
+
+    public Double getLon() {
+        return lon;
+    }
 }
