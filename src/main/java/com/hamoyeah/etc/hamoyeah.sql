@@ -49,7 +49,7 @@ CREATE TABLE contents (
     FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
 CREATE TABLE user (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    userId INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(50) NOT NULL,
     nickname VARCHAR(50) NOT NULL,

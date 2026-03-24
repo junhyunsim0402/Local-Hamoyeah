@@ -18,3 +18,15 @@ INSERT INTO category (content_type, content_category) VALUES
 --                                                                                                   (1, '진양호', '노을이 아름다운 호수 공원', NULL, NULL, '진주시 판문동', 35.1650, 128.0400),
 --                                                                                                   (4, '헬스장', '최신 시설의 공공 헬스장', NULL, NULL, '진주시 충무공동', 35.2050, 128.1250),
 --                                                                                                   (5, '공공미술 작품', '상대동 거리의 예술품', NULL, NULL, '진주시 상대동', 35.2000, 128.0950);
+
+INSERT INTO user(email, password, nickname, total_points, is_Admin) VALUES
+    ('user1@test.com', '1234', '유저1', 0, FALSE),
+    ('user2@test.com', '1234', '유저2', 10, FALSE),
+    ('user3@test.com', '1234', '유저3', 20, FALSE),
+    ('user4@test.com', '1234', '유저4', 30, FALSE),
+    ('user5@test.com', '1234', '유저5', 40, FALSE),
+    ('user6@test.com', '1234', '유저6', 50, FALSE),
+    ('user7@test.com', '1234', '유저7', 60, FALSE),
+    ('user8@test.com', '1234', '유저8', 70, FALSE),
+    ('user9@test.com', '1234', '유저9', 80, FALSE),
+    ('admin@test.com', 'admin', '관리자', 999, TRUE);
