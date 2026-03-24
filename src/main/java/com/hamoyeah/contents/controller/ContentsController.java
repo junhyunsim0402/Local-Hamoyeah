@@ -32,6 +32,6 @@ public class ContentsController {
         contentsService.dataApi("https://api.odcloud.kr/api/15099262/v1/uddi:4adcb840-f974-4de6-b48f-d1be8a047eaa", 6);
 
 
-        return "모든 데이터 동기화 완료!";
+        return "진주시 컨텐츠들 동기화 완료!";
     }
 }
