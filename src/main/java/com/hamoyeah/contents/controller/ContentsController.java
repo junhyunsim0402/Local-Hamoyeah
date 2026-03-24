@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping
+@RequestMapping("/api/content")
 public class ContentsController {
     private final ContentsService contentsService;
-    @GetMapping("/api/sync")
+    @GetMapping("/sync")
     public String syncData() {
         // 1. 관광 카테고리 ID: 1
         contentsService.contentApi("https://www.jinju.go.kr/openapi/tour/tourinfo.do", 1);
