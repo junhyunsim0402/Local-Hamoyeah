@@ -18,7 +18,7 @@ public class DistanceCalculator {
 
     public Map<String,Integer> countInRange(double userLat,double userLng){
         Map<String,Integer> result=new HashMap<>();
-        int cctvCount=0; int streetLightCount=0;
+        int cctvCount=5; int streetLightCount=10;    // TODO : API연결
         result.put("cctv",cctvCount); result.put("streetLight",streetLightCount);
         return result;
     }// 유저가 찍은 지점을 기준으로 반경 500m안에 cctv, 가로동의 개수를 반환하는 함수
