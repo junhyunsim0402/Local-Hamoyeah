@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CctvRepository extends JpaRepository<CctvEntity, Long> {
+    boolean existsByLatitudeAndLongitude(Double latitude, Double longitude);
 }

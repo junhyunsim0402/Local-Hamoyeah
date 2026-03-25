@@ -71,12 +71,14 @@ public class SafetyService {
             for (Map<String, Object> item : dataList) {
                 double lat = Double.parseDouble(String.valueOf(item.get("위도")));
                 double lon = Double.parseDouble(String.valueOf(item.get("경도")));
-                StreetLampEntity lamp = StreetLampEntity.builder()
-                        .latitude(lat)
-                        .longitude(lon)
-                        .address(String.valueOf(item.get("지번 주소")))
-                        .build();
-                streetLampRepository.save(lamp);
+                if (!streetLampRepository.existsByLatitudeAndLongitude(lat, lon)) {
+                    StreetLampEntity lamp = StreetLampEntity.builder()
+                            .latitude(lat)
+                            .longitude(lon)
+                            .address(String.valueOf(item.get("지번 주소")))
+                            .build();
+                    streetLampRepository.save(lamp);
+                }
             }
             System.out.println("가로등 수집 중: " + page + " / " + totalPages);
         }
@@ -108,12 +110,14 @@ public class SafetyService {
                 double lat = Double.parseDouble(String.valueOf(item.get("위도")));
                 double lon = Double.parseDouble(String.valueOf(item.get("경도")));
 
-                CctvEntity cctv = CctvEntity.builder()
-                        .latitude(lat)
-                        .longitude(lon)
-                        .installCnt(Integer.parseInt(String.valueOf(item.get("설치대수"))))
-                        .build();
-                cctvRepository.save(cctv);
+                if (!cctvRepository.existsByLatitudeAndLongitude(lat, lon)) {
+                    CctvEntity cctv = CctvEntity.builder()
+                            .latitude(lat)
+                            .longitude(lon)
+                            .installCnt(Integer.parseInt(String.valueOf(item.get("설치대수"))))
+                            .build();
+                    cctvRepository.save(cctv);
+                }
             }
             System.out.println("CCTV 수집 중: " + page + " / " + totalPages);
         }
