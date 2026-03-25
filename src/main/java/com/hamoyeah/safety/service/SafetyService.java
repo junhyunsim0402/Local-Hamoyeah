@@ -1,9 +1,15 @@
 package com.hamoyeah.safety.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.hamoyeah.safety.dto.SafetyRequestDto;
 import com.hamoyeah.safety.dto.SafetyResponseDto;
+import com.hamoyeah.safety.entity.AirStation;
+import com.hamoyeah.safety.entity.AirpollutionEntity;
 import com.hamoyeah.safety.entity.CctvEntity;
 import com.hamoyeah.safety.entity.StreetLampEntity;
+import com.hamoyeah.safety.repository.AirpollutionRepository;
 import com.hamoyeah.safety.repository.CctvRepository;
 import com.hamoyeah.safety.repository.StreetLampRepository;
 import com.hamoyeah.util.DistanceCalculator;
@@ -14,6 +20,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +32,8 @@ public class SafetyService {
     private final GradeCalculator gradeCalculator;
     private final CctvRepository cctvRepository;
     private final StreetLampRepository streetLampRepository;
+    private final AirpollutionRepository airRepository;
+    private final ObjectMapper xmlMapper = new XmlMapper();
     private final WebClient webClient = WebClient.builder()
             .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
             .build();
@@ -109,5 +119,59 @@ public class SafetyService {
         }
         System.out.println("CCTV 수집 완료! 총 " + totalCount + "건 처리됨.");
     }
+
+    public boolean syncAir(){
+        for(AirStation station : AirStation.values()){
+            try{
+                String xmlRaw = webClient.get()
+                        .uri(uriBuilder -> uriBuilder
+                                .scheme("https")
+                                .host("apis.data.go.kr")
+                                .path("B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty")
+                                .queryParam("serviceKey", serviceKey)
+                                .queryParam("returnType", "xml")
+                                .queryParam("stationName", station.getName())
+                                .queryParam("dataTerm", "daily")
+                                .queryParam("ver", "1.3")
+                                .build())
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .block();
+
+                JsonNode root = xmlMapper.readTree(xmlRaw);
+                JsonNode items = root.path("body").path("items").path("item");
+
+                if (items.isArray() && items.has(0)) {
+                    JsonNode latestItem = items.get(0); // 가장 최근 시간 데이터
+
+                    String dataTimeStr = latestItem.path("dataTime").asText();
+                    LocalDateTime measuredAt = LocalDateTime.parse(dataTimeStr,
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+                    // 4. 중복 체크 후 저장 (Enum의 주소와 좌표 활용!)
+                    if (!airRepository.existsByAddressAndMeasuredAt(station.getAddress(), measuredAt)) {
+                        AirpollutionEntity entity = AirpollutionEntity.builder()
+                                .address(station.getAddress())
+                                .latitude(station.getLat())
+                                .longitude(station.getLon())
+                                .pm10Value(Integer.valueOf(latestItem.path("pm10Value").asText()))
+                                .pm25Value(Integer.valueOf(latestItem.path("pm25Value").asText()))
+                                .measuredAt(measuredAt)
+                                .build();
+
+                        airRepository.save(entity);
+                    }
+                }
+            }catch (Exception e){
+                System.out.println(e);
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+
+
 }
 
