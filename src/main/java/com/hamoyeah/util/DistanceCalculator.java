@@ -44,10 +44,6 @@ public class DistanceCalculator {
     // 반경 안에 있는 데이터 개수를 세는 함수
     public int calculateCount(double userLat, double userLng, double radius, List<Map<String, Object>> apiData) {
         int count = 0;  // 반경 안에 있는 개수 초기화
-        List<Map<String,Object>> cctvData=null;// TODO : cctvAPI불러오기
-        List<Map<String,Object>> streetLampData=null;   // TODO : 가로등API가져오기
-        if(cctvData!=null)apiData.addAll(cctvData);
-        if(streetLampData!=null)apiData.addAll(streetLampData);
         for (Map<String, Object> item : apiData) {  // API 데이터 리스트를 하나씩 순회
             try {
                 double targetLat = (double) item.get("lat");    // 데이터의 위도 꺼내기

@@ -23,6 +23,9 @@ public class GradeCalculator {
         Map<String, Object> result = new HashMap<>();
         result.put("cctvScore", Math.min(cctvScore, 45)); // 최대치 방어
         result.put("streetLampScore", Math.min(streetLampScore, 15));
+        System.out.println("cctvCount = " + cctvCount);
+        System.out.println("lampCount = " + lampCount);
+        System.out.println("PlusResult = " + result);
         return result;
     }
     public Map<String,Object> minusScore(double noiseAvg,int pm10, int pm25){
@@ -43,6 +46,7 @@ public class GradeCalculator {
         int totalScore=( cctvScore + streetLampScore ) - ( noiseScore + airScore );
         String grade = totalScore >= 80 ? "A" : totalScore >= 60 ? "B" : totalScore >= 40 ? "C" : "D";
         result.put("totalScore",totalScore); result.put("grade",grade);
+        System.out.println("grade = " + grade);
         return result;
     }
 }

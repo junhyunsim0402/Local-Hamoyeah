@@ -20,5 +20,4 @@ public class SafetyController {
         safetyService.syncCctv("https://api.odcloud.kr/api/15143299/v1/uddi:47bc7b31-8e0f-42d0-9137-f5d85640fbaa");
         return "가로등 및 cctv 수집 완료";
     }
-
 }
