@@ -1,6 +1,7 @@
 package com.hamoyeah.contents.Entity;
 
 import com.hamoyeah.contents.dto.ContentsDto;
+import com.hamoyeah.util.LocationEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +16,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Data
 @Builder
-public class ContentsEntity {
+public class ContentsEntity implements LocationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "content_id")
@@ -57,5 +58,10 @@ public class ContentsEntity {
                 .latitude(this.latitude)
                 .longitude(this.longitude)
                 .build();
+    }
+    @Override
+    public void updateLocation(Double lat, Double lon){
+        this.latitude = lat;
+        this.longitude = lon;
     }
 }

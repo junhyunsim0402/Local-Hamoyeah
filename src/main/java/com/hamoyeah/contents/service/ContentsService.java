@@ -4,6 +4,7 @@ import com.hamoyeah.contents.Entity.CategoryEntity;
 import com.hamoyeah.contents.Entity.ContentsEntity;
 import com.hamoyeah.contents.repository.CategoryRepository;
 import com.hamoyeah.contents.repository.ContentsRepository;
+import com.hamoyeah.util.GeocodingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,7 @@ public class ContentsService {
     private final ContentsRepository contentsRepository;
     private final CategoryRepository categoryRepository;
     private final WebClient webClient = WebClient.builder().build();
+    private final GeocodingService geocodingService;
 
     @Value("${api.service.key}")
     private String serviceKey;
@@ -71,36 +73,48 @@ public class ContentsService {
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
-        int totalCount = Integer.parseInt(String.valueOf(checkRes.get("totalCount"))); // 전체 레코드 수 가져오기
-
-        String finalUrl = baseUrl + "?page=1&perPage=" + totalCount + "&serviceKey="+serviceKey; // 전체 레코드를 한꺼번에 가져오기
-        Map<String, Object> response = webClient.get()
-                .uri(finalUrl)
-                .retrieve()
-                .bodyToMono(Map.class)
-                .block();
-        List<Map<String, Object>> dataList = (List<Map<String, Object>>) response.get("data"); // data 부분이 필요한 부분이므로 가져와서 저장
+        int totalCount = Integer.parseInt(String.valueOf(checkRes.get("totalCount")));
+        int pageSize = 50;
+        int totalPages = (int) Math.ceil((double) totalCount / pageSize);
 
         CategoryEntity category = categoryRepository.findById(categoryId).orElseThrow(); // 존재하는 카테고리 번호인지 확인
 
-        if (dataList != null) {
-            for (Map<String, Object> item : dataList) {
-                String title = getTitleFromJson(item);
-                String address = getAddressFromJson(item);
-                String type = String.valueOf(item.getOrDefault("종류", "공공미술/작품"));
 
-                if (!contentsRepository.existsByContentTitle(title)) {
-                    ContentsEntity entity = ContentsEntity.builder()
-                            .contentTitle(title)
-                            .contentDes(type)
-                            .address(address)
-                            .latitude(0.0)
-                            .longitude(0.0)
-                            .category(category)
-                            .build();
-                    contentsRepository.save(entity);
+        for (int currentPage = 1; currentPage <= totalPages; currentPage++) {
+            String pageUrl = baseUrl + "?page=" + currentPage + "&perPage=" + pageSize + "&serviceKey=" + serviceKey;
+
+            Map<String, Object> response = webClient.get()
+                    .uri(pageUrl)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+
+            List<Map<String, Object>> dataList = (List<Map<String, Object>>) response.get("data");
+
+            if (dataList != null) {
+                for (Map<String, Object> item : dataList) {
+                    String title = getTitleFromJson(item);
+                    String address = getAddressFromJson(item);
+                    String type = String.valueOf(item.getOrDefault("종류", "공공미술/작품"));
+
+                    if (!contentsRepository.existsByContentTitle(title)) {
+                        ContentsEntity entity = ContentsEntity.builder()
+                                .contentTitle(title)
+                                .contentDes(type)
+                                .address(address)
+                                .latitude(0.0)
+                                .longitude(0.0)
+                                .category(category)
+                                .build();
+
+                        geocodingService.fillCoordinates(entity);
+                        contentsRepository.save(entity);
+
+                        try { Thread.sleep(50); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+                    }
                 }
             }
+            System.out.println(categoryId + "번 카테고리: " + currentPage + " / " + totalPages + " 페이지 작업 중...");
         }
     }
 
@@ -108,7 +122,7 @@ public class ContentsService {
 
     private void saveOneItem(Map<String, Object> item, CategoryEntity category){
         String title = String.valueOf(item.get("name"));
-
+        String address = String.valueOf(item.get("address"));
         if (!contentsRepository.existsByContentTitle(title)) {
             ContentsEntity entity = ContentsEntity.builder()
                     .contentTitle(title)
@@ -118,7 +132,11 @@ public class ContentsService {
                     .longitude(parseSafeDouble(item.get("yposition")))
                     .category(category)
                     .build();
+
+            geocodingService.fillCoordinates(entity);
+
             contentsRepository.save(entity);
+            try { Thread.sleep(50); } catch (InterruptedException e) { }
         }
     }
     /*
