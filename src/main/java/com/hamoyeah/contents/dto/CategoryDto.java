@@ -17,7 +17,6 @@ public class CategoryDto {
 
     public CategoryEntity toEntity() {
         return CategoryEntity.builder()
-                .categoryId(this.categoryId)
                 .contentType(this.contentType)
                 .contentCategory(this.contentCategory)
                 .build();
