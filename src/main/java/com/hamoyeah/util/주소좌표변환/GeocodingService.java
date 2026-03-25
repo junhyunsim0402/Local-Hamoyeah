@@ -1,4 +1,4 @@
-package com.hamoyeah.util;
+package com.hamoyeah.util.주소좌표변환;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

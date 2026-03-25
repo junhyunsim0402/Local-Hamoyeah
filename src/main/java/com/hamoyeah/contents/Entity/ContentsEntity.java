@@ -1,7 +1,7 @@
 package com.hamoyeah.contents.Entity;
 
 import com.hamoyeah.contents.dto.ContentsDto;
-import com.hamoyeah.util.LocationEntity;
+import com.hamoyeah.util.주소좌표변환.LocationEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

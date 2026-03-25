@@ -4,7 +4,7 @@ import com.hamoyeah.contents.Entity.CategoryEntity;
 import com.hamoyeah.contents.Entity.ContentsEntity;
 import com.hamoyeah.contents.repository.CategoryRepository;
 import com.hamoyeah.contents.repository.ContentsRepository;
-import com.hamoyeah.util.GeocodingService;
+import com.hamoyeah.util.주소좌표변환.GeocodingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

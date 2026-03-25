@@ -1,4 +1,4 @@
-package com.hamoyeah.util;
+package com.hamoyeah.util.주소좌표변환;
 
 public interface LocationEntity {
     String getAddress();
