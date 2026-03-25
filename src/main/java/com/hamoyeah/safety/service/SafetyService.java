@@ -4,47 +4,54 @@ import com.hamoyeah.safety.dto.SafetyRequestDto;
 import com.hamoyeah.safety.dto.SafetyResponseDto;
 import com.hamoyeah.util.DistanceCalculator;
 import com.hamoyeah.util.GradeCalculator;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
-@Service @RequiredArgsConstructor @Transactional
+@Service @RequiredArgsConstructor
 public class SafetyService {
     private final DistanceCalculator distanceCalculator;
     private final GradeCalculator gradeCalculator;
-    public SafetyResponseDto getSafety(SafetyRequestDto requestDto){
-        double userLat=requestDto.getLat(); // 유저의 위도
-        double userLng=requestDto.getLng(); // 유저의 경도
 
-        // 안전 점수 계산
-        Map<String,Object> plusResult=gradeCalculator.PlusPoint(userLat,userLng);   // 사용자의 위도/경도 주입
-        int cctvScore=(int) plusResult.get("cctvScore");
-        int streetLampScore=(int) plusResult.get("streetLampScore");
+    public SafetyResponseDto getSafety(SafetyRequestDto requestDto) {
+        // 1. API 데이터 수집 (현재는 빈 리스트)
+        List<Map<String, Object>> cctvRawData = fetchCctvFromApi();
+        List<Map<String, Object>> lampRawData = fetchLampFromApi();
 
-        // TODO : api로 가져올 소음/미세먼지/초미세먼지 데이터 현재는 샘플데이터
-        double noiseAvg=55.0;   // 5점
-        int pm10=45;            // 5점
-        int pm25=20;            // 5점
+        // 2. 반경 내 개수 계산 (DistanceCalculator 활용)
+        int cctvCount = distanceCalculator.calculateCount(
+                requestDto.getLat(), requestDto.getLng(), requestDto.getRadius(), cctvRawData);
+        int lampCount = distanceCalculator.calculateCount(
+                requestDto.getLat(), requestDto.getLng(), requestDto.getRadius(), lampRawData);
 
-        // 위험 점수 계산
-        Map<String,Object> minusResult=gradeCalculator.minusScore(noiseAvg,pm10,pm25);
-        int noiseScore=(int) minusResult.get("noiseScore");
-        int airScore=(int) minusResult.get("airScore");
+        // 3. 점수 환산 (GradeCalculator 활용)
+        Map<String, Object> plusResult = gradeCalculator.calculatePlusScore(cctvCount, lampCount);
+        int cctvScore = (int) plusResult.get("cctvScore");
+        int streetLampScore = (int) plusResult.get("streetLampScore");
 
-        // 등급 및 점수
-        Map<String,Object> result=gradeCalculator.totalGrade(cctvScore,streetLampScore,noiseScore,airScore);
-        System.out.println("result = " + result);
+        // 4. 위험 점수 및 최종 등급 계산
+        Map<String, Object> minusResult = gradeCalculator.minusScore(55.0, 45, 20);
+        int noiseScore = (int) minusResult.get("noiseScore");
+        int airScore = (int) minusResult.get("airScore");
+
+        Map<String, Object> totalResult = gradeCalculator.totalGrade(cctvScore, streetLampScore, noiseScore, airScore);
+
         return SafetyResponseDto.builder()
-                .grade(result.get("grade").toString())
-                .totalScore((int) result.get("totalScore"))
+                .grade(totalResult.get("grade").toString())
+                .totalScore((int) totalResult.get("totalScore"))
                 .cctvScore(cctvScore)
                 .streetLampScore(streetLampScore)
                 .noiseScore(noiseScore)
                 .airScore(airScore)
-                .pm10(pm10)
-                .pm25(pm25)
                 .build();
+    }
+    private List<Map<String, Object>> fetchCctvFromApi() {
+        return null;
+    }
+
+    private List<Map<String, Object>> fetchLampFromApi() {
+        return null;
     }
 }
