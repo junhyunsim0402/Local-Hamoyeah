@@ -10,4 +10,3 @@ import java.time.LocalDateTime;
 public interface AirpollutionRepository extends JpaRepository<AirpollutionEntity, Long> {
     boolean existsByAddressAndMeasuredAt(String address, LocalDateTime measuredAt);
 }
-
