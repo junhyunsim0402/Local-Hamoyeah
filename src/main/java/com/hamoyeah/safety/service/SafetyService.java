@@ -25,6 +25,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+import java.util.List;
+import java.util.Map;
+
 @Service @RequiredArgsConstructor
 @Transactional
 public class SafetyService {
@@ -45,8 +48,19 @@ public class SafetyService {
 
     public SafetyResponseDto getSafety(SafetyRequestDto requestDto) {
         // 1. API 데이터 수집 (현재는 빈 리스트)
-        List<Map<String, Object>> cctvRawData = fetchCctvFromApi();
-        List<Map<String, Object>> lampRawData = fetchLampFromApi();
+        List<Map<String, Object>> cctvRawData = cctvRepository.findAll().stream()
+                .map(cctv -> Map.<String, Object>of(
+                        "lat", cctv.getLatitude(),
+                        "lng", cctv.getLongitude()
+                ))
+                .collect(java.util.stream.Collectors.toList());
+
+        List<Map<String, Object>> lampRawData = streetLampRepository.findAll().stream()
+                .map(lamp -> Map.<String, Object>of(
+                        "lat", lamp.getLatitude(),
+                        "lng", lamp.getLongitude()
+                ))
+                .collect(java.util.stream.Collectors.toList());
 
         // 2. 반경 내 개수 계산 (DistanceCalculator 활용)
         int cctvCount = distanceCalculator.calculateCount(
@@ -75,13 +89,6 @@ public class SafetyService {
                 .airScore(airScore)
                 .build();
     }
-    private List<Map<String, Object>> fetchCctvFromApi() {
-        return null;
-    }
-
-    private List<Map<String, Object>> fetchLampFromApi() {return null;
-    }
-
     public void syncStreetLamp(String baseUrl) {
         int perPage = 1000; // 한번에 최대 500개
 
@@ -119,7 +126,6 @@ public class SafetyService {
         }
         System.out.println("가로등 수집 완료! 총 " + totalCount + "건 처리됨.");
     }
-
     public void syncCctv(String baseUrl) {
         int perPage = 1000;
 
