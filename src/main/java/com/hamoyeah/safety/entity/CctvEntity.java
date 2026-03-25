@@ -1,5 +1,6 @@
 package com.hamoyeah.safety.entity;
 
+import com.hamoyeah.safety.dto.CctvDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,4 +23,13 @@ public class CctvEntity {
     private Double longitude;
     @Column(nullable = false)
     private Integer installCnt; // 설치대수
+
+    public CctvDto toDto(){
+        return CctvDto.builder()
+                .cctvId(this.cctvId)
+                .longitude(this.longitude)
+                .latitude(this.latitude)
+                .installCnt(this.installCnt)
+                .build();
+    }
 }

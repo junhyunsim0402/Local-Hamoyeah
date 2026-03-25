@@ -1,5 +1,6 @@
 package com.hamoyeah.safety.entity;
 
+import com.hamoyeah.safety.dto.AirpollutionDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,4 +31,15 @@ public class AirpollutionEntity {
 
     private Double latitude;     // 위도
     private Double longitude;    // 경도
+
+    public AirpollutionDto toEntity() {
+        return AirpollutionDto.builder()
+                .measuredAt(this.measuredAt)
+                .address(this.address)
+                .latitude(this.latitude)
+                .longitude(this.longitude)
+                .pm10Value(this.pm10Value)
+                .pm25Value(this.pm25Value)
+                .build();
+    }
 }
