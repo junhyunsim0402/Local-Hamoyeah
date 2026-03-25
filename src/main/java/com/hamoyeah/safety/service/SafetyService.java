@@ -79,7 +79,8 @@ public class SafetyService {
         return null;
     }
 
-    private List<Map<String, Object>> fetchLampFromApi() {
+    private List<Map<String, Object>> fetchLampFromApi() {return null;
+    }
 
     public void syncStreetLamp(String baseUrl) {
         int perPage = 1000; // 한번에 최대 500개
