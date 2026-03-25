@@ -16,6 +16,6 @@ public class SafetyResponseDto {
     private int noiseScore;         // 소음 점수
     private double noiseAvg;        // 평균 소음
     private int airScore;           // 대기질 점수
-    private int pm10Avg;            // 평균 미세먼지
-    private int pm25Avg;            // 평균 초미세먼지
+    private int pm10;            // 평균 미세먼지
+    private int pm25;            // 평균 초미세먼지
 }
