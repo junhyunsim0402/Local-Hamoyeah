@@ -8,5 +8,5 @@ import java.time.LocalDateTime;
 
 @Repository
 public interface AirpollutionRepository extends JpaRepository<AirpollutionEntity, Long> {
-    boolean existsByAirAreaAndMeasuredAt(String airArea, LocalDateTime measuredAt);
+    boolean existsByaddressAndMeasuredAt(String address, LocalDateTime measuredAt);
 }
