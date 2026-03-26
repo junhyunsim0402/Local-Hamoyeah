@@ -37,6 +37,9 @@ public class GradeCalculator {
         int pm25Score = pm25 <= 15 ? 0 : pm25 <= 35 ? 5 : pm25 <= 75 ? 8 : 10;  // 초미세먼지
          int minusAirScore=pm10Score+pm25Score;
         minusResult.put("noiseScore",noiseScore); minusResult.put("airScore",minusAirScore);
+        System.out.println("noiseAvg = " + noiseAvg);
+        System.out.println("pm10 = " + pm10);
+        System.out.println("pm25 = " + pm25);
         System.out.println("MinusResult = " + minusResult);
         return minusResult;
     }

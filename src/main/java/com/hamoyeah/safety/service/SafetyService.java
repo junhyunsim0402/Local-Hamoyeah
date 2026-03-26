@@ -5,12 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.hamoyeah.safety.dto.SafetyRequestDto;
 import com.hamoyeah.safety.dto.SafetyResponseDto;
-import com.hamoyeah.safety.entity.AirStation;
-import com.hamoyeah.safety.entity.AirpollutionEntity;
-import com.hamoyeah.safety.entity.CctvEntity;
-import com.hamoyeah.safety.entity.StreetLampEntity;
+import com.hamoyeah.safety.entity.*;
 import com.hamoyeah.safety.repository.AirpollutionRepository;
 import com.hamoyeah.safety.repository.CctvRepository;
+import com.hamoyeah.safety.repository.NoiseRepository;
 import com.hamoyeah.safety.repository.StreetLampRepository;
 import com.hamoyeah.util.DistanceCalculator;
 import com.hamoyeah.util.GradeCalculator;
@@ -24,9 +22,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-
-import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service @RequiredArgsConstructor
 @Transactional
@@ -36,6 +32,7 @@ public class SafetyService {
     private final CctvRepository cctvRepository;
     private final StreetLampRepository streetLampRepository;
     private final AirpollutionRepository airRepository;
+    private final NoiseRepository noiseRepository;
     private final ObjectMapper xmlMapper = new XmlMapper();
     private final WebClient webClient = WebClient.builder()
             .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
@@ -47,7 +44,7 @@ public class SafetyService {
 
 
     public SafetyResponseDto getSafety(SafetyRequestDto requestDto) {
-        // 1. API 데이터 수집 (현재는 빈 리스트)
+        // 1. CCTV API
         List<Map<String, Object>> cctvRawData = cctvRepository.findAll().stream()
                 .map(cctv -> Map.<String, Object>of(
                         "lat", cctv.getLatitude(),
@@ -55,6 +52,7 @@ public class SafetyService {
                 ))
                 .collect(java.util.stream.Collectors.toList());
 
+        // 2. 가로등 API
         List<Map<String, Object>> lampRawData = streetLampRepository.findAll().stream()
                 .map(lamp -> Map.<String, Object>of(
                         "lat", lamp.getLatitude(),
@@ -62,19 +60,64 @@ public class SafetyService {
                 ))
                 .collect(java.util.stream.Collectors.toList());
 
-        // 2. 반경 내 개수 계산 (DistanceCalculator 활용)
+        // 3. 반경 내 개수 계산 (DistanceCalculator 활용)
         int cctvCount = distanceCalculator.calculateCount(
                 requestDto.getLat(), requestDto.getLng(), requestDto.getRadius(), cctvRawData);
         int lampCount = distanceCalculator.calculateCount(
                 requestDto.getLat(), requestDto.getLng(), requestDto.getRadius(), lampRawData);
 
-        // 3. 점수 환산 (GradeCalculator 활용)
+        // 4. Plus점수 환산 (GradeCalculator 활용)
         Map<String, Object> plusResult = gradeCalculator.calculatePlusScore(cctvCount, lampCount);
         int cctvScore = (int) plusResult.get("cctvScore");
         int streetLampScore = (int) plusResult.get("streetLampScore");
 
-        // 4. 위험 점수 및 최종 등급 계산
-        Map<String, Object> minusResult = gradeCalculator.minusScore(55.0, 45, 20);
+        // 5. 대기질 API
+        List<AirpollutionEntity> airDataList=airRepository.findAll().stream()
+                .collect(java.util.stream.Collectors.toList()); // 대기질관련 api정보 가져오기
+        // 6. 거리비례 대기질 값(미세먼지, 초미세먼지) 가져오기
+        AirpollutionEntity nearAir=null;    // 기본값을 null로 고정
+        double airMinDist=Double.MAX_VALUE;    // 측정소와의 거리를 아주 멀게 설정
+        for(AirpollutionEntity air:airDataList){
+            double airDist=distanceCalculator.getDistanceInMeters(
+                    requestDto.getLat(),requestDto.getLng(),
+                    air.getLatitude(),air.getLongitude()
+            );  // 측정소와 유저가 찍은 곳의 거리 가져오기
+            System.out.println("airDist = " + airDist);
+            if(airDist<airMinDist){
+                airMinDist=airDist;   // 측정소 하나씩 가져와서 거리가 짧으면 업데이트
+                nearAir=air;    // 거리가 짧은 측정소를 저장
+            }
+        }
+        System.out.println("airMinDist = " + airMinDist);
+        int pm10= nearAir != null ? nearAir.getPm10Value() : 0; // 거리를 가져오면 값 저장
+        int pm25= nearAir != null ? nearAir.getPm25Value() : 0;
+
+        // 7. 소음 API
+        List<NoiseEntity> noiseDataList=noiseRepository.findAll().stream()
+                .collect(java.util.stream.Collectors.toList());
+        // 8. nosie 측정소와의 거리를 가져와서 값을 가져오기
+        NoiseEntity nearNoise=null;
+        double noiseMinDist=Double.MAX_VALUE;
+        for(NoiseEntity nosie : noiseDataList){
+            double nosieDist=distanceCalculator.getDistanceInMeters(
+                    requestDto.getLat(),requestDto.getLng(),
+                    nosie.getLatitude(),nosie.getLongitude()
+            );
+            System.out.println("측정된 소음 지점과의 거리 = " + nosieDist);
+            if(nosieDist<noiseMinDist){
+                noiseMinDist=nosieDist;
+                nearNoise=nosie;
+            }
+        }
+        System.out.println("가장 가까운 소음 측정소 주소 = " + nearNoise.getAddress());
+        System.out.println("측정소까지 거리 = " + noiseMinDist + "m");
+        System.out.println("측정소 dayAvg = " + nearNoise.getDayAvg());
+        System.out.println("사용자가 찍은 경도 = " + requestDto.getLat());
+        System.out.println("사용자가 찍은 위도 = " + requestDto.getLng());
+        double nosieValue = nearNoise != null ? nearNoise.getDayAvg() : 0;
+
+        // 8. 위험 점수 및 최종 등급 계산
+        Map<String,Object> minusResult= gradeCalculator.minusScore(nosieValue,pm10,pm25);
         int noiseScore = (int) minusResult.get("noiseScore");
         int airScore = (int) minusResult.get("airScore");
 
