@@ -1,16 +1,18 @@
 package com.hamoyeah.contents.controller;
 
 import com.hamoyeah.contents.service.ContentsService;
+import com.hamoyeah.contents.service.ShopService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/content")
 public class ContentsController {
     private final ContentsService contentsService;
+    private final ShopService shopService;
     @GetMapping("/sync")
     public String syncData() {
         // 1. 관광 카테고리 ID: 1
@@ -34,4 +36,13 @@ public class ContentsController {
 
         return "진주시 컨텐츠들 동기화 완료!";
     }
+
+    @PostMapping("/shop")
+    public ResponseEntity<?> impoetShop(@RequestParam("file")MultipartFile file){
+        try {
+            shopService.importShopFromExcel(file.getInputStream());
+            return ResponseEntity.ok("엑셀 데이터 적재 성공");
+        }catch (Exception e){return ResponseEntity.status(500).body("엑셀 업로드 중 오류 발생");}
+    }
+
 }
