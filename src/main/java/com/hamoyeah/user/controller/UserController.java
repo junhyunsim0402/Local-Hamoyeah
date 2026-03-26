@@ -31,22 +31,18 @@ public class UserController {
         } return ResponseEntity.ok(false);
     }
 
-    // 유저 로그아웃
-    @GetMapping("/logout")
-    public ResponseEntity<?> logout(){return ResponseEntity.ok(true);}
-
-    // 유저 정보 조회(관리자) // 정보 조회는 되는데 관리자만 볼 수 있게 고쳐야 됨
-    @GetMapping("/detailinfo")
-    public ResponseEntity<?> userinfo(@RequestHeader("Authorization")String token, UserDto userDto){
-        if(token==null||!token.startsWith("Bearer ")){
-            return ResponseEntity.ok(false);
-        }
-        token=token.replace("Bearer ","");
-        String email=userService.getClaim(token);
-        UserDto user=userService.userinfo(email);
-        if(user==null || user.getIsAdmin()== null|| !user.getIsAdmin()){
-            return ResponseEntity.ok(false);
-        }
-        return ResponseEntity.ok(user);
-    }
+//    유저 정보 조회(관리자만 가능)-2차 userproof
+//    @GetMapping("/detailinfo")
+//    public ResponseEntity<?> userinfo(@RequestHeader("Authorization")String token, UserDto userDto){
+//        if(token==null||!token.startsWith("Bearer ")){
+//            return ResponseEntity.ok(false);
+//        }
+//        token=token.replace("Bearer ","");
+//        String email=userService.getClaim(token);
+//        UserDto user=userService.userinfo(email);
+//        if(user==null || user.getIsAdmin()== null|| !user.getIsAdmin()){
+//            return ResponseEntity.ok(false);
+//        }
+//        return ResponseEntity.ok(user);
+//    }
 }

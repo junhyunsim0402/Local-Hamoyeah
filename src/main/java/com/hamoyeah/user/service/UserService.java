@@ -67,7 +67,6 @@ public class UserService {
 
         // 등록 성공 후 인증 상태 초기화
         emailService.clearVerification(userDto.getEmail());
-
         return savedEntity.getUserId()>0;
     }
 
@@ -82,12 +81,12 @@ public class UserService {
         } return false;
     }
 
-    // 유저 정보 조회(관리자) // 정보 조회는 되는데 관리자만 볼 수 있게 고쳐야 됨
-    public UserDto userinfo(String loginEmail){
-        Optional<UserEntity> entityOptional=userRepository.findByEmail(loginEmail);
-        if(entityOptional.isPresent()){
-            return entityOptional.get().toDto();
-        }
-        return null;
-    }
+//    유저 정보 조회(관리자만 가능)-2차 userproof
+//    public UserDto userinfo(String loginEmail){
+//        Optional<UserEntity> entityOptional=userRepository.findByEmail(loginEmail);
+//        if(entityOptional.isPresent()){
+//            return entityOptional.get().toDto();
+//        }
+//        return null;
+//    }
 }
