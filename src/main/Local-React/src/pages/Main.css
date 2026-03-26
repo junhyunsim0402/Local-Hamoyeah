@@ -1,0 +1,81 @@
+/* MainPage.css */
+.main-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* 상단 로고 & 설정 버튼 바 */
+.top-bar {
+  display: flex;
+  justify-content: center; /* 로고를 중앙으로 */
+  align-items: center;
+  padding: 15px 20px;
+  position: relative; /* 설정 버튼의 절대 위치 기준 */
+}
+
+.project-logo {
+  height: 32px; /* 로고 이미지 크기에 맞춰 조절 */
+  object-fit: contain;
+}
+
+.settings-btn {
+  position: absolute; /* 로고 중앙을 유지하면서 버튼만 우측으로 */
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* 토글 버튼 영역 */
+.header-tabs {
+  padding: 10px 20px 20px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+
+.toggle-container {
+  display: flex;
+  background-color: #f1f3f5; /* 컨테이너 배경은 연한 회색 유지 */
+  padding: 4px;
+  border-radius: 30px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.toggle-btn {
+  flex: 1;
+  border: none;
+  padding: 12px 0;
+  border-radius: 26px;
+  font-size: 0.95rem;
+  font-weight: 700; /* 글자를 조금 더 진하게 */
+  transition: 0.3s ease;
+  
+  /* 비활성화 상태 색상: #D9D9D9 */
+  background-color: transparent; 
+  color: #D9D9D9; 
+}
+
+.toggle-btn.active {
+  background-color: #FFF186; 
+  color: #333333; /* 노란색 배경엔 어두운 글씨가 잘 보여요 */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 지도 영역: 나머지 화면 전체 차지 */
+.map-section {
+  flex: 1;
+  background-color: #e9ecef; /* 지도 대신 보여줄 배경색 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.map-placeholder {
+  color: #adb5bd;
+  font-weight: bold;
+}
