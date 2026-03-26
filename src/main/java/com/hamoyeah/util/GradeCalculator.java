@@ -29,7 +29,7 @@ public class GradeCalculator {
         System.out.println("PlusResult = " + result);
         return result;
     }
-    public Map<String,Object> minusScore(double noiseAvg,int pm10, int pm25){
+    public Map<String,Object> minusScore(double noiseAvg,int pm10, int pm25){   // 반경 500미터 안에 들때 실행하는 코드
          Map<String,Object> minusResult=new HashMap<>();
          int noiseScore=noiseAvg >= 80 ? 20 : noiseAvg >= 60 ? 15 :
                  noiseAvg >= 55 ? 10 : noiseAvg >= 50 ? 5 : 0 ;  // 소음점수
@@ -43,12 +43,34 @@ public class GradeCalculator {
         System.out.println("MinusResult = " + minusResult);
         return minusResult;
     }
+    public Map<String,Object> noNoiseScore(int pm10,int pm25){  // 반경 500미터 안에 소음 측정한 데이터가 없을시
+        Map<String,Object> minusResult=new HashMap<>();
+        int pm10Score = pm10 <= 30 ? 0 : pm10 <= 80 ? 10 : pm10 <= 150 ? 15 : 20;  // 환경부 공식 기준(미세먼지)
+        int pm25Score = pm25 <= 15 ? 0 : pm25 <= 35 ? 10 : pm25 <= 75 ? 15 : 20;  // 초미세먼지
+        System.out.println("pm10Score = " + pm10Score);
+        System.out.println("pm25Score = " + pm25Score);
+        minusResult.put("pm10Score",pm10Score); minusResult.put("pm25Score",pm25Score);
+        return minusResult;
+    }
 
-    public Map<String,Object> totalGrade(int cctvScore, int streetLampScore, int noiseScore, int airScore){
+    public Map<String,Object> totalGrade(int cctvScore, int streetLampScore, int noiseScore, int airScore){ // 반경 500미터 안에 소음 측정한 데이터가 있을시 최종 등급 계산
          Map<String,Object> result=new HashMap<>();
         int totalScore=( cctvScore + streetLampScore ) - ( noiseScore + airScore ); // + 점수 최대 : 60, - 점수 최대 : 40
         String grade = totalScore >= 45 ? "A" : totalScore >= 30 ? "B" : totalScore >= 15 ? "C" : "D";
         result.put("totalScore",totalScore); result.put("grade",grade);
+        System.out.println("grade = " + grade);
+        return result;
+    }
+
+    public Map<String,Object> noNoiseGrade(int cctvScore, int streetLampScore, int pm10Score, int pm25Score){
+        Map<String,Object> result=new HashMap<>();
+        System.out.println("======================");
+        System.out.println("   소음 데이터 없을 시   ");
+        System.out.println("======================");
+        int totalScore=( cctvScore + streetLampScore ) - ( pm10Score + pm25Score );
+        result.put("totalScore",totalScore);
+        String grade = totalScore >= 45 ? "A" : totalScore >= 30 ? "B" : totalScore >= 15 ? "C" : "D";
+        result.put("grade",grade);
         System.out.println("grade = " + grade);
         return result;
     }

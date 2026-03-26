@@ -109,28 +109,45 @@ public class SafetyService {
                 nearNoise=nosie;
             }
         }
-        System.out.println("가장 가까운 소음 측정소 주소 = " + nearNoise.getAddress());
-        System.out.println("측정소까지 거리 = " + noiseMinDist + "m");
-        System.out.println("측정소 dayAvg = " + nearNoise.getDayAvg());
         System.out.println("사용자가 찍은 경도 = " + requestDto.getLat());
         System.out.println("사용자가 찍은 위도 = " + requestDto.getLng());
-        double nosieValue = nearNoise != null ? nearNoise.getDayAvg() : 0;
+        System.out.println("가장 가까운 소음 측정소 주소 = " + nearNoise.getAddress());
+        System.out.println("측정소까지 거리 = " + noiseMinDist + "m");
+        if(noiseMinDist<=500){  // 소음 측정소 사이의 거리가 500미터 이하이면 실행
+            System.out.println("측정소 dayAvg = " + nearNoise.getDayAvg());
+            double nosieValue = nearNoise != null ? nearNoise.getDayAvg() : 0;
 
-        // 8. 위험 점수 및 최종 등급 계산
-        Map<String,Object> minusResult= gradeCalculator.minusScore(nosieValue,pm10,pm25);
-        int noiseScore = (int) minusResult.get("noiseScore");
-        int airScore = (int) minusResult.get("airScore");
+            // 8. 위험 점수 및 최종 등급 계산
+            Map<String,Object> minusResult= gradeCalculator.minusScore(nosieValue,pm10,pm25);
+            int noiseScore = (int) minusResult.get("noiseScore");
+            int airScore = (int) minusResult.get("airScore");
 
-        Map<String, Object> totalResult = gradeCalculator.totalGrade(cctvScore, streetLampScore, noiseScore, airScore);
+            Map<String, Object> totalResult = gradeCalculator.totalGrade(cctvScore, streetLampScore, noiseScore, airScore);
 
-        return SafetyResponseDto.builder()
-                .grade(totalResult.get("grade").toString())
-                .totalScore((int) totalResult.get("totalScore"))
-                .cctvScore(cctvScore)
-                .streetLampScore(streetLampScore)
-                .noiseScore(noiseScore)
-                .airScore(airScore)
-                .build();
+            return SafetyResponseDto.builder()
+                    .grade(totalResult.get("grade").toString())
+                    .totalScore((int) totalResult.get("totalScore"))
+                    .cctvScore(cctvScore)
+                    .streetLampScore(streetLampScore)
+                    .noiseScore(noiseScore)
+                    .airScore(airScore)
+                    .build();
+        }else{
+            // TODO : 소음을 제외하여 점수 계산할 수 있도록 전달/응답받기 해주는 코드
+            Map<String,Object> minusResult=gradeCalculator.noNoiseScore(pm10,pm25);
+            int pm10Score=(int) minusResult.get("pm10Score");
+            int pm25Score=(int) minusResult.get("pm25Score");
+            Map<String,Object> totalResult=gradeCalculator.noNoiseGrade(cctvScore,streetLampScore,pm10Score,pm25Score);
+
+            return SafetyResponseDto.builder()
+                    .grade(totalResult.get("grade").toString())
+                    .totalScore((int)totalResult.get("totalScore"))
+                    .cctvScore(cctvScore)
+                    .streetLampScore(streetLampScore)
+                    .pm10(pm10Score)
+                    .pm25(pm25Score)
+                    .build();
+        }
     }
     public void syncStreetLamp(String baseUrl) {
         int perPage = 1000; // 한번에 최대 500개
