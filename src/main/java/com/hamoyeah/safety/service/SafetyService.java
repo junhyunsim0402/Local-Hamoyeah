@@ -126,13 +126,23 @@ public class SafetyService {
 
             Map<String, Object> totalResult = gradeCalculator.totalGrade(cctvScore, streetLampScore, noiseScore, airScore);
 
+            // List<ContentsEntity> allContents = contentsRepository.findAll();
+            // List<Map<String,Object>> contentsList = distanceCalculator.getContents(      // 모든정보가 필요하면 쓰기
+            //        requestDto.getLat(), requestDto.getLng(), 1000, allContents);
+
             return SafetyResponseDto.builder()
                     .grade(totalResult.get("grade").toString())
-                    .totalScore((int) totalResult.get("totalScore"))
+                    .totalScore((int)totalResult.get("totalScore"))
                     .cctvScore(cctvScore)
+                    .cctvCount(cctvCount)
                     .streetLampScore(streetLampScore)
+                    .streetLampCount(lampCount)
+                    .noiseAvg(nosieValue)
                     .noiseScore(noiseScore)
                     .airScore(airScore)
+                    .pm10(pm10)
+                    .pm25(pm25)
+                    // .contents(contentsList)  // 모든정보가 필요하면 쓰기
                     .build();
         }else{
             // TODO : 소음을 제외하여 점수 계산할 수 있도록 전달/응답받기 해주는 코드
@@ -141,15 +151,23 @@ public class SafetyService {
             int pm25Score=(int) minusResult.get("pm25Score");
             Map<String,Object> totalResult=gradeCalculator.noNoiseGrade(cctvScore,streetLampScore,pm10Score,pm25Score);
 
+            // List<ContentsEntity> allContents = contentsRepository.findAll();
+            // List<Map<String,Object>> contentsList = distanceCalculator.getContents(      // 모든정보가 필요하면 쓰기
+            //        requestDto.getLat(), requestDto.getLng(), 1000, allContents);
+
             // System.out.println("중요 = " + requestDto.getLng());   확인 완료
             // System.out.println("중요2 = " + requestDto.getLat());  확인 완료
             return SafetyResponseDto.builder()
                     .grade(totalResult.get("grade").toString())
                     .totalScore((int)totalResult.get("totalScore"))
                     .cctvScore(cctvScore)
+                    .cctvCount(cctvCount)
                     .streetLampScore(streetLampScore)
+                    .streetLampCount(lampCount)
+                    .airScore(pm10Score+pm25Score)
                     .pm10(pm10Score)
                     .pm25(pm25Score)
+                    // .contents(contentsList)  // 모든정보가 필요하면 쓰기
                     .build();
         }
     }

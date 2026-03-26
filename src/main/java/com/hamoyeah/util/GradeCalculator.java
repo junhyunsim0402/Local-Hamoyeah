@@ -15,8 +15,8 @@ public class GradeCalculator {
 
         if (totalPlus > 0) {
             // CCTV는 3점 가중치, 가로등은 1점 가중치로 계산하는 로직 유지
-            cctvScore = cctvCount >= 40 ? 45 : cctvCount >= 30 ? 33 :
-                    cctvCount >= 22 ? 25 : cctvCount >= 15 ? 5 : 0;
+            cctvScore = cctvCount >= 40 ? 60 : cctvCount >= 35 ? 45 :
+                    cctvCount >= 28 ? 30 : cctvCount >= 15 ? 10 : cctvCount >= 10 ? 5 :0;
             streetLampScore = lampCount >= 130 ? 15 : lampCount >= 100 ? 10 :
                     lampCount >= 60 ? 5 : lampCount >= 30 ? 2 : 0;
         }
