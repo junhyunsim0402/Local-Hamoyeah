@@ -1,7 +1,10 @@
 package com.hamoyeah.util;
 
+import com.hamoyeah.contents.Entity.ContentsEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 @Component
@@ -36,5 +39,26 @@ public class DistanceCalculator {
             } catch (Exception e) { System.out.println("calculateCount()오류 발생 = " + e); }
         }
         return count;   // 반경 안에 있는 총 개수 반환
+    }
+
+    // TODO : 유저 GPS자표 기준 주변 1km반경으로 컨텐츠, 지역화페 가맹점 가져오는 함수 위도/경도/컨텐츠이름/pk클릭했을때
+    public List<Map<String,Object>> getContents(double userLat,double userLng, double radius, List<ContentsEntity> contentsApiData){
+        List<Map<String,Object>> result=new ArrayList<>();
+        for(ContentsEntity item : contentsApiData) {
+            try {
+                double dist=getDistanceInMeters(userLat,userLng,item.getLatitude(),item.getLongitude());
+                if(dist<=radius){
+                    Map<String,Object> contents=new HashMap<>();    // 반경안에 있는 contents를 담을 Map
+                    contents.put("contentsId",item.getContentId());
+                    contents.put("contentsTitle",item.getContentTitle());
+                    contents.put("lat",item.getLatitude());
+                    // System.out.println("item.getLatitude() = " + item.getLatitude()); 확인 완료
+                    contents.put("lng",item.getLongitude());
+                    System.out.println("item.getLongitude() = " + item.getLongitude());
+                    result.add(contents);   // 컨텐츠 아이디/제목, 위도 경도 저장
+                }
+            } catch (Exception e) { System.out.println("e = " + e); }
+        }
+        return result;
     }
 }

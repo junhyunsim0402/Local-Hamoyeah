@@ -3,6 +3,8 @@ package com.hamoyeah.safety.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.hamoyeah.contents.Entity.ContentsEntity;
+import com.hamoyeah.contents.repository.ContentsRepository;
 import com.hamoyeah.safety.dto.SafetyRequestDto;
 import com.hamoyeah.safety.dto.SafetyResponseDto;
 import com.hamoyeah.safety.entity.*;
@@ -22,7 +24,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service @RequiredArgsConstructor
 @Transactional
@@ -33,6 +34,7 @@ public class SafetyService {
     private final StreetLampRepository streetLampRepository;
     private final AirpollutionRepository airRepository;
     private final NoiseRepository noiseRepository;
+    private final ContentsRepository contentsRepository;
     private final ObjectMapper xmlMapper = new XmlMapper();
     private final WebClient webClient = WebClient.builder()
             .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
@@ -109,10 +111,10 @@ public class SafetyService {
                 nearNoise=nosie;
             }
         }
-        System.out.println("사용자가 찍은 경도 = " + requestDto.getLat());
-        System.out.println("사용자가 찍은 위도 = " + requestDto.getLng());
-        System.out.println("가장 가까운 소음 측정소 주소 = " + nearNoise.getAddress());
-        System.out.println("측정소까지 거리 = " + noiseMinDist + "m");
+        // System.out.println("사용자가 찍은 경도 = " + requestDto.getLat()); // 확인
+        // System.out.println("사용자가 찍은 위도 = " + requestDto.getLng());   // 확인
+        // System.out.println("가장 가까운 소음 측정소 주소 = " + nearNoise.getAddress());  // 확인
+        // System.out.println("측정소까지 거리 = " + noiseMinDist + "m");  // 확인
         if(noiseMinDist<=500){  // 소음 측정소 사이의 거리가 500미터 이하이면 실행
             System.out.println("측정소 dayAvg = " + nearNoise.getDayAvg());
             double nosieValue = nearNoise != null ? nearNoise.getDayAvg() : 0;
@@ -139,6 +141,8 @@ public class SafetyService {
             int pm25Score=(int) minusResult.get("pm25Score");
             Map<String,Object> totalResult=gradeCalculator.noNoiseGrade(cctvScore,streetLampScore,pm10Score,pm25Score);
 
+            // System.out.println("중요 = " + requestDto.getLng());   확인 완료
+            // System.out.println("중요2 = " + requestDto.getLat());  확인 완료
             return SafetyResponseDto.builder()
                     .grade(totalResult.get("grade").toString())
                     .totalScore((int)totalResult.get("totalScore"))
@@ -149,6 +153,13 @@ public class SafetyService {
                     .build();
         }
     }
+    public List<Map<String,Object>> getContents(SafetyRequestDto requestDto){
+        System.out.println("service코드의 위도 = " + requestDto.getLat());   // 확인
+        System.out.println("service코드의 경도 = " + requestDto.getLng());   // 확인
+        List<ContentsEntity> allContents=contentsRepository.findAll();
+        return distanceCalculator.getContents(requestDto.getLat(), requestDto.getLng(), 1000,allContents);
+    }   // 사용자의 위도/경도, 반경 1000m, api정보를 getContents로 넣음
+
     public void syncStreetLamp(String baseUrl) {
         int perPage = 1000; // 한번에 최대 500개
 

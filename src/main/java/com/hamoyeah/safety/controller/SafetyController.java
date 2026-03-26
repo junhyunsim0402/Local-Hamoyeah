@@ -21,6 +21,10 @@ public class SafetyController {
         return "가로등 및 cctv 수집 완료";
     }
 
+    @GetMapping("/contents") public ResponseEntity<?> getContents(@ModelAttribute SafetyRequestDto requestDto){
+        return ResponseEntity.ok(safetyService.getContents(requestDto));
+    }
+
     @GetMapping("/sync/air")
     public boolean syncAir(){
         boolean result = safetyService.syncAir();

@@ -48,9 +48,11 @@ function KakaoMap() {       // 함수 시작
                                     lat: lat,
                                     lng: lng,
                                     radius: 500,    // 반경 500m
-                                }),
+                                }),         // http://localhost:8080/api/safety/에 POST매핑으로 헤더에 콘텐츠 타입을 json타입으로 하고 전달은 위도,경도, 그에따른 반경 500로 전달
                             });
-                            // http://localhost:8080/api/safety/에 POST매핑으로 헤더에 콘텐츠 타입을 json타입으로 하고 전달은 위도,경도, 그에따른 반경 500로 전달
+                            const response2 = await fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`);
+                            const contents = await response2.json();
+                            console.log("주변컨텐츠", contents);
                             const data = await response.json();
                             console.log("결과", data);
 
@@ -88,6 +90,9 @@ function KakaoMap() {       // 함수 시작
                             });
                             const data = await response.json();
                             console.log("결과", data);
+                            const response2 = await fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`);
+                            const contents = await response2.json();
+                            console.log("주변컨텐츠", contents);
 
                             console.log("클릭한 위치 - 위도:", lat, "경도:", lng);
                         });
