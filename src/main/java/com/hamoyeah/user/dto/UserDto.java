@@ -17,11 +17,9 @@ public class UserDto {
 
     public UserEntity toEntity(){
         return UserEntity.builder()
-                .email(this.email)
-                .password(this.password)
-                .nickname(this.nickname)
-                .total_points(0) // 회원가입할 때 포인트에 대한 정보 필요 없으므로 0
-                .isAdmin(this.isAdmin)
+                .email(email)
+                .password(password)
+                .nickname(nickname)
                 .build();
     }
 }
