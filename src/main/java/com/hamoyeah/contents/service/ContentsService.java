@@ -39,8 +39,13 @@ public class ContentsService {
                 .bodyToMono(Map.class)
                 .block();
 
-        if (firstResponse == null || !"OK".equals(firstResponse.get("status"))) { // 첫 응답이 없거나 응답 값에서 상태가 ok가 아니면
-            System.out.println("첫 페이지 호출 실패");
+        if (firstResponse == null) {
+            System.out.println("API 서버에서 응답이 오지 않았습니다. (URL: " + firstUri + ")");
+            return;
+        }
+        Object status = firstResponse.get("status");
+        if (!"OK".equals(status)) {
+            System.out.println("첫 페이지 호출 실패: " + status);
             return;
         }
         int totalPages = (int) firstResponse.get("page_count"); // 각 api 마다 totalpage가 다르므로 첫번째 응답에서 전체 페이지 카운트를 가져옴
@@ -72,6 +77,17 @@ public class ContentsService {
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
+
+        if (checkRes == null) {
+            System.out.println("공공데이터 포털 응답 실패 (URL: " + checkUrl + ")");
+            return;
+        }
+        Object totalCountObj = checkRes.get("totalCount");
+        if (totalCountObj == null) {
+            System.out.println("totalCount 필드가 응답에 없습니다.");
+            return;
+        }
+
         int totalCount = Integer.parseInt(String.valueOf(checkRes.get("totalCount")));
         int pageSize = 50;
         int totalPages = (int) Math.ceil((double) totalCount / pageSize);
@@ -119,9 +135,14 @@ public class ContentsService {
 
 
 
-    private void saveOneItem(Map<String, Object> item, CategoryEntity category){ // null 체크
-        String title = String.valueOf(item.get("name"));
-        String address = String.valueOf(item.get("address"));
+    private void saveOneItem(Map<String, Object> item, CategoryEntity category){
+        Object rawName = item.get("name");
+        Object rawAddr = item.get("address");
+        if (rawName == null || rawAddr == null || rawAddr.toString().isBlank()) {
+            System.out.println("필수 데이터 누락으로 스킵: " + rawName);
+            return;
+        }
+        String title = rawName.toString().trim();
         if (!contentsRepository.existsByContentTitle(title)) {
             ContentsEntity entity = ContentsEntity.builder()
                     .contentTitle(title)
@@ -160,8 +181,8 @@ public class ContentsService {
     }
 
     private String getTitleFromJson(Map<String, Object> item) {
-        if (item.containsKey("시설명")) return String.valueOf(item.get("시설명"));
-        if (item.containsKey("작품명")) return String.valueOf(item.get("작품명"));
+        if (item.get("시설명") != null) return String.valueOf(item.get("시설명")).trim();
+        if (item.get("작품명") != null) return String.valueOf(item.get("작품명")).trim();
         if (item.containsKey("공공미술 명")) return String.valueOf(item.get("공공미술 명")); // 공공미술용
         return "이름 없음";
     }
