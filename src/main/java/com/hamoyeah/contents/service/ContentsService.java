@@ -7,13 +7,14 @@ import com.hamoyeah.contents.repository.ContentsRepository;
 import com.hamoyeah.util.주소좌표변환.GeocodingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Map;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -40,12 +41,12 @@ public class ContentsService {
                 .block();
 
         if (firstResponse == null) {
-            System.out.println("API 서버에서 응답이 오지 않았습니다. (URL: " + firstUri + ")");
+            log.error("컨텐츠 API 서버 응답 없음 (URL: {})", firstUri);
             return;
         }
         Object status = firstResponse.get("status");
         if (!"OK".equals(status)) {
-            System.out.println("첫 페이지 호출 실패: " + status);
+            log.warn("컨텐츠 API 호출 실패 - 상태코드: {}, URL: {}", status, firstUri);
             return;
         }
         int totalPages = (int) firstResponse.get("page_count"); // 각 api 마다 totalpage가 다르므로 첫번째 응답에서 전체 페이지 카운트를 가져옴
@@ -79,12 +80,12 @@ public class ContentsService {
                 .block();
 
         if (checkRes == null) {
-            System.out.println("공공데이터 포털 응답 실패 (URL: " + checkUrl + ")");
+            log.error("공공데이터 포털 응답 실패 (URL: {})", checkUrl);
             return;
         }
         Object totalCountObj = checkRes.get("totalCount");
         if (totalCountObj == null) {
-            System.out.println("totalCount 필드가 응답에 없습니다.");
+            log.warn("데이터 개수(totalCount) 확인 불가 - URL: {}", checkUrl);
             return;
         }
 
@@ -139,7 +140,7 @@ public class ContentsService {
         Object rawName = item.get("name");
         Object rawAddr = item.get("address");
         if (rawName == null || rawAddr == null || rawAddr.toString().isBlank()) {
-            System.out.println("필수 데이터 누락으로 스킵: " + rawName);
+            log.warn("필수 데이터 누락으로 스킵 - 이름: {}, 주소: {}", rawName, rawAddr);
             return;
         }
         String title = rawName.toString().trim();
@@ -174,8 +175,8 @@ public class ContentsService {
             // 2. 숫자로 변환 시도
             return Double.parseDouble(value.toString());
         } catch (NumberFormatException e) {
-            // 3. 만약 "abc" 같은 이상한 글자가 들어있어도 0.0을 줘서 서버가 안 죽게 함
-            System.out.println("숫자 변환 실패: " + value);
+            // 3. 만약 "abc" 같은 이상한 글자가 들어있어도 0.0 주기
+            log.error("좌표 숫자 변환 실패 - 입력값: {}", value);
             return 0.0;
         }
     }
