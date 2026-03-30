@@ -1,23 +1,36 @@
 INSERT INTO category (content_type, content_category) VALUES
-                                                          (1, 1), -- ID: 1 (관광지)
-                                                          (1, 2), -- ID: 2 (축제)
-                                                          (1, 3), -- ID: 3 (문화재)
-                                                          (2, 1), -- ID: 4 (운동시설)
-                                                          (3, 1), -- ID: 5 (공공미술)
-                                                          (3, 2); -- ID: 6 (건축물 미술)
+(1,1), -- 콘텐츠 - 관광지
+(1,2), -- 콘텐츠 - 축제
+(1,3), -- 콘텐츠 - 문화재
+(2,1), -- 운동시설
+(3,1), -- 미술 - 공공미술
+(3,2); -- 미술 - 건축물미술
 
-INSERT INTO user
-(email, password, nickname, total_points, is_admin) VALUES
-                                                       ('user1@test.com', '1234', '유저1', 0, FALSE),
-                                                       ('user2@test.com', '1234', '유저2', 10, FALSE),
-                                                       ('user3@test.com', '1234', '유저3', 20, FALSE),
-                                                       ('user4@test.com', '1234', '유저4', 30, FALSE),
-                                                       ('user5@test.com', '1234', '유저5', 40, FALSE),
-                                                       ('user6@test.com', '1234', '유저6', 50, FALSE),
-                                                       ('user7@test.com', '1234', '유저7', 60, FALSE),
-                                                       ('user8@test.com', '1234', '유저8', 70, FALSE),
-                                                       ('user9@test.com', '1234', '유저9', 80, FALSE),
-                                                       ('admin@test.com', 'admin', '관리자', 999, TRUE);
+INSERT INTO contents
+(category_id, content_title, content_des, start_date, end_date, address, latitude, longitude) VALUES
+(1, '진주성', '진주의 대표 관광지', NULL, NULL, '진주시 본성동', 35.1895, 128.0802),
+(2, '남강유등축제', '화려한 유등 축제', '2026-10-01', '2026-10-15', '진주시 남강', 35.1920, 128.0840),
+(3, '촉석루', '진주 남강가에 위치한 누각', NULL, NULL, '진주시 남성동', 35.1890, 128.0810),
+(4, '진주 체육관', '시민들을 위한 운동시설', NULL, NULL, '진주시 초전동', 35.2100, 128.1000),
+(5, '벽화거리', '아름다운 벽화가 있는 거리', NULL, NULL, '진주시 평거동', 35.1800, 128.0700),
+(6, '건축 미술관', '강남동에 위치한 미술관', NULL, NULL, '진주시 강남동', 35.1900, 128.0850),
+(6, '조형물', '현대적 감각의 조형 작품', NULL, NULL, '진주시 하대동', 35.1950, 128.0900),
+(1, '진양호', '노을이 아름다운 호수 공원', NULL, NULL, '진주시 판문동', 35.1650, 128.0400),
+(4, '헬스장', '최신 시설의 공공 헬스장', NULL, NULL, '진주시 충무공동', 35.2050, 128.1250),
+(5, '공공미술 작품', '상대동 거리의 예술품', NULL, NULL, '진주시 상대동', 35.2000, 128.0950);
+
+INSERT INTO user (email, password, nickname, total_points, is_admin) VALUES
+('user1@test.com', '1234', '유저1', 0, FALSE),
+('user2@test.com', '1234', '유저2', 10, FALSE),
+('user3@test.com', '1234', '유저3', 20, FALSE),
+('user4@test.com', '1234', '유저4', 30, FALSE),
+('user5@test.com', '1234', '유저5', 40, FALSE),
+('user6@test.com', '1234', '유저6', 50, FALSE),
+('user7@test.com', '1234', '유저7', 60, FALSE),
+('user8@test.com', '1234', '유저8', 70, FALSE),
+('user9@test.com', '1234', '유저9', 80, FALSE),
+('admin@test.com', 'admin', '관리자', 999, TRUE);
+
 INSERT INTO noise (address, day_avg, night_avg, area_type, latitude, longitude) VALUES
 -- 1. 경상대학교 칠암캠퍼스 (도서관 앞 / 3분기)
 ('경상남도 진주시 동진로 33', 49.0, 38.0, '일반', 35.180801712, 128.095142920),
@@ -87,3 +100,23 @@ INSERT INTO noise (address, day_avg, night_avg, area_type, latitude, longitude) 
 
 -- 23. 진주 PVC종합상사 앞 (2분기 최신)
 ('경상남도 진주시 동진로264번길 7', 60.0, 60.0, '일반', 35.179934873, 128.120443153);
+
+
+-- [1. 승인 완료 데이터 - 5건] (관리자 계정을 10이라 치고)
+INSERT INTO userproof (user_id, content_id, image_url, status, created_at, admin_id, reject_reason, reviewed_at) VALUES
+(2, 1, 'https://example.com/p1.jpg', '승인', '2026-03-25 10:00:00', 10, NULL, '2026-03-25 14:00:00'),
+(5, 3, 'https://example.com/p4.jpg', '승인', '2026-03-26 13:45:00', 10, NULL, '2026-03-26 17:00:00'),
+(2, 4, 'https://example.com/p5.jpg', '승인', '2026-03-27 10:20:00', 10, NULL, '2026-03-27 11:30:00'),
+(4, 9, 'https://example.com/p8.jpg', '승인', '2026-03-28 14:20:00', 10, NULL, '2026-03-28 16:45:00'),
+(3, 10, 'https://example.com/p10.jpg', '승인', '2026-03-29 16:30:00', 10, NULL, '2026-03-30 09:00:00');
+
+-- [2. 검토 대기중 데이터 - 3건]
+INSERT INTO userproof (user_id, content_id, image_url, status, created_at, admin_id, reject_reason, reviewed_at) VALUES
+(4, 1, 'https://example.com/p3.jpg', '대기중', '2026-03-26 09:15:00', 10, NULL, NULL),
+(5, 8, 'https://example.com/p7.jpg', '대기중', '2026-03-28 08:00:00', 10, NULL, NULL),
+(2, 7, 'https://example.com/p9.jpg', '대기중', '2026-03-29 11:10:00', 10, NULL, NULL);
+
+-- [3. 반려됨 데이터 - 2건]
+INSERT INTO userproof (user_id, content_id, image_url, status, created_at, admin_id, reject_reason, reviewed_at) VALUES
+(3, 2, 'https://example.com/p2.jpg', '반려', '2026-03-25 11:30:00', 10, '사진이 흐릿하여 확인할 수 없습니다.', '2026-03-25 15:20:00'),
+(3, 5, 'https://example.com/p6.jpg', '반려', '2026-03-27 15:00:00', 10, '해당 장소가 아닌 것으로 보입니다.', '2026-03-27 18:10:00');

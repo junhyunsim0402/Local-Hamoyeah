@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user")
@@ -30,19 +32,4 @@ public class UserController {
                     .body(true);
         } return ResponseEntity.ok(false);
     }
-
-//    유저 정보 조회(관리자만 가능)-2차 userproof
-//    @GetMapping("/detailinfo")
-//    public ResponseEntity<?> userinfo(@RequestHeader("Authorization")String token, UserDto userDto){
-//        if(token==null||!token.startsWith("Bearer ")){
-//            return ResponseEntity.ok(false);
-//        }
-//        token=token.replace("Bearer ","");
-//        String email=userService.getClaim(token);
-//        UserDto user=userService.userinfo(email);
-//        if(user==null || user.getIsAdmin()== null|| !user.getIsAdmin()){
-//            return ResponseEntity.ok(false);
-//        }
-//        return ResponseEntity.ok(user);
-//    }
 }

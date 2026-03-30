@@ -8,14 +8,18 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +28,15 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
     private final EmailService emailService;
 
-    private String secret="123456789123456789123456789123456789";
-    private Key secretKey= Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    @Value("${api.service.key}")
+    private String secret;
+
+    private Key secretKey;
+
+    @PostConstruct // 생성자 호출됨
+    public void init() {
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
 
     // 토큰 발급
     public String createToken(String email){
@@ -80,13 +91,4 @@ public class UserService {
             else{return false;}
         } return false;
     }
-
-//    유저 정보 조회(관리자만 가능)-2차 userproof
-//    public UserDto userinfo(String loginEmail){
-//        Optional<UserEntity> entityOptional=userRepository.findByEmail(loginEmail);
-//        if(entityOptional.isPresent()){
-//            return entityOptional.get().toDto();
-//        }
-//        return null;
-//    }
 }
