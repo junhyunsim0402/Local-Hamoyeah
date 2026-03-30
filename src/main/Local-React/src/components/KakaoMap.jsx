@@ -24,6 +24,7 @@ function KakaoMap() {       // 함수 시작
                         //     level: 3,                                       // 화면 확대 레벨
                         // };
                         const map = new window.kakao.maps.Map(mapRef.current, options); // 맵 화면 띄울변수
+                        let contentMarkers = [];  // contents 마커들을 저장할 배열 추가
                         console.log("요청 좌표", lat, lng);
                         fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`)    // 현재 위치를 기준으로 반경 1km 안에 있는 컨텐츠들 호출
                             .then(res => res.json())
@@ -36,6 +37,7 @@ function KakaoMap() {       // 함수 시작
                                         title: content.contentsTitle
                                     });
                                     marker.setMap(map);
+                                    contentMarkers.push(marker);  // 배열에 저장
                                 });
                             });
 
@@ -45,8 +47,8 @@ function KakaoMap() {       // 함수 시작
                             position: makerPosition
                         });
                         maker.setMap(map);      // 지도에 마커 표시
+
                         let clickMaker = null;    // 클릭 마커 선언(처음은 없음)
-                        let contentMarkers = [];  // contents 마커들을 저장할 배열 추가
                         window.kakao.maps.event.addListener(map, 'click', async (mouseEvent) => {
                             const lat = mouseEvent.latLng.getLat(); // 클릭한 위도
                             const lng = mouseEvent.latLng.getLng(); // 클릭한 경도
@@ -82,7 +84,7 @@ function KakaoMap() {       // 함수 시작
                                     title: content.contentsTitle
                                 });
                                 marker.setMap(map);
-                                contentMarkers.push(marker);  // 나중에 지우려고 배열에 저장
+                                contentMarkers.push(marker);  // 새 배열에 저장
                             });
 
                             const data = await response.json();
@@ -93,16 +95,19 @@ function KakaoMap() {       // 함수 시작
                         });
                     },
                     () => {         // GPS실패 했을 경우의 코드 시작( 진주 시청을 기본값 )
+                        const lat = 35.1798;  // 진주시 위도/경도
+                        const lng = 128.1076;
                         const options = {       // 지도 옵션 실행
-                            center: new window.kakao.maps.LatLng(35.1798, 128.1076),
+                            center: new window.kakao.maps.LatLng(lat, lng),
                             level: 3,
                         };
                         const map = new window.kakao.maps.Map(mapRef.current, options);
+                        let contentMarkers = [];  // contents 마커들을 저장할 배열 추가
 
                         fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`)    // 현재 위치를 기준으로 반경 1km 안에 있는 컨텐츠들 호출
                             .then(res => res.json())
                             .then(contents => {
-                                console.log("초기 주변 컨텐츠", contents);
+                                console.log("GPS 실패 초기 주변 컨텐츠", contents);
                                 // 여기서 마커 찍거나 상태 업데이트
                                 contents.forEach(content => {
                                     const marker = new window.kakao.maps.Marker({
@@ -110,10 +115,11 @@ function KakaoMap() {       // 함수 시작
                                         title: content.contentsTitle
                                     });
                                     marker.setMap(map);
+                                    contentMarkers.push(marker);  // 배열에 저장
                                 });
                             });
 
-                        const markerPosition = new window.kakao.maps.LatLng(35.1798, 128.1076);
+                        const markerPosition = new window.kakao.maps.LatLng(lat, lng);
                         const marker = new window.kakao.maps.Marker({
                             position: markerPosition,
                         });
@@ -140,6 +146,15 @@ function KakaoMap() {       // 함수 시작
                             const response2 = await fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`);
                             const contents = await response2.json();
                             console.log("주변컨텐츠", contents);
+
+                            contents.forEach(content => {   // 클릭 기준 contents마커 찍기
+                                const marker = new window.kakao.maps.Marker({
+                                    position: new window.kakao.maps.LatLng(content.lat, content.lng),
+                                    title: content.contentsTitle
+                                });
+                                marker.setMap(map);
+                                contentMarkers.push(marker);  // 새 배열에 저장
+                            });
 
                             console.log("클릭한 위치 - 위도:", lat, "경도:", lng);
                         });
