@@ -1,0 +1,150 @@
+.login-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative; /* 배경 이미지 절대 위치 기준 */
+  background-color: #ffffff;
+}
+
+/* 1. 배경 이미지 스타일 */
+.login-bg-image {
+  position: absolute;
+  width: 100%;
+  object-fit: cover; /* 이미지가 찌그러지지 않게 */
+  z-index: 1; /* 레이어 가장 아래 */
+}
+
+/* 상단 배경 */
+.login-top-bg {
+  top: 0;
+  height: 200px; 
+  width: 100%;
+  object-fit: fill;
+  position: absolute;
+  z-index: 1;
+}
+
+/* 하단 배경 */
+.login-bottom-bg {
+  bottom: 0;
+  height: 400px; 
+  width: 100%;
+  object-fit: fill;
+  position: absolute;
+  z-index: 1;
+}
+.logo-section {
+  position: fixed; 
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  
+  /* 너비와 높이 설정 */
+  width: 100%;
+  max-width: 501px; 
+  height: 160px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100; 
+  
+}
+
+/* 2. 콘텐츠 레이어 스타일 */
+.login-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  z-index: 10; /* 배경 이미지 위에 붕 띄움 */
+  position: relative;
+  padding-bottom: 50px;
+}
+
+
+
+.login-logo {
+  height: 55px; /* 로고 크기는 적절히 조절하세요 */
+  object-fit: contain;
+}
+
+/* 중앙 입력 폼 영역 (가장 중요 ⭐) */
+.login-form {
+    margin-top: 220px;
+    padding: 0px;
+    display: flex;
+    gap: 15px; /* 입력 그룹과 로그인 버튼 사이 간격 */
+    align-items: stretch; /* 입력창과 버튼 높이를 맞춤 */
+    width: 90%;
+    max-width: 320px; 
+  margin-left: auto;  /* 가로 중앙 정렬 */
+  margin-right: auto; /* 가로 중앙 정렬 */
+}
+
+/* 아이디, 비밀번호 입력창 그룹 (왼쪽) */
+.input-group {
+  flex: 1; /* 남은 공간 다 차지 */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.login-input {
+  width: 100%;
+  padding: 18px;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  background-color: #D9D9D9; /* 배경 이미지가 살짝 보이게 반투명 */
+  font-size: 1rem;
+  outline: none;
+}
+
+.login-input:focus {
+  border-color: #FFF186; /* 우리 시그니처 컬러 포커스! */
+}
+
+/* 로그인 버튼 (오른쪽) */
+.login-submit-btn {
+  width: 90px; /* 버튼 너비 고정 */
+  border: none;
+  border-radius: 12px;
+  background-color: #FFF186; /* 노란색 포인트 */
+  color: #333;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  writing-mode: horizontal-tb; /* 폰 화면에서 세로로 보일 수 있어서 방지 */
+}
+
+/* 3. 하단 여백 및 푸터 */
+.spacer {
+  flex: 1; /* 중간 공간을 확보해서 푸터를 아래로 밈 */
+}
+
+.login-footer {
+  position: absolute;
+  bottom: 230px;
+  width: 100%;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  z-index: 10;
+  padding-bottom: env(safe-area-inset-bottom); /* 아이폰 하단 대응 */
+}
+
+.join-link-btn {
+  width: 140px; 
+  height: 40px;
+  border: none;
+  border-radius: 40px;
+  background-color: #FFF186; 
+  color: #333;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  writing-mode: horizontal-tb;
+}
+.login-submit-btn:active, .join-link-btn:active {
+  filter: brightness(0.9); /* 살짝 어두워지면서 눌리는 느낌 */
+  transform: scale(0.98);   /* 아주 미세하게 작아짐 */
+}

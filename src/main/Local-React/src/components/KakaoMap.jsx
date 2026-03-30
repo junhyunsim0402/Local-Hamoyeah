@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";  // React에서 useEffect, useRef 기능을 가져옴
 
-function KakaoMap() {       // 함수 시작
+function KakaoMap({viewType}) {       // 함수 시작
     const mapRef = useRef(null);        // 지도를 그릴 div를 나중에 찾기 위한 변수, 처음엔 비어있음(null)
 
     useEffect(() => {       // 함수 시작
@@ -99,11 +99,11 @@ function KakaoMap() {       // 함수 시작
                     }
                 );
             });
-        };
+        }, 
         document.head.appendChild(script);  // <head>태그에 <script>태그를 넣는다
-    }, []);
+    }, [viewType]);
 
-    return <div ref={mapRef} style={{ width: "100%", height: "500px" }} />;     // <div>안에 맵 화면을 그려주는 코드
+    return <div ref={mapRef} style={{ width: "100%", height: "100%", position: "absolute" }} />;
 }
 
 export default KakaoMap;
