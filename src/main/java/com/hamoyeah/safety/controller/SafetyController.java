@@ -25,7 +25,7 @@ public class SafetyController {
         return ResponseEntity.ok(safetyService.getContents(requestDto));
     }
 
-    // 500m 반경 contents,shop 목록 가져오는 코드 (인증용)
+    // 50m 반경 contents,shop 목록 가져오는 코드 (인증용)
     @GetMapping("/auth-contents")
     public ResponseEntity<?> getAuthContents(@ModelAttribute SafetyRequestDto requestDto) {
         return ResponseEntity.ok(safetyService.getAuthContents(requestDto));

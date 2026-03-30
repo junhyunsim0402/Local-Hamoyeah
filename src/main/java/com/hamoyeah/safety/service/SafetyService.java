@@ -185,8 +185,8 @@ public class SafetyService {
     public List<Map<String,Object>> getAuthContents(SafetyRequestDto requestDto){   // 500미터 안에 있는 컨텐츠 컨텐츠 불러오는 함수
         List<ContentsEntity> allContents=contentsRepository.findAll();
         List<ShopEntity> allShop=shopRepository.findAll();
-        List<Map<String,Object>> contentsResult=distanceCalculator.getContents(requestDto.getLat(),requestDto.getLng(),500,allContents);    // 반경 500m 안에 있는 모든 컨텐츠 가져오기
-        List<Map<String,Object>> shopResult=distanceCalculator.getShop(requestDto.getLat(),requestDto.getLng(),500,allShop);                // 반경 500m 안에 있는 모든 shop 가져오기
+        List<Map<String,Object>> contentsResult=distanceCalculator.getContents(requestDto.getLat(),requestDto.getLng(),50,allContents);    // 반경 50m 안에 있는 모든 컨텐츠 가져오기
+        List<Map<String,Object>> shopResult=distanceCalculator.getShop(requestDto.getLat(),requestDto.getLng(),50,allShop);                // 반경 50m 안에 있는 모든 shop 가져오기
         List<Map<String,Object>> result=new ArrayList<>();
         result.addAll(contentsResult); result.addAll(shopResult);
         return result;
