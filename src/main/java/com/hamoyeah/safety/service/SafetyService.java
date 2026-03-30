@@ -149,7 +149,6 @@ public class SafetyService {
                     // .contents(contentsList)  // 모든정보가 필요하면 쓰기
                     .build();
         }else{
-            // TODO : 소음을 제외하여 점수 계산할 수 있도록 전달/응답받기 해주는 코드
             Map<String,Object> minusResult=gradeCalculator.noNoiseScore(pm10,pm25);
             int pm10Score=(int) minusResult.get("pm10Score");
             int pm25Score=(int) minusResult.get("pm25Score");
@@ -176,17 +175,20 @@ public class SafetyService {
         }
     }
     public List<Map<String,Object>> getContents(SafetyRequestDto requestDto){
-        System.out.println("service코드의 위도 = " + requestDto.getLat());   // 확인
-        System.out.println("service코드의 경도 = " + requestDto.getLng());   // 확인
-        List<ContentsEntity> allContents=contentsRepository.findAll();
-        return distanceCalculator.getContents(requestDto.getLat(), requestDto.getLng(), 1000,allContents);
-    }   // 사용자의 위도/경도, 반경 1000m, api정보를 getContents로 넣음
-
-    public List<Map<String,Object>> getAuthContents(SafetyRequestDto requestDto){   // 500미터 안에 있는 컨텐츠 컨텐츠 불러오는 함수
         List<ContentsEntity> allContents=contentsRepository.findAll();
         List<ShopEntity> allShop=shopRepository.findAll();
-        List<Map<String,Object>> contentsResult=distanceCalculator.getContents(requestDto.getLat(),requestDto.getLng(),50,allContents);    // 반경 50m 안에 있는 모든 컨텐츠 가져오기
-        List<Map<String,Object>> shopResult=distanceCalculator.getShop(requestDto.getLat(),requestDto.getLng(),50,allShop);                // 반경 50m 안에 있는 모든 shop 가져오기
+        List<Map<String,Object>> contentResult=distanceCalculator.getContents(requestDto.getLat(), requestDto.getLng(), requestDto.getRadius(), allContents);
+        List<Map<String,Object>> shopResult=distanceCalculator.getShop(requestDto.getLat(), requestDto.getLng(), requestDto.getRadius(), allShop);
+        List<Map<String,Object>> result=new ArrayList<>();
+        result.addAll(contentResult); result.addAll(shopResult);
+        return result;
+    }   // 1km반경의 contents,shop 호출 함수
+
+    public List<Map<String,Object>> getAuthContents(SafetyRequestDto requestDto){   // 50미터 안에 있는 컨텐츠,shop 불러오는 함수
+        List<ContentsEntity> allContents=contentsRepository.findAll();
+        List<ShopEntity> allShop=shopRepository.findAll();
+        List<Map<String,Object>> contentsResult=distanceCalculator.getContents(requestDto.getLat(),requestDto.getLng(), requestDto.getRadius(), allContents);    // 반경 50m 안에 있는 모든 컨텐츠 가져오기
+        List<Map<String,Object>> shopResult=distanceCalculator.getShop(requestDto.getLat(),requestDto.getLng(), requestDto.getRadius(), allShop);                // 반경 50m 안에 있는 모든 shop 가져오기
         List<Map<String,Object>> result=new ArrayList<>();
         result.addAll(contentsResult); result.addAll(shopResult);
         return result;

@@ -36,29 +36,32 @@ function KakaoMap() {       // 함수 시작
                             fetch(`http://localhost:8080/api/safety/auth-contents?lat=${currentlat}&lng=${currentlng}&radius=50`).then(res => res.json())
                         ]).then(([contents, auth]) => {
                             authContents = auth;  // 저장해두면 클릭 이벤트에서도 쓸 수 있음
-                            console.log("초기 주변 컨텐츠", contents);
-                            console.log("인증가능컨텐츠", authContents);
                             contents.forEach(content => {
+                                const title = content.contentsTitle ?? content.shopTitle;
+                                const id = content.contentsId ?? content.shopId;
                                 const marker = new window.kakao.maps.Marker({
                                     position: new window.kakao.maps.LatLng(content.lat, content.lng),
-                                    title: content.contentsTitle
+                                    title: title
                                 });
                                 marker.setMap(map);
                                 contentMarkers.push(marker);
                                 // 반경이내에 있으면 인증 가능
-                                const isAuthable = authContents.some(auth => auth.contentsId === content.contentsId);
+                                const isAuthable = authContents.some(auth =>
+                                    (auth.contentsId && auth.contentsId === content.contentsId) ||
+                                    (auth.shopId && auth.shopId === content.shopId)
+                                );
 
                                 const infowindow = new window.kakao.maps.InfoWindow({
-                                    content: `
+                                        content: `
                                         <div style="padding:10px; min-width:200px">
-                                            <b>${content.contentsTitle}</b><br/>
+                                            <b>${title}</b><br/>
                                             ${isAuthable
-                                            ? `<button id="auth-btn-${content.contentsId}" ...>인증하기</button>`
-                                            : `<p style="color:gray">50m 밖 - 인증 불가</p>`
-                                        }
+                                                ? `<button id="auth-btn-${id}" ...>인증하기</button>`
+                                                : `<p style="color:gray">50m 밖 - 인증 불가</p>`
+                                            }
                                         </div>
                                     `
-                                });
+                                    });
                                 infowindows.push(infowindow);   // 인증창 저장
 
                                 // 마커 클릭 시 인포윈도우 열기
@@ -67,12 +70,12 @@ function KakaoMap() {       // 함수 시작
                                     infowindow.open(map, marker);
 
                                     setTimeout(() => {
-                                        const btn = document.getElementById(`auth-btn-${content.contentsId}`);
+                                        const btn = document.getElementById(`auth-btn-${id}`);
                                         if (btn) {
                                             btn.onclick = async () => {
-                                                console.log("인증하기 클릭:", content.contentsTitle);
+                                                console.log("인증하기 클릭:", title);
                                                 // TODO: 인증 API 호출
-                                                alert(`${content.contentsTitle} 인증 완료!`);
+                                                alert(`${title} 인증 완료!`);
                                             };
                                         }
                                     }, 100);
@@ -117,24 +120,27 @@ function KakaoMap() {       // 함수 시작
                             const response2 = await fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`);
 
                             const contents = await response2.json();
-                            console.log("주변컨텐츠", contents);
-                            console.log("인증가능컨텐츠", authContents);
                             contents.forEach(content => {
+                                const title=content.contentsTitle ?? content.shopTitle;
+                                const id=content.contentsId ?? content.shopId;
                                 const marker = new window.kakao.maps.Marker({
                                     position: new window.kakao.maps.LatLng(content.lat, content.lng),
-                                    title: content.contentsTitle
+                                    title: title
                                 });
                                 marker.setMap(map);
                                 contentMarkers.push(marker);
 
-                                const isAuthable = authContents.some(auth => auth.contentsId === content.contentsId);
+                                 const isAuthable = authContents.some(auth =>
+                                    (auth.contentsId && auth.contentsId === content.contentsId) ||
+                                    (auth.shopId && auth.shopId === content.shopId)
+                                );
 
                                 const infowindow = new window.kakao.maps.InfoWindow({
                                     content: `
                                         <div style="padding:10px; min-width:200px">
-                                            <b>${content.contentsTitle}</b><br/>
+                                            <b>${title}</b><br/>
                                             ${isAuthable
-                                            ? `<button id="auth-btn-${content.contentsId}"
+                                            ? `<button id="auth-btn-${id}"
                                             style="margin-top:8px; padding:4px 8px; cursor:pointer;
                                                background:#4CAF50; color:white; border:none; border-radius:4px">
                                             인증하기
@@ -220,7 +226,6 @@ function KakaoMap() {       // 함수 시작
 
                             const response2 = await fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`);
                             const contents = await response2.json();
-                            console.log("주변컨텐츠", contents);
 
                             // 마커만 찍고 인포윈도우 없음
                             contents.forEach(content => {
@@ -257,4 +262,9 @@ export default KakaoMap;
 8. script를 <head>에 넣어서 다운로드 시작 ← (3번 직후에 일어남)
 9. div를 화면에 그려줌 (return)
 10. 다른 파일에서 쓸 수 있게 KakaoMap으로 내보냄
+
+참고
+1. 500m 반경의 안심등급
+2. 1km 반경의 contents 출력
+3. 50m 반경의 인증 기능
 */
