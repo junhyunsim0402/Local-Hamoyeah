@@ -1,8 +1,40 @@
 import { useEffect, useRef } from "react";  // React에서 useEffect, useRef 기능을 가져옴
-
+import tourIcon from '../assets/tour.png';
+import festivalIcon from '../assets/festival.png';
+import gymIcon from '../assets/gym.png';
+import artIcon from '../assets/art.png';
+import foodIcon from '../assets/food.png';
+import dessertIcon from '../assets/dessert.png';
+import marketIcon from '../assets/market.png';
+import pharmacyIcon from '../assets/pharmacy.png';
+import buildingIcon from '../assets/building.png';
+import cultureIcon from '../assets/culture.png';
 function KakaoMap() {       // 함수 시작
     const mapRef = useRef(null);        // 지도를 그릴 div를 나중에 찾기 위한 변수, 처음엔 비어있음(null)
-
+    const getMarkerIcon = (content) => {
+        if (content.categoryId) {
+            const contentIconMap = {
+                1: tourIcon,      // 관광
+                2: festivalIcon,  // 축제
+                3: cultureIcon,   // 문화재
+                4: gymIcon,       // 공공 체육시설
+                5: artIcon,       // 건축 미술
+                6: artIcon,       // 공공 미술
+            };
+            return contentIconMap[content.categoryId];
+        }
+        if (content.shopCategory) {
+            const shopIconMap = {
+                'FOOD': foodIcon,
+                'CAFE': dessertIcon,
+                'STORE': marketIcon,
+                'MEDICAL': pharmacyIcon,
+                'LIFE': buildingIcon,
+                'ETC': buildingIcon,
+            };
+            return shopIconMap[content.shopCategory];
+        }
+    };
     useEffect(() => {       // 함수 시작
         const script = document.createElement("script");        // scipt를 만들고
         script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_KEY}&autoload=false`; // 연결할 스크립트 url
@@ -39,10 +71,21 @@ function KakaoMap() {       // 함수 시작
                             contents.forEach(content => {
                                 const title = content.contentsTitle ?? content.shopTitle;
                                 const id = content.contentsId ?? content.shopId;
+
+                                // 아이콘 추가
+                                const iconUrl = getMarkerIcon(content);
+                                const markerImage = iconUrl
+                                    ? new window.kakao.maps.MarkerImage(
+                                        iconUrl,
+                                        new window.kakao.maps.Size(27, 44)
+                                    )
+                                    : null;
                                 const marker = new window.kakao.maps.Marker({
                                     position: new window.kakao.maps.LatLng(content.lat, content.lng),
-                                    title: title
+                                    title: title,
+                                    image: markerImage
                                 });
+
                                 marker.setMap(map);
                                 contentMarkers.push(marker);
                                 // 반경이내에 있으면 인증 가능
@@ -52,16 +95,16 @@ function KakaoMap() {       // 함수 시작
                                 );
 
                                 const infowindow = new window.kakao.maps.InfoWindow({
-                                        content: `
+                                    content: `
                                         <div style="padding:10px; min-width:200px">
                                             <b>${title}</b><br/>
                                             ${isAuthable
-                                                ? `<button id="auth-btn-${id}" ...>인증하기</button>`
-                                                : `<p style="color:gray">50m 밖 - 인증 불가</p>`
-                                            }
+                                            ? `<button id="auth-btn-${id}" ...>인증하기</button>`
+                                            : `<p style="color:gray">50m 밖 - 인증 불가</p>`
+                                        }
                                         </div>
                                     `
-                                    });
+                                });
                                 infowindows.push(infowindow);   // 인증창 저장
 
                                 // 마커 클릭 시 인포윈도우 열기
@@ -121,16 +164,24 @@ function KakaoMap() {       // 함수 시작
 
                             const contents = await response2.json();
                             contents.forEach(content => {
-                                const title=content.contentsTitle ?? content.shopTitle;
-                                const id=content.contentsId ?? content.shopId;
+                                const title = content.contentsTitle ?? content.shopTitle;
+                                const id = content.contentsId ?? content.shopId;
+                                const iconUrl = getMarkerIcon(content);
+                                const markerImage = iconUrl
+                                    ? new window.kakao.maps.MarkerImage(
+                                        iconUrl,
+                                        new window.kakao.maps.Size(27, 44)
+                                    )
+                                    : null;
                                 const marker = new window.kakao.maps.Marker({
                                     position: new window.kakao.maps.LatLng(content.lat, content.lng),
-                                    title: title
+                                    title: title,
+                                    image: markerImage
                                 });
                                 marker.setMap(map);
                                 contentMarkers.push(marker);
 
-                                 const isAuthable = authContents.some(auth =>
+                                const isAuthable = authContents.some(auth =>
                                     (auth.contentsId && auth.contentsId === content.contentsId) ||
                                     (auth.shopId && auth.shopId === content.shopId)
                                 );
@@ -157,11 +208,11 @@ function KakaoMap() {       // 함수 시작
                                     infowindow.open(map, marker);
 
                                     setTimeout(() => {
-                                        const btn = document.getElementById(`auth-btn-${content.contentsId}`);
+                                        const btn = document.getElementById(`auth-btn-${id}`);
                                         if (btn) {
                                             btn.onclick = async () => {
-                                                console.log("인증하기 클릭:", content.contentsTitle);
-                                                alert(`${content.contentsTitle} 인증 완료!`);
+                                                console.log("인증하기 클릭:", title);
+                                                alert(`${title} 인증 완료!`);
                                             };
                                         }
                                     }, 100);

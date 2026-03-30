@@ -53,10 +53,9 @@ public class DistanceCalculator {
                     Map<String,Object> contents=new HashMap<>();    // 반경안에 있는 contents를 담을 Map
                     contents.put("contentsId",item.getContentId());
                     contents.put("contentsTitle",item.getContentTitle());
+                    contents.put("categoryId",item.getCategory().getCategoryId());
                     contents.put("lat",item.getLatitude());
-                    // System.out.println("item.getLatitude() = " + item.getLatitude()); 확인 완료
                     contents.put("lng",item.getLongitude());
-                    System.out.println("item.getLongitude() = " + item.getLongitude());
                     result.add(contents);   // 컨텐츠 아이디/제목, 위도 경도 저장
                 }
             } catch (Exception e) { System.out.println("e = " + e); }
@@ -76,6 +75,8 @@ public class DistanceCalculator {
                     Map<String,Object> contents=new HashMap<>();    // 반경안에 있는 contents를 담을 Map
                     contents.put("shopId",item.getShopId());
                     contents.put("shopTitle",item.getName());
+                    contents.put("shopCategory",item.getShopCategory() != null ?
+                            item.getShopCategory().name() : "ETC"); // 없으면 ETC
                     contents.put("lat",item.getLatitude());
                     contents.put("lng",item.getLongitude());
                     result.add(contents);   // 컨텐츠 아이디/제목, 위도 경도 저장
