@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.hamoyeah.contents.Entity.ContentsEntity;
+import com.hamoyeah.contents.Entity.ShopEntity;
 import com.hamoyeah.contents.repository.ContentsRepository;
+import com.hamoyeah.contents.repository.ShopRepository;
 import com.hamoyeah.safety.dto.SafetyRequestDto;
 import com.hamoyeah.safety.dto.SafetyResponseDto;
 import com.hamoyeah.safety.entity.*;
@@ -22,6 +24,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +38,7 @@ public class SafetyService {
     private final AirpollutionRepository airRepository;
     private final NoiseRepository noiseRepository;
     private final ContentsRepository contentsRepository;
+    private final ShopRepository shopRepository;
     private final ObjectMapper xmlMapper = new XmlMapper();
     private final WebClient webClient = WebClient.builder()
             .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
@@ -177,6 +181,16 @@ public class SafetyService {
         List<ContentsEntity> allContents=contentsRepository.findAll();
         return distanceCalculator.getContents(requestDto.getLat(), requestDto.getLng(), 1000,allContents);
     }   // 사용자의 위도/경도, 반경 1000m, api정보를 getContents로 넣음
+
+    public List<Map<String,Object>> getAuthContents(SafetyRequestDto requestDto){   // 500미터 안에 있는 컨텐츠 컨텐츠 불러오는 함수
+        List<ContentsEntity> allContents=contentsRepository.findAll();
+        List<ShopEntity> allShop=shopRepository.findAll();
+        List<Map<String,Object>> contentsResult=distanceCalculator.getContents(requestDto.getLat(),requestDto.getLng(),500,allContents);    // 반경 500m 안에 있는 모든 컨텐츠 가져오기
+        List<Map<String,Object>> shopResult=distanceCalculator.getShop(requestDto.getLat(),requestDto.getLng(),500,allShop);                // 반경 500m 안에 있는 모든 shop 가져오기
+        List<Map<String,Object>> result=new ArrayList<>();
+        result.addAll(contentsResult); result.addAll(shopResult);
+        return result;
+    }
 
     public void syncStreetLamp(String baseUrl) {
         int perPage = 1000; // 한번에 최대 500개

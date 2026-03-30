@@ -16,7 +16,7 @@ function KakaoMap() {       // 함수 시작
                         // const lng = position.coords.longitude;  // GPS로 받은 사용자 위치(경도)
 
                         const options = {
-                            center: new window.kakao.maps.LatLng(35.1798, 128.1076), // 진주 시청으로 고정
+                            center: new window.kakao.maps.LatLng(lat, lng), // 진주 시청으로 고정
                             level: 3,
                         };
                         // const options = {       // 지도 옵션 설정
@@ -25,6 +25,7 @@ function KakaoMap() {       // 함수 시작
                         // };
                         const map = new window.kakao.maps.Map(mapRef.current, options); // 맵 화면 띄울변수
                         let contentMarkers = [];  // contents 마커들을 저장할 배열 추가
+                        let infowindows = [];   // 인포윈도우(인증 창) 배열
                         console.log("요청 좌표", lat, lng);
                         fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`)    // 현재 위치를 기준으로 반경 1km 안에 있는 컨텐츠들 호출
                             .then(res => res.json())
@@ -57,6 +58,8 @@ function KakaoMap() {       // 함수 시작
 
                             contentMarkers.forEach(m => m.setMap(null));
                             contentMarkers = [];    // 클릭할때 마다 이전 contents마커 전부 제거
+                            infowindows.forEach(iw => iw.close());  // 기존 인포윈도우 전부 닫기
+                            infowindows = [];
 
                             clickMaker = new window.kakao.maps.Marker({
                                 position: new window.kakao.maps.LatLng(lat, lng),   // 새 마커 생성
@@ -75,8 +78,12 @@ function KakaoMap() {       // 함수 시작
                                 }),         // http://localhost:8080/api/safety/에 POST매핑으로 헤더에 콘텐츠 타입을 json타입으로 하고 전달은 위도,경도, 그에따른 반경 500로 전달
                             });
                             const response2 = await fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`);
+                            const response3 = await fetch(`http://localhost:8080/api/safety/auth-contents?lat=${lat}&lng=${lng}&radius=500`);
+
                             const contents = await response2.json();
+                            const authContents = await response3.json();
                             console.log("주변컨텐츠", contents);
+                            console.log("인증가능컨텐츠", authContents);
 
                             contents.forEach(content => {   // 클릭 기준 contents마커 찍기
                                 const marker = new window.kakao.maps.Marker({
@@ -85,12 +92,39 @@ function KakaoMap() {       // 함수 시작
                                 });
                                 marker.setMap(map);
                                 contentMarkers.push(marker);  // 새 배열에 저장
+                                // 반경이내에 있으면 인증 가능
+                                const isAuthable = authContents.some(auth => auth.contentsId === content.contentsId);
+
+                                const infowindow = new window.kakao.maps.InfoWindow({
+                                    content: `
+                                        <div style="padding:10px; min-width:200px">
+                                            <b>${content.contentsTitle}</b><br/>
+                                            ${isAuthable
+                                            ? `<button id="auth-btn-${content.contentsId}" ...>인증하기</button>`
+                                            : `<p style="color:gray">500m 밖 - 인증 불가</p>`
+                                        }
+                                        </div>
+                                    `
+                                });
+                                infowindows.push(infowindow);   // 인증창 저장
+
+                                // 마커 클릭 시 인포윈도우 열기
+                                window.kakao.maps.event.addListener(marker, 'click', () => {
+                                    infowindows.forEach(iw => iw.close());  // 기존 인포윈도우 전부 닫기
+                                    infowindow.open(map, marker);
+
+                                    setTimeout(() => {
+                                        const btn = document.getElementById(`auth-btn-${content.contentsId}`);
+                                        if (btn) {
+                                            btn.onclick = async () => {
+                                                console.log("인증하기 클릭:", content.contentsTitle);
+                                                // TODO: 인증 API 호출
+                                                alert(`${content.contentsTitle} 인증 완료!`);
+                                            };
+                                        }
+                                    }, 100);
+                                });
                             });
-
-                            const data = await response.json();
-                            console.log("결과", data);
-
-
                             console.log("클릭한 위치 - 위도:", lat, "경도:", lng);  // test용 위도 경도 확인차 콘솔 출력
                         });
                     },
@@ -103,6 +137,7 @@ function KakaoMap() {       // 함수 시작
                         };
                         const map = new window.kakao.maps.Map(mapRef.current, options);
                         let contentMarkers = [];  // contents 마커들을 저장할 배열 추가
+                        let infowindows = [];   // 인포윈도우(인증 창) 배열
 
                         fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`)    // 현재 위치를 기준으로 반경 1km 안에 있는 컨텐츠들 호출
                             .then(res => res.json())
@@ -131,6 +166,11 @@ function KakaoMap() {       // 함수 시작
 
                             if (clickMaker) { clickMaker.setMap(null); }
 
+                            contentMarkers.forEach(m => m.setMap(null));
+                            contentMarkers = [];    // 클릭할때 마다 이전 contents마커 전부 제거
+                            infowindows.forEach(iw => iw.close());  // 기존 인포윈도우 전부 닫기
+                            infowindows = [];
+
                             clickMaker = new window.kakao.maps.Marker({
                                 position: new window.kakao.maps.LatLng(lat, lng),
                             });
@@ -145,17 +185,53 @@ function KakaoMap() {       // 함수 시작
                             console.log("결과", data);
                             const response2 = await fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`);
                             const contents = await response2.json();
+                            const authContents = await response.json();
                             console.log("주변컨텐츠", contents);
+                            console.log("인증가능컨텐츠", authContents);
 
-                            contents.forEach(content => {   // 클릭 기준 contents마커 찍기
+                            contents.forEach(content => {
                                 const marker = new window.kakao.maps.Marker({
                                     position: new window.kakao.maps.LatLng(content.lat, content.lng),
                                     title: content.contentsTitle
                                 });
                                 marker.setMap(map);
-                                contentMarkers.push(marker);  // 새 배열에 저장
-                            });
+                                contentMarkers.push(marker);
 
+                                // ✅ 추가 - 인포윈도우 + 인증하기 버튼
+                                const isAuthable = authContents.some(auth => auth.contentsId === content.contentsId);
+
+                                const infowindow = new window.kakao.maps.InfoWindow({
+                                    content: `
+                                        <div style="padding:10px; min-width:200px">
+                                            <b>${content.contentsTitle}</b><br/>
+                                                ${isAuthable
+                                            ? `<button id="auth-btn-${content.contentsId}"
+                                                    style="margin-top:8px; padding:4px 8px; cursor:pointer;
+                                                    background:#4CAF50; color:white; border:none; border-radius:4px">
+                                                    인증하기
+                                                </button>`
+                                            : `<p style="color:gray; font-size:12px; margin-top:8px">500m 밖 - 인증 불가</p>`
+                                        }
+                                    </div>
+                                `
+                                });
+                                infowindows.push(infowindow);
+
+                                window.kakao.maps.event.addListener(marker, 'click', () => {
+                                    infowindows.forEach(iw => iw.close());
+                                    infowindow.open(map, marker);
+
+                                    setTimeout(() => {
+                                        const btn = document.getElementById(`auth-btn-${content.contentsId}`);
+                                        if (btn) {
+                                            btn.onclick = async () => {
+                                                console.log("인증하기 클릭:", content.contentsTitle);
+                                                alert(`${content.contentsTitle} 인증 완료!`);
+                                            };
+                                        }
+                                    }, 100);
+                                });
+                            });
                             console.log("클릭한 위치 - 위도:", lat, "경도:", lng);
                         });
                     }
