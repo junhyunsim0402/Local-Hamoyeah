@@ -1,12 +1,15 @@
 package com.hamoyeah.util.주소좌표변환;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GeocodingService {
@@ -20,7 +23,7 @@ public class GeocodingService {
     public void fillCoordinates(LocationEntity entity){
         String address = entity.getAddress();
         if (address == null || address.isBlank()){
-            System.out.println("주소가 비어있어 변환을 스킵");
+            log.warn("좌표 변환 스킵: 엔티티(ID: {})의 주소 데이터가 비어있습니다.");
             return;
         }
         try {
@@ -44,13 +47,16 @@ public class GeocodingService {
                 double lat = firstResult.path("y").asDouble();
 
                 entity.updateLocation(lat, lon);
-                System.out.println("좌표변환 성공 주소 : "+address+" -> 위도 : "+lat+" , 경도 : "+lon);
             }else {
-                System.out.println("결과 없음 해당 주소의 좌표를 찾을 수 없음 "+address);
+                log.warn("좌표를 찾을 수 없는 주소입니다: {}", address);
             }
 
+        } catch (WebClientResponseException e) {
+            // API 키 문제나 권한, 쿼리 제한 등 HTTP 에러 처리
+            log.error("카카오 API 호출 실패(HTTP {}): {}", e.getStatusCode(), e.getResponseBodyAsString());
         } catch (Exception e) {
-            System.out.println(e);
+            // 그 외 예기치 못한 모든 에러
+            log.error("좌표 변환 중 알 수 없는 시스템 오류 발생 (주소: {})", address, e);
         }
     }
 }
