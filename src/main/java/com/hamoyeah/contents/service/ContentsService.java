@@ -7,13 +7,14 @@ import com.hamoyeah.contents.repository.ContentsRepository;
 import com.hamoyeah.util.주소좌표변환.GeocodingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Map;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -39,8 +40,13 @@ public class ContentsService {
                 .bodyToMono(Map.class)
                 .block();
 
-        if (firstResponse == null || !"OK".equals(firstResponse.get("status"))) { // 첫 응답이 없거나 응답 값에서 상태가 ok가 아니면
-            System.out.println("첫 페이지 호출 실패");
+        if (firstResponse == null) {
+            log.error("컨텐츠 API 서버 응답 없음 (URL: {})", firstUri);
+            return;
+        }
+        Object status = firstResponse.get("status");
+        if (!"OK".equals(status)) {
+            log.warn("컨텐츠 API 호출 실패 - 상태코드: {}, URL: {}", status, firstUri);
             return;
         }
         int totalPages = (int) firstResponse.get("page_count"); // 각 api 마다 totalpage가 다르므로 첫번째 응답에서 전체 페이지 카운트를 가져옴
@@ -61,7 +67,6 @@ public class ContentsService {
                     saveOneItem(item, category);
                 }
             }
-            System.out.println(categoryId + "번 카테고리: " + currentPage + " / " + totalPages + " 작업 중");
         }
     }
 
@@ -73,11 +78,23 @@ public class ContentsService {
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
+
+        if (checkRes == null) {
+            log.error("공공데이터 포털 응답 실패 (URL: {})", checkUrl);
+            return;
+        }
+        Object totalCountObj = checkRes.get("totalCount");
+        if (totalCountObj == null) {
+            log.warn("데이터 개수(totalCount) 확인 불가 - URL: {}", checkUrl);
+            return;
+        }
+
         int totalCount = Integer.parseInt(String.valueOf(checkRes.get("totalCount")));
         int pageSize = 50;
         int totalPages = (int) Math.ceil((double) totalCount / pageSize);
 
-        CategoryEntity category = categoryRepository.findById(categoryId).orElseThrow(); // 존재하는 카테고리 번호인지 확인
+        CategoryEntity category = categoryRepository.findById(categoryId) // 카테고리 id가 존재하는지 찾기
+                .orElseThrow(() -> new RuntimeException("카테고리 번호 [" + categoryId + "]가 DB에 존재하지 않습니다."));
 
 
         for (int currentPage = 1; currentPage <= totalPages; currentPage++) {
@@ -114,15 +131,19 @@ public class ContentsService {
                     }
                 }
             }
-            System.out.println(categoryId + "번 카테고리: " + currentPage + " / " + totalPages + " 페이지 작업 중...");
         }
     }
 
 
 
     private void saveOneItem(Map<String, Object> item, CategoryEntity category){
-        String title = String.valueOf(item.get("name"));
-        String address = String.valueOf(item.get("address"));
+        Object rawName = item.get("name");
+        Object rawAddr = item.get("address");
+        if (rawName == null || rawAddr == null || rawAddr.toString().isBlank()) {
+            log.warn("필수 데이터 누락으로 스킵 - 이름: {}, 주소: {}", rawName, rawAddr);
+            return;
+        }
+        String title = rawName.toString().trim();
         if (!contentsRepository.existsByContentTitle(title)) {
             ContentsEntity entity = ContentsEntity.builder()
                     .contentTitle(title)
@@ -154,15 +175,15 @@ public class ContentsService {
             // 2. 숫자로 변환 시도
             return Double.parseDouble(value.toString());
         } catch (NumberFormatException e) {
-            // 3. 만약 "abc" 같은 이상한 글자가 들어있어도 0.0을 줘서 서버가 안 죽게 함
-            System.out.println("숫자 변환 실패: " + value);
+            // 3. 만약 "abc" 같은 이상한 글자가 들어있어도 0.0 주기
+            log.error("좌표 숫자 변환 실패 - 입력값: {}", value);
             return 0.0;
         }
     }
 
     private String getTitleFromJson(Map<String, Object> item) {
-        if (item.containsKey("시설명")) return String.valueOf(item.get("시설명"));
-        if (item.containsKey("작품명")) return String.valueOf(item.get("작품명"));
+        if (item.get("시설명") != null) return String.valueOf(item.get("시설명")).trim();
+        if (item.get("작품명") != null) return String.valueOf(item.get("작품명")).trim();
         if (item.containsKey("공공미술 명")) return String.valueOf(item.get("공공미술 명")); // 공공미술용
         return "이름 없음";
     }
