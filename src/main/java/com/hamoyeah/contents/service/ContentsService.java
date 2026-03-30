@@ -61,7 +61,6 @@ public class ContentsService {
                     saveOneItem(item, category);
                 }
             }
-            System.out.println(categoryId + "번 카테고리: " + currentPage + " / " + totalPages + " 작업 중");
         }
     }
 
@@ -77,7 +76,8 @@ public class ContentsService {
         int pageSize = 50;
         int totalPages = (int) Math.ceil((double) totalCount / pageSize);
 
-        CategoryEntity category = categoryRepository.findById(categoryId).orElseThrow(); // 존재하는 카테고리 번호인지 확인
+        CategoryEntity category = categoryRepository.findById(categoryId) // 카테고리 id가 존재하는지 찾기
+                .orElseThrow(() -> new RuntimeException("카테고리 번호 [" + categoryId + "]가 DB에 존재하지 않습니다."));
 
 
         for (int currentPage = 1; currentPage <= totalPages; currentPage++) {
@@ -114,13 +114,12 @@ public class ContentsService {
                     }
                 }
             }
-            System.out.println(categoryId + "번 카테고리: " + currentPage + " / " + totalPages + " 페이지 작업 중...");
         }
     }
 
 
 
-    private void saveOneItem(Map<String, Object> item, CategoryEntity category){
+    private void saveOneItem(Map<String, Object> item, CategoryEntity category){ // null 체크
         String title = String.valueOf(item.get("name"));
         String address = String.valueOf(item.get("address"));
         if (!contentsRepository.existsByContentTitle(title)) {

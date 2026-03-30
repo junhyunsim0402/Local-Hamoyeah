@@ -122,9 +122,7 @@ public class SafetyService {
                     streetLampRepository.save(lamp);
                 }
             }
-            System.out.println("가로등 수집 중: " + page + " / " + totalPages);
         }
-        System.out.println("가로등 수집 완료! 총 " + totalCount + "건 처리됨.");
     }
     public void syncCctv(String baseUrl) {
         int perPage = 1000;
@@ -160,9 +158,7 @@ public class SafetyService {
                     cctvRepository.save(cctv);
                 }
             }
-            System.out.println("CCTV 수집 중: " + page + " / " + totalPages);
         }
-        System.out.println("CCTV 수집 완료! 총 " + totalCount + "건 처리됨.");
     }
 
     public boolean syncAir(){
