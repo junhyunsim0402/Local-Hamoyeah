@@ -22,6 +22,7 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
+    private final EmailService emailService;
 
     private String secret="123456789123456789123456789123456789";
     private Key secretKey= Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
@@ -53,10 +54,19 @@ public class UserService {
 
     // 유저 등록
     public boolean signup(UserDto userDto){
+        // 해당 이메일 인증 됐는지
+        if(!emailService.isEmailVerified(userDto.getEmail())){
+            throw new RuntimeException("이메일 인증이 필요합니다.");
+        }
+
+        // 등록 진행
         UserEntity saveEntity=userDto.toEntity();
         String secretpwd=passwordEncoder.encode(saveEntity.getPassword());
         saveEntity.setPassword(secretpwd);
         UserEntity savedEntity=userRepository.save(saveEntity);
+
+        // 등록 성공 후 인증 상태 초기화
+        emailService.clearVerification(userDto.getEmail());
         return savedEntity.getUserId()>0;
     }
 
@@ -71,12 +81,12 @@ public class UserService {
         } return false;
     }
 
-    // 유저 정보 조회(관리자) // 정보 조회는 되는데 관리자만 볼 수 있게 고쳐야 됨
-    public UserDto userinfo(String loginEmail){
-        Optional<UserEntity> entityOptional=userRepository.findByEmail(loginEmail);
-        if(entityOptional.isPresent()){
-            return entityOptional.get().toDto();
-        }
-        return null;
-    }
+//    유저 정보 조회(관리자만 가능)-2차 userproof
+//    public UserDto userinfo(String loginEmail){
+//        Optional<UserEntity> entityOptional=userRepository.findByEmail(loginEmail);
+//        if(entityOptional.isPresent()){
+//            return entityOptional.get().toDto();
+//        }
+//        return null;
+//    }
 }
