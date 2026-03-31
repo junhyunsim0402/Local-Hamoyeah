@@ -80,6 +80,7 @@ public class SafetyService {
         // 5. 대기질 API
         List<AirpollutionEntity> airDataList=airRepository.findAll().stream()
                 .collect(java.util.stream.Collectors.toList()); // 대기질관련 api정보 가져오기
+
         // 6. 거리비례 대기질 값(미세먼지, 초미세먼지) 가져오기
         AirpollutionEntity nearAir=null;    // 기본값을 null로 고정
         double airMinDist=Double.MAX_VALUE;    // 측정소와의 거리를 아주 멀게 설정
@@ -119,11 +120,13 @@ public class SafetyService {
         // System.out.println("사용자가 찍은 위도 = " + requestDto.getLng());   // 확인
         // System.out.println("가장 가까운 소음 측정소 주소 = " + nearNoise.getAddress());  // 확인
         // System.out.println("측정소까지 거리 = " + noiseMinDist + "m");  // 확인
-        if(noiseMinDist<=500){  // 소음 측정소 사이의 거리가 500미터 이하이면 실행
+
+        // 9. 소음 측정소 사이의 거리가 500미터 이하이면 실행
+        if(noiseMinDist<=500){
             System.out.println("측정소 dayAvg = " + nearNoise.getDayAvg());
             double nosieValue = nearNoise != null ? nearNoise.getDayAvg() : 0;
 
-            // 8. 위험 점수 및 최종 등급 계산
+            // 10. 위험 점수 및 최종 등급 계산
             Map<String,Object> minusResult= gradeCalculator.minusScore(nosieValue,pm10,pm25);
             int noiseScore = (int) minusResult.get("noiseScore");
             int airScore = (int) minusResult.get("airScore");

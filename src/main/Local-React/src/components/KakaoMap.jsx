@@ -9,6 +9,7 @@ import marketIcon from '../assets/market.png';
 import pharmacyIcon from '../assets/pharmacy.png';
 import buildingIcon from '../assets/building.png';
 import cultureIcon from '../assets/culture.png';
+
 function KakaoMap() {       // 함수 시작
     const mapRef = useRef(null);        // 지도를 그릴 div를 나중에 찾기 위한 변수, 처음엔 비어있음(null)
     const getMarkerIcon = (content) => {
@@ -112,12 +113,12 @@ function KakaoMap() {       // 함수 시작
                                     infowindows.forEach(iw => iw.close());  // 기존 인포윈도우 전부 닫기
                                     infowindow.open(map, marker);
 
-                                    setTimeout(() => {
+                                    setTimeout(() => {  // 초기 로드 시 마커 클릭 이벤트
                                         const btn = document.getElementById(`auth-btn-${id}`);
                                         if (btn) {
                                             btn.onclick = async () => {
+                                                // TODO : 인증하기 버튼 클릭시 실행할 코드
                                                 console.log("인증하기 클릭:", title);
-                                                // TODO: 인증 API 호출
                                                 alert(`${title} 인증 완료!`);
                                             };
                                         }
@@ -207,10 +208,11 @@ function KakaoMap() {       // 함수 시작
                                     infowindows.forEach(iw => iw.close());
                                     infowindow.open(map, marker);
 
-                                    setTimeout(() => {
+                                    setTimeout(() => {      // 클릭 이벤트 안 마커 클릭 이벤트
                                         const btn = document.getElementById(`auth-btn-${id}`);
                                         if (btn) {
                                             btn.onclick = async () => {
+                                                // TODO : 인증하기 버튼 클릭시 실행할 코드
                                                 console.log("인증하기 클릭:", title);
                                                 alert(`${title} 인증 완료!`);
                                             };
@@ -218,8 +220,10 @@ function KakaoMap() {       // 함수 시작
                                     }, 100);
                                 });
                             });
-
                             console.log("클릭한 위치 - 위도:", lat, "경도:", lng);  // test용 위도 경도 확인차 콘솔 출력
+                            const data = await response.json();
+                            console.log("안심등급 세부내용", data);
+                            console.log("1km내 있는 contents,shop",contents);
                         });
                     },
                     () => {
@@ -272,8 +276,6 @@ function KakaoMap() {       // 함수 시작
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({ lat, lng, radius: 500 }),
                             });
-                            const data = await response.json();
-                            console.log("결과", data);
 
                             const response2 = await fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`);
                             const contents = await response2.json();
@@ -289,6 +291,9 @@ function KakaoMap() {       // 함수 시작
                             });
 
                             console.log("클릭한 위치 - 위도:", lat, "경도:", lng);
+                            const data = await response.json();
+                            console.log("결과", data);
+                            console.log("1km내 있는 contents,shop",contents);
                         });
                     }
                 );
