@@ -1,7 +1,7 @@
 import React from 'react';
 import './ProofCard.css';
 
-function ProofCard({ proof, index }) {
+function ProofCard({ proof, index, onReview }) {
   // 상태에 따른 CSS 클래스 결정
   let statusClass = '';
   
@@ -20,7 +20,8 @@ function ProofCard({ proof, index }) {
       {/* 1. 왼쪽: 이미지 영역 */}
       <div className="proof-image-section">
         <span className={`status-label ${statusClass}-text`}>{proof.status}</span>
-        <img src={proof.image_url || 'placeholder.png'} alt="인증샷" className="proof-thumb" />
+        <img src={proof.image_url || 'https://via.placeholder.co/400x300'} 
+            alt="원본 인증샷" className="proof-thumb" />
       </div>
 
       {/* 2. 중앙: 정보 영역 */}
@@ -32,7 +33,7 @@ function ProofCard({ proof, index }) {
 
       {/* 3. 오른쪽: 액션 & 관리자 영역 */}
       <div className="proof-action-section">
-        <button className="review-btn">검토하기</button>
+        <button className="review-btn" onClick={onReview}>검토하기</button>
         
         <div className="admin-info">
           {proof.status !== '대기' && (
