@@ -4,19 +4,28 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  width: 100vw;
+  width: 100%;
   overflow: hidden;
   background-color: #ffffff;
   margin: 0 auto;
+  transition: max-width 0.3s ease;
+}
+.app-container.admin-mode {
+  max-width: 100% !important; 
+  width: 100% !important;
+  border: none !important;
 }
 @media screen and (min-width: 501px) {
-  .app-container{
+  .app-container:not(.admin-mode){
     width: 501px;
+    max-width: 501px;
     border-left: 1px solid #eeeeee;  
     border-right: 1px solid #eeeeee; 
   }
-  #root{
-    width: 501px;
+  #root {
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
 } 
 /* 하단 흰색 여백 영역 */
