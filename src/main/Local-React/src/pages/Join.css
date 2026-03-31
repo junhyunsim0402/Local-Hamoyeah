@@ -1,0 +1,158 @@
+.join-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  background-color: #ffffff;
+}
+
+.join-bg-image {
+  position: absolute;
+  width: 100%;
+  object-fit: cover; /* 이미지가 찌그러지지 않게 */
+  z-index: 1; /* 레이어 가장 아래 */
+  opacity: 0.5;
+}
+
+.join-top-bg { top: 0;
+  height: 200px; 
+  width: 100%;
+  object-fit: fill;
+  position: absolute;
+  z-index: 1; }
+.join-bottom-bg { bottom: 0;
+  height: 400px; 
+  width: 100%;
+  object-fit: fill;
+  position: absolute;
+  z-index: 1;
+} 
+
+.join-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  position: relative;
+}
+
+.logo-section {
+  position: fixed; 
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  
+  /* 너비와 높이 설정 */
+  width: 100%;
+  max-width: 501px; 
+  height: 160px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100; 
+  
+}
+
+.join-logo { height: 55px; object-fit: contain; }
+
+.join-form {
+    margin-top: 180px;
+  padding: 0px;
+  display: flex;
+  flex-direction: column; /* 회원가입은 버튼을 아래로 두는 게 깔끔해요 */
+  gap: 20px;
+  align-items: center;
+}
+
+.join-input-group {
+    width: 90%;
+    max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.join-input {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #eee;
+  border-radius: 40px;
+  background-color: #D9D9D9;
+  font-size: 0.95rem;
+  outline: none;
+}
+.input-with-button {
+  position: relative;
+  width: 100%;
+}
+.input-with-button .join-input {
+  width: 100%; 
+  padding-right: 70px; /* 버튼 자리를 비워줍니다 */
+}
+/* 이메일 입력창 안의 버튼 */
+.inner-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 6px 12px;
+  border: none;
+  border-radius: 20px;
+  background-color: #FFF186; /* 테마 노란색 */
+  color: #333;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+/* 인증번호 확인 버튼 (가로 꽉 차게) */
+.verify-check-btn {
+  width: 100px;
+  padding: 10px;
+  border: none;
+  border-radius: 12px;
+  background-color: #FFF186; /* 테마 노란색 */
+  color: #333;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-bottom: 5px; /* 다음 입력창과의 간격 */
+}
+/* 버튼 눌렀을 때 효과 */
+.inner-btn:active, .verify-check-btn:active {
+  filter: brightness(0.9);
+}
+/* 기존 join-input에 우측 패딩 추가 (글자가 버튼에 가려지지 않게) */
+.input-with-button .join-input {
+  padding-right: 60px;
+}
+
+.join-submit-btn {
+  width: 150px;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  background-color: #FFF186;
+  color: #333;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.join-footer {
+  position: absolute;
+  bottom: 140px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 10;
+}
+
+.back-login-btn {
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  color: #555;
+  cursor: pointer;
+}
