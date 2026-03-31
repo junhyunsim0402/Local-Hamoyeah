@@ -68,7 +68,7 @@ function KakaoMap({ viewType }) {       // 함수 시작
                         const clusterer = new window.kakao.maps.MarkerClusterer({
                             map: map,           // 마커들을 클러스터로 관리하고 표시할 지도 객체
                             averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
-                            minLevel: 5,        // 클러스터 할 최소 지도 레벨
+                            minLevel: 2,        // 클러스터 할 최소 지도 레벨
                             disableClickZoom: true // 클러스터 마커를 클릭했을 때 지도가 자동 확대되지 않도록 설정
                         });
                         // 클러스터 마커를 클릭했을 때 해당 클러스터 중심을 기준으로 지도를 1레벨씩 확대합니다
@@ -159,7 +159,7 @@ function KakaoMap({ viewType }) {       // 함수 시작
                         maker.setMap(map);
 
                         let clickMaker = null;    // 클릭 마커 선언(처음은 없음)
-                        window.kakao.maps.event.addListener(map, 'click', async (mouseEvent) => {
+                        window.kakao.maps.event.addListener(map, 'click', async (mouseEvent) => {   // 사용자가 클릭했을 때 적용되는 함수
                             const lat = mouseEvent.latLng.getLat(); // 클릭한 위도
                             const lng = mouseEvent.latLng.getLng(); // 클릭한 경도
 
@@ -207,6 +207,7 @@ function KakaoMap({ viewType }) {       // 함수 시작
                                 });
                                 marker.setMap(map);
                                 contentMarkers.push(marker);
+                                clusterer.addMarker(marker);    // 클러스터 적용
 
                                 const isAuthable = authContents.some(auth =>
                                     (auth.contentsId && auth.contentsId === content.contentsId) ||
@@ -234,7 +235,7 @@ function KakaoMap({ viewType }) {       // 함수 시작
                                     infowindows.forEach(iw => iw.close());
                                     infowindow.open(map, marker);
 
-                                    setTimeout(() => {      // 클릭 이벤트 안 마커 클릭 이벤트
+                                    setTimeout(() => {      // 클릭 이벤트 안 마커 클릭(인증) 이벤트
                                         const btn = document.getElementById(`auth-btn-${id}`);
                                         if (btn) {
                                             btn.onclick = async () => {
@@ -251,8 +252,8 @@ function KakaoMap({ viewType }) {       // 함수 시작
                             console.log("안심등급 세부내용", data);
                             console.log("1km내 있는 contents,shop", contents);
                         });
-                    },
-                    () => {
+                    },      // GPS 성공 함수 끝
+                    () => { // GPS 실패 함수 시작
                         const lat = 35.1798;
                         const lng = 128.1076;
 
@@ -320,13 +321,13 @@ function KakaoMap({ viewType }) {       // 함수 시작
                             const data = await response.json();
                             console.log("결과", data);
                             console.log("1km내 있는 contents,shop", contents);
-                        });
-                    }
-                );
-            });
-        },
+                        });     // 마우스 클릭 이벤트 끝
+                    }   // GPS 실패 함수 끝
+                );      // GPS 성공/실패 함수 끝
+            });         // 맵 띄우는 함수 끝
+        };              // spript 끝
             document.head.appendChild(script);  // <head>태그에 <script>태그를 넣는다
-    }, [viewType]);
+    }, [viewType]);     // useEffect 함수 끝
 
     return <div ref={mapRef} style={{ width: "100%", height: "100%", position: "absolute" }} />;
 }
