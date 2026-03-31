@@ -35,6 +35,15 @@ CREATE TABLE category (
     content_category INT NOT NULL,
     UNIQUE (content_type, content_category) -- 중복 방지
 );
+CREATE TABLE user (
+user_id INT AUTO_INCREMENT PRIMARY KEY,
+email VARCHAR(100) NOT NULL UNIQUE,
+password VARCHAR(50) NOT NULL,
+nickname VARCHAR(50) NOT NULL,
+total_points INT NOT NULL DEFAULT 0,
+is_admin BOOLEAN NOT NULL DEFAULT FALSE
+);
+
 CREATE TABLE contents (
     content_id INT AUTO_INCREMENT PRIMARY KEY,
     category_id INT NOT NULL,
@@ -48,13 +57,23 @@ CREATE TABLE contents (
     CONSTRAINT fk_contents_category
     FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
-CREATE TABLE user (
-    userId INT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(50) NOT NULL,
-    nickname VARCHAR(50) NOT NULL,
-    total_points INT NOT NULL DEFAULT 0,
-    isAdmin BOOLEAN NOT NULL DEFAULT FALSE
+
+CREATE TABLE userproof(
+    proof_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    content_id INT NOT NULL,
+    image_url VARCHAR(255) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT '대기중',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    admin_id INT NOT NULL,
+    reject_reason VARCHAR(100) NULL,
+    reviewed_at DATETIME NULL,
+    CONSTRAINT fk_userproof_user
+    FOREIGN KEY (user_id) REFERENCES user(user_id),
+    CONSTRAINT fk_userproof_contents
+    FOREIGN KEY (content_id) REFERENCES contents(content_id),
+    CONSTRAINT fk_userproof_admin
+    FOREIGN KEY (admin_id) REFERENCES user(user_id)
 );
 INSERT INTO category (content_type, content_category) VALUES
 (1,1), -- 콘텐츠 - 관광지
@@ -63,6 +82,18 @@ INSERT INTO category (content_type, content_category) VALUES
 (2,1), -- 운동시설
 (3,1), -- 미술 - 공공미술
 (3,2); -- 미술 - 건축물미술
+INSERT INTO user
+(email, password, nickname, total_points, is_admin) VALUES
+('user1@test.com', '1234', '유저1', 0, FALSE),
+('user2@test.com', '1234', '유저2', 10, FALSE),
+('user3@test.com', '1234', '유저3', 20, FALSE),
+('user4@test.com', '1234', '유저4', 30, FALSE),
+('user5@test.com', '1234', '유저5', 40, FALSE),
+('user6@test.com', '1234', '유저6', 50, FALSE),
+('user7@test.com', '1234', '유저7', 60, FALSE),
+('user8@test.com', '1234', '유저8', 70, FALSE),
+('user9@test.com', '1234', '유저9', 80, FALSE),
+('admin@test.com', 'admin', '관리자', 999, TRUE);
 INSERT INTO contents
 (category_id, content_title, content_des, start_date, end_date, address, latitude, longitude) VALUES
 (1, '진주성', '진주의 대표 관광지', NULL, NULL, '진주시 본성동', 35.1895, 128.0802),
@@ -87,7 +118,7 @@ INSERT INTO airpollution
 ('정촌면', '2026-03-02 12:00:00', 42, 19, 35.1708, 128.0608),
 ('대안동', '2026-03-03 09:00:00', 47, 23, 35.1909, 128.0809),
 ('상대동', '2026-03-03 10:00:00', 53, 27, 35.2010, 128.0910);
-INSERT INTO noise 
+INSERT INTO noise
 (day_avg, night_avg, location_name, area_type) VALUES
 (55.5, 45.2, '진주역', '일반'),
 (60.1, 50.3, '고속버스터미널', '도로변'),
@@ -123,15 +154,22 @@ INSERT INTO cctv
 (35.1977, 128.0877, 3),
 (35.1988, 128.0888, 2),
 (35.1999, 128.0899, 4);
-INSERT INTO user 
-(email, password, nickname, total_points, isAdmin) VALUES
-('user1@test.com', '1234', '유저1', 0, FALSE),
-('user2@test.com', '1234', '유저2', 10, FALSE),
-('user3@test.com', '1234', '유저3', 20, FALSE),
-('user4@test.com', '1234', '유저4', 30, FALSE),
-('user5@test.com', '1234', '유저5', 40, FALSE),
-('user6@test.com', '1234', '유저6', 50, FALSE),
-('user7@test.com', '1234', '유저7', 60, FALSE),
-('user8@test.com', '1234', '유저8', 70, FALSE),
-('user9@test.com', '1234', '유저9', 80, FALSE),
-('admin@test.com', 'admin', '관리자', 999, TRUE);
+
+-- [1. 승인 완료 데이터 - 5건] (관리자 계정을 10이라 치고)
+INSERT INTO userproof (user_id, content_id, image_url, status, created_at, admin_id, reject_reason, reviewed_at) VALUES
+(2, 1, 'https://example.com/p1.jpg', '승인', '2026-03-25 10:00:00', 10, NULL, '2026-03-25 14:00:00'),
+(5, 3, 'https://example.com/p4.jpg', '승인', '2026-03-26 13:45:00', 10, NULL, '2026-03-26 17:00:00'),
+(2, 4, 'https://example.com/p5.jpg', '승인', '2026-03-27 10:20:00', 10, NULL, '2026-03-27 11:30:00'),
+(4, 9, 'https://example.com/p8.jpg', '승인', '2026-03-28 14:20:00', 10, NULL, '2026-03-28 16:45:00'),
+(3, 10, 'https://example.com/p10.jpg', '승인', '2026-03-29 16:30:00', 10, NULL, '2026-03-30 09:00:00');
+
+-- [2. 검토 대기중 데이터 - 3건]
+INSERT INTO userproof (user_id, content_id, image_url, status, created_at, admin_id, reject_reason, reviewed_at) VALUES
+(4, 1, 'https://example.com/p3.jpg', '대기중', '2026-03-26 09:15:00', 10, NULL, NULL),
+(5, 8, 'https://example.com/p7.jpg', '대기중', '2026-03-28 08:00:00', 10, NULL, NULL),
+(2, 7, 'https://example.com/p9.jpg', '대기중', '2026-03-29 11:10:00', 10, NULL, NULL);
+
+-- [3. 반려됨 데이터 - 2건]
+INSERT INTO userproof (user_id, content_id, image_url, status, created_at, admin_id, reject_reason, reviewed_at) VALUES
+(3, 2, 'https://example.com/p2.jpg', '반려', '2026-03-25 11:30:00', 10, '사진이 흐릿하여 확인할 수 없습니다.', '2026-03-25 15:20:00'),
+(3, 5, 'https://example.com/p6.jpg', '반려', '2026-03-27 15:00:00', 10, '해당 장소가 아닌 것으로 보입니다.', '2026-03-27 18:10:00');

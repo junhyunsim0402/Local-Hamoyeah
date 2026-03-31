@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor @AllArgsConstructor @Builder @Data
 public class UserEntity extends BaseTime{
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    @Column(name = "user_id")
+    private Integer userId;
 
     @Column(nullable = false, length = 100, unique = true)
     private String email;
@@ -22,9 +23,9 @@ public class UserEntity extends BaseTime{
     @Column(nullable = false, length = 50)
     private String nickname;
 
-    @Column(nullable = false)
+    @Column(name = "total_points",nullable = false)
     @Builder.Default
-    private int total_points=0;
+    private int totalPoints=0;
 
     @Column(nullable = false)
     @Builder.Default
@@ -34,7 +35,7 @@ public class UserEntity extends BaseTime{
         return UserDto.builder()
                 .email(email)
                 .nickname(nickname)
-                .total_points(0)
+                .totalPoints(0)
                 .isAdmin(isAdmin)
                 .build();
     }

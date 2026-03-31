@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor @AllArgsConstructor @Builder @Data
 public class UserDto {
-    private Long userId;
+    private Integer userId;
     private String email;
     private String password;
     private String nickname;
-    private Integer total_points;
+    private Integer totalPoints;
     private Boolean isAdmin;
 
     public UserEntity toEntity(){

@@ -37,7 +37,7 @@ public class ContentsController {
         return "진주시 컨텐츠들 동기화 완료!";
     }
 
-    @PostMapping("/shop")
+    @PostMapping("/shop") // etc에 있는 xlsx 파일을 form 으로 post body file
     public ResponseEntity<?> impoetShop(@RequestParam("file")MultipartFile file){
         try {
             shopService.importShopFromExcel(file.getInputStream());

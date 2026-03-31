@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './Main.css';
 import logo from '../assets/logo.png';
+import Kakaomap from '../components/KakaoMap'
 function MainPage() {
   const [viewType, setViewType] = useState('noise');
 
@@ -34,8 +35,9 @@ function MainPage() {
       <main className="map-section">
         <div className="map-placeholder">
           {viewType === 'noise' ? '🔊 정주여건 로딩 중...' : '🛍️ 지역탐방 로딩 중...'}
+            
         </div>
-        {/* 나중에 여기에 <KakaoMap viewType={viewType} /> 를 넣으면 됩니다! */}
+        <Kakaomap viewType={viewType} />
       </main>
     </div>
   );
