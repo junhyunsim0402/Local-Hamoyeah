@@ -22,7 +22,7 @@ public class UserproofService {
     private final ContentsRepository contentsRepository;
     private final FileService fileService;
 
-    // 인증 등록
+    // 유저 사진 등록 기능
     @Transactional
     public UserproofEntity signup(String email, UserProofDto userProofDto) {
         Optional<UserEntity> userpro = userRepository.findByEmail(email);

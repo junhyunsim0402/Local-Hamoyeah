@@ -14,7 +14,7 @@ public class UserproofController {
     private final UserproofService userproofService;
     private final UserService userService;
 
-    // 유저 인증 등록
+    // 유저 사진 등록 기능
     @PostMapping("/verify")
     public ResponseEntity<String> signup(
             @RequestHeader(value="Authorization", required = false) String bearerToken,
