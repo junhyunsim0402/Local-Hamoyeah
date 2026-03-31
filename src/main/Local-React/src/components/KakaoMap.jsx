@@ -9,6 +9,7 @@ import marketIcon from '../assets/market.png';
 import pharmacyIcon from '../assets/pharmacy.png';
 import buildingIcon from '../assets/building.png';
 import cultureIcon from '../assets/culture.png';
+import peopleIcon from '../assets/people.png';
 
 function KakaoMap({ viewType }) {       // 함수 시작
     const mapRef = useRef(null);        // 지도를 그릴 div를 나중에 찾기 위한 변수, 처음엔 비어있음(null)
@@ -153,8 +154,13 @@ function KakaoMap({ viewType }) {       // 함수 시작
                         });
 
                         const makerPosition = new window.kakao.maps.LatLng(lat, lng);
+                        const UserImage= new window.kakao.maps.MarkerImage(
+                            peopleIcon,
+                            new window.kakao.maps.Size(27,44)
+                        );
                         const maker = new window.kakao.maps.Marker({
-                            position: makerPosition
+                            position: makerPosition,
+                            image: UserImage
                         });
                         maker.setMap(map);
 
