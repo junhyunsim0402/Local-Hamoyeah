@@ -43,7 +43,7 @@ public class UserService {
         String token= Jwts.builder()
                 .claim("email", email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis()*1000*60*60*24)) // 24시간 임시 지정
+                .setExpiration(new Date(System.currentTimeMillis()+1000*60*60*24)) // 24시간 임시 지정
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
         return token;
@@ -57,10 +57,11 @@ public class UserService {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-            Object object=claims.get("email");
-            return (String) object;
-        } catch(Exception e){System.out.println(e);}
-        return null;
+            return (String) claims.get("email");
+        } catch (Exception e) {
+            System.out.println("토큰 파싱 에러: " + e.getMessage()); // 콘솔에 에러 원인 출력
+            return null;
+        }
     }
 
     // 유저 등록

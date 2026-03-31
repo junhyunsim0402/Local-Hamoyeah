@@ -7,32 +7,31 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
 @AllArgsConstructor @NoArgsConstructor @Builder @Data
 public class UserProofDto {
+    private String imageUrl;
+
     private Integer proofId;
     private Integer userId;
-    private Integer contentId;
-    private String imageUrl;
     private String status;
     private LocalDateTime createdAt;
     private Integer adminId;
     private String rejectReason;
     private LocalDateTime reviewedAt;
 
-    public UserproofEntity toEntity() {
+    private Integer contentId;
+    private MultipartFile uploadimg;
+
+    public UserproofEntity toEntity(UserEntity user, ContentsEntity content) {
         return UserproofEntity.builder()
-                .proofId(this.proofId)
                 .imageUrl(this.imageUrl)
-                .status(this.status)
-                .rejectReason(this.rejectReason)
-                .reviewedAt(this.getReviewedAt())
-                .userEntity(UserEntity.builder().userId(this.userId).build())
-                .contentsEntity(ContentsEntity.builder().contentId(this.contentId).build())
-                .adminEntity(this.adminId != null ? UserEntity.builder().userId(this.adminId).build() : null)
+                .userEntity(user)
+                .contentsEntity(content)
+                .status("대기중") // 처음은 고정
                 .build();
     }
-
 }
