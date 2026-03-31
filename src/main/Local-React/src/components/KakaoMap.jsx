@@ -220,7 +220,7 @@ function KakaoMap({ viewType }) {       // 함수 시작
                                     (auth.shopId && auth.shopId === content.shopId)
                                 );
 
-                                const infowindow = new window.kakao.maps.InfoWindow({
+                                const infowindow = new window.kakao.maps.InfoWindow({ // 인증하기 모달 부분
                                     content: `
                                         <div style="padding:10px; min-width:200px">
                                             <b>${title}</b><br/>

@@ -3,17 +3,20 @@ import './App.css';
 import MainPage from './pages/Main';
 import LoginPage from './pages/Login';
 import JoinPage from './pages/Join';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import AdminPage from './pages/Admin';
 function App() {
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin')
   return (
-    <Router>
-      <div className="app-container">
+      <div className={`app-container ${isAdmin ? 'admin-mode' : ''}`} >
         {/* 1. 여기에 상단 바가 공통으로 들어갈 수도 있음 */}
         
         {/* 2. 주소에 따라 바뀌는 메인 콘텐츠 영역 */}
         <div className="app-content">
           <Routes>
             <Route path="/" element={<Navigate to="/login" />} />
+            <Route path='/admin' element={<AdminPage/>} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/join" element={<JoinPage />} />
             <Route path="/main" element={<MainPage />} />
@@ -25,7 +28,6 @@ function App() {
           <span className="footer-text">© 2026 하모예. All rights reserved.</span>
         </footer>
       </div>
-    </Router>
   );
 }
 
