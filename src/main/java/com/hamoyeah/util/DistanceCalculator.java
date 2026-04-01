@@ -13,11 +13,16 @@ public class DistanceCalculator {
 
     // 두 좌표(위도/경도) 사이의 거리를 미터(m) 단위로 계산하는 함수
     public double getDistanceInMeters(double lat1, double lng1, double lat2, double lng2) {
+        if (lat1 < -90 || lat1 > 90 || lat2 < -90 || lat2 > 90 ||
+                lng1 < -180 || lng1 > 180 || lng2 < -180 || lng2 > 180) {
+            return Double.NaN; // 위도, 경도를 받은 데이터에 대한 예외처리(숫자가 아니라는 상태의 상수 반환)
+        }
+
         double theta = lng1 - lng2;     // 두 지점의 경도 차이 계산
         double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) +   // 두 지점의 높이
                 Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
-        // 위도/경도를 라디안으로 변환 후 구면 삼각법 공식으로 거리 계산
-        // 즉] (1번 높이*2번 높이) + ( 1번 수평 반지름 * 2번 수평반지름 * 두 사이 벌어진 각도 ) = (0,0,0)기준의 사잇각
+        // 위도/경도를 라디안으로 변환 후 구면 코사인 법칙을 활용한 구면 삼각법 거리 계산식으로 거리 계산
+        // 즉] (1번 높이*2번 높이) + ( 1번 수평 반지름 * 2번 수평반지름 * 두 사이 벌어진 각도 ) = 두 지점 사이의 코사인 사잇각
         dist = Math.acos(dist);     // 아크코사인(길이->각도) 함수로 각도(라디안) 변환
         dist = rad2deg(dist);       // 라디안 -> 도(degree)로 변환
         return dist * 60 * 1.1515 * 1609.344;   // 도 -> 미터(m)로 단위 변환

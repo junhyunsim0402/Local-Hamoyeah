@@ -96,8 +96,8 @@ public class SafetyService {
             }
         }
         System.out.println("airMinDist = " + airMinDist);
-        int pm10= nearAir != null ? nearAir.getPm10Value() : 0; // 거리를 가져오면 값 저장
-        int pm25= nearAir != null ? nearAir.getPm25Value() : 0;
+        int pm10= nearAir != null ? nearAir.getPm10Value() : 0; // 거리를 가져오면 값 저장(예외처리)
+        int pm25= nearAir != null ? nearAir.getPm25Value() : 0; // 거리를 가져오면 값 저장(예외처리)
 
         // 7. 소음 API
         List<NoiseEntity> noiseDataList=noiseRepository.findAll().stream()
