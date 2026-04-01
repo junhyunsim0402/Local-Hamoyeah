@@ -41,9 +41,7 @@ public class UserproofController {
                 return ResponseEntity.status(401).body("토큰이 유효하지 않습니다.");
             }
             String statusToken = token.substring(7);
-            System.out.println("UserproofController.status");
             String email = userService.getClaim(statusToken);
-            System.out.println("UserproofController.status");
             if (email == null) {
                 return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
             }
