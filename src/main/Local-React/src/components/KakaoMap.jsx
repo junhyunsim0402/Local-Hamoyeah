@@ -93,15 +93,28 @@ function KakaoMap({viewType}) {       // 함수 시작
                                     (auth.contentsId && auth.contentsId === content.contentsId) ||
                                     (auth.shopId && auth.shopId === content.shopId)
                                 );
-
+                                const description = content.contentsDes;
                                 const infowindow = new window.kakao.maps.InfoWindow({
                                     content: `
-                                        <div style="padding:10px; min-width:200px">
-                                            <b>${title}</b><br/>
-                                            ${isAuthable
-                                            ? `<button id="auth-btn-${id}" ...>인증하기</button>`
-                                            : `<p style="color:gray">50m 밖 - 인증 불가</p>`
-                                        }
+                                        <div class="map-info-window">
+                                            <div class="info-body">
+                                                <strong class="info-title">${title}</strong>
+                                                
+                                                ${description 
+                                                    ? `<p class="info-description">${description}</p>` 
+                                                    : '' 
+                                                }
+
+                                                <div class="info-action-area">
+                                                    ${isAuthable 
+                                                        ? `<button id="auth-btn-${id}" class="info-auth-btn">인증하기 📸</button>`
+                                                        : `<div class="info-disauth-wrap">
+                                                            <span class="info-dist-text">📍 50m 밖</span>
+                                                            <p class="info-notice">인증 불가</p>
+                                                        </div>`
+                                                    }
+                                                </div>
+                                            </div>
                                         </div>
                                     `
                                 });
@@ -185,20 +198,29 @@ function KakaoMap({viewType}) {       // 함수 시작
                                     (auth.contentsId && auth.contentsId === content.contentsId) ||
                                     (auth.shopId && auth.shopId === content.shopId)
                                 );
-
+                                const description = content.contentsDes;
                                 const infowindow = new window.kakao.maps.InfoWindow({ // 인증하기 모달 부분
                                     content: `
-                                        <div style="padding:10px; min-width:200px">
-                                            <b>${title}</b><br/>
-                                            ${isAuthable
-                                            ? `<button id="auth-btn-${id}"
-                                            style="margin-top:8px; padding:4px 8px; cursor:pointer;
-                                               background:#4CAF50; color:white; border:none; border-radius:4px">
-                                            인증하기
-                                            </button>`
-                                            : `<p style="color:gray; font-size:12px; margin-top:8px">50m 밖 - 인증 불가</p>`
-                                        }
-                                         </div>
+                                       <div class="map-info-window">
+                                            <div class="info-body">
+                                                <strong class="info-title">${title}</strong>
+                                                
+                                                ${description 
+                                                    ? `<p class="info-description">${description}</p>` 
+                                                    : '' 
+                                                }
+
+                                                <div class="info-action-area">
+                                                    ${isAuthable 
+                                                        ? `<button id="auth-btn-${id}" class="info-auth-btn">인증하기 📸</button>`
+                                                        : `<div class="info-disauth-wrap">
+                                                            <span class="info-dist-text">📍 50m 밖</span>
+                                                            <p class="info-notice">인증 불가</p>
+                                                        </div>`
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
                                         `
                                 });
                                 infowindows.push(infowindow);
