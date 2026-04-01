@@ -9,7 +9,7 @@ import marketIcon from '../assets/market.png';
 import pharmacyIcon from '../assets/pharmacy.png';
 import buildingIcon from '../assets/building.png';
 import cultureIcon from '../assets/culture.png';
-function KakaoMap({viewType}) {       // 함수 시작
+function KakaoMap({viewType, onAuthBtnClick}) {       // 함수 시작
     const mapRef = useRef(null);        // 지도를 그릴 div를 나중에 찾기 위한 변수, 처음엔 비어있음(null)
     const getMarkerIcon = (content) => {
         if (content.categoryId) {
@@ -71,6 +71,7 @@ function KakaoMap({viewType}) {       // 함수 시작
                             contents.forEach(content => {
                                 const title = content.contentsTitle ?? content.shopTitle;
                                 const id = content.contentsId ?? content.shopId;
+                                const description = content.contentDes || content.contentsDes || content.rawCategory || "상세 정보 준비 중";
 
                                 // 아이콘 추가
                                 const iconUrl = getMarkerIcon(content);
@@ -93,7 +94,7 @@ function KakaoMap({viewType}) {       // 함수 시작
                                     (auth.contentsId && auth.contentsId === content.contentsId) ||
                                     (auth.shopId && auth.shopId === content.shopId)
                                 );
-                                const description = content.contentsDes;
+                                
                                 const infowindow = new window.kakao.maps.InfoWindow({
                                     content: `
                                         <div class="map-info-window">
@@ -131,7 +132,9 @@ function KakaoMap({viewType}) {       // 함수 시작
                                             btn.onclick = async () => {
                                                 console.log("인증하기 클릭:", title);
                                                 // TODO: 인증 API 호출
-                                                alert(`${title} 인증 완료!`);
+                                                if (onAuthBtnClick) {
+                                                    onAuthBtnClick(title);
+                                                }
                                             };
                                         }
                                     }, 100);
@@ -179,6 +182,7 @@ function KakaoMap({viewType}) {       // 함수 시작
                             contents.forEach(content => {
                                 const title = content.contentsTitle ?? content.shopTitle;
                                 const id = content.contentsId ?? content.shopId;
+                                const description = content.contentDes || content.contentsDes || content.rawCategory || "상세 정보 준비 중";
                                 const iconUrl = getMarkerIcon(content);
                                 const markerImage = iconUrl
                                     ? new window.kakao.maps.MarkerImage(
@@ -198,7 +202,7 @@ function KakaoMap({viewType}) {       // 함수 시작
                                     (auth.contentsId && auth.contentsId === content.contentsId) ||
                                     (auth.shopId && auth.shopId === content.shopId)
                                 );
-                                const description = content.contentsDes;
+                    
                                 const infowindow = new window.kakao.maps.InfoWindow({ // 인증하기 모달 부분
                                     content: `
                                        <div class="map-info-window">
@@ -234,7 +238,9 @@ function KakaoMap({viewType}) {       // 함수 시작
                                         if (btn) {
                                             btn.onclick = async () => {
                                                 console.log("인증하기 클릭:", title);
-                                                alert(`${title} 인증 완료!`);
+                                                if (onAuthBtnClick) {
+                                                    onAuthBtnClick(title);
+                                                }
                                             };
                                         }
                                     }, 100);

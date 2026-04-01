@@ -2,8 +2,16 @@ import React, { useState } from 'react';
 import './Main.css';
 import logo from '../assets/logo.png';
 import Kakaomap from '../components/KakaoMap'
+import AuthModal from '../components/AuthModal';
 function MainPage() {
   const [viewType, setViewType] = useState('noise');
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState('');
+
+  const openAuthModal = (title) => {
+    setSelectedPlace(title);
+    setIsAuthModalOpen(true);
+  };
 
   return (
     <div className="main-page">
@@ -37,8 +45,13 @@ function MainPage() {
           {viewType === 'noise' ? '🔊 정주여건 로딩 중...' : '🛍️ 지역탐방 로딩 중...'}
             
         </div>
-        <Kakaomap viewType={viewType} />
+        <Kakaomap viewType={viewType} onAuthBtnClick={openAuthModal} />
       </main>
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+        targetTitle={selectedPlace} 
+      />
     </div>
   );
 }

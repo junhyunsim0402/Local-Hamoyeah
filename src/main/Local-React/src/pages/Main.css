@@ -83,9 +83,9 @@
 
 /* --- 지도 인포윈도우(팝업) 스타일 --- */
 .map-info-window {
-  padding: 12px;
-  min-width: 180px;
-  background-color: #ffffff;
+  padding: 10px;
+   width: 220px;           
+  box-sizing: border-box;
 }
 
 .info-body {
@@ -114,7 +114,15 @@
     color: #666;
     text-align: center;
     line-height: 1.4;
-    margin: 0 0 12px 0;
+    margin: 8px 0 12px 0;
+
+   
+    display: -webkit-box;
+    -webkit-line-clamp: 4;    /* 3줄까지만 보여줌 (숫자 조절 가능) */
+    -webkit-box-orient: vertical;
+    overflow: hidden;         /* 넘치는 부분 숨김 */
+    text-overflow: ellipsis;  /* 끝에 ... 붙임 */
+    word-break: break-all;    /* 단어 단위가 아닌 글자 단위로 자름 */
 }
 
 .info-action-area {
