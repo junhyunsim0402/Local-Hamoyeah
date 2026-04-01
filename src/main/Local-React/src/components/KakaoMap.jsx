@@ -91,7 +91,7 @@ function KakaoMap({ viewType }) {       // 함수 시작
                             fetch(`http://localhost:8080/api/safety/auth-contents?lat=${currentlat}&lng=${currentlng}&radius=50`).then(res => res.json())
                         ]).then(([contents, auth]) => {
                             authContents = auth;  // 저장해두면 클릭 이벤트에서도 쓸 수 있음
-                            contents.forEach(content => {
+                            contents.forEach(content => {       // 마커 생성하거 클러스터 적용 하는 부분
                                 const title = content.contentsTitle ?? content.shopTitle;
                                 const id = content.contentsId ?? content.shopId;
 
@@ -121,7 +121,7 @@ function KakaoMap({ viewType }) {       // 함수 시작
                                     (auth.shopId && auth.shopId === content.shopId)
                                 );
 
-                                const infowindow = new window.kakao.maps.InfoWindow({
+                                const infowindow = new window.kakao.maps.InfoWindow({   // 윈포윈도우(인증창) 설정
                                     content: `
                                         <div style="padding:10px; min-width:200px">
                                             <b>${title}</b><br/>
@@ -131,7 +131,7 @@ function KakaoMap({ viewType }) {       // 함수 시작
                                         }
                                         </div>
                                     `
-                                });
+                                });         // 윈포윈도우(인증창) 설정 끝
                                 infowindows.push(infowindow);   // 인증창 저장
 
                                 // 마커 클릭 시 인포윈도우 열기
@@ -149,14 +149,14 @@ function KakaoMap({ viewType }) {       // 함수 시작
                                             };
                                         }
                                     }, 100);
-                                });
-                            });
+                                });     // 원포윈도우 끝
+                            });     // // 마커 생성하거 클러스터 적용 하는 부분 끝
                         });
 
                         const makerPosition = new window.kakao.maps.LatLng(lat, lng);
-                        const UserImage= new window.kakao.maps.MarkerImage(
+                        const UserImage = new window.kakao.maps.MarkerImage(
                             peopleIcon,
-                            new window.kakao.maps.Size(27,44)
+                            new window.kakao.maps.Size(27, 44)
                         );
                         const maker = new window.kakao.maps.Marker({
                             position: makerPosition,
@@ -200,6 +200,7 @@ function KakaoMap({ viewType }) {       // 함수 시작
                                 const title = content.contentsTitle ?? content.shopTitle;
                                 const id = content.contentsId ?? content.shopId;
                                 const iconUrl = getMarkerIcon(content);
+
                                 const markerImage = iconUrl
                                     ? new window.kakao.maps.MarkerImage(
                                         iconUrl,
@@ -211,6 +212,7 @@ function KakaoMap({ viewType }) {       // 함수 시작
                                     title: title,
                                     image: markerImage
                                 });
+
                                 marker.setMap(map);
                                 contentMarkers.push(marker);
                                 clusterer.addMarker(marker);    // 클러스터 적용
@@ -332,7 +334,7 @@ function KakaoMap({ viewType }) {       // 함수 시작
                 );      // GPS 성공/실패 함수 끝
             });         // 맵 띄우는 함수 끝
         };              // spript 끝
-            document.head.appendChild(script);  // <head>태그에 <script>태그를 넣는다
+        document.head.appendChild(script);  // <head>태그에 <script>태그를 넣는다
     }, [viewType]);     // useEffect 함수 끝
 
     return <div ref={mapRef} style={{ width: "100%", height: "100%", position: "absolute" }} />;

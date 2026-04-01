@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.hamoyeah.contents.Entity.ContentsEntity;
+import com.hamoyeah.contents.Entity.ShopCategory;
 import com.hamoyeah.contents.Entity.ShopEntity;
 import com.hamoyeah.contents.repository.ContentsRepository;
 import com.hamoyeah.contents.repository.ShopRepository;
@@ -186,6 +187,17 @@ public class SafetyService {
         result.addAll(contentResult); result.addAll(shopResult);
         return result;
     }   // 1km반경의 contents,shop 호출 함수
+
+    public List<Map<String,Object>> getContentsByCategory(SafetyRequestDto requestDto,Integer categoryId){
+        List<ContentsEntity> contents=contentsRepository.findByCategoryCategoryId(categoryId);
+        return distanceCalculator.getContents(requestDto.getLat(), requestDto.getLng(), requestDto.getRadius(), contents);
+    }   // 카테고리 아이디 별로 contents 반환
+
+    public List<Map<String,Object>> getShopByCategory(SafetyRequestDto requestDto,String shopCategory){
+        ShopCategory category=ShopCategory.valueOf(shopCategory);
+        List<ShopEntity> shops=shopRepository.findByShopCategory(category);
+        return distanceCalculator.getShop(requestDto.getLat(), requestDto.getLng(), requestDto.getRadius(), shops);
+    }   // 카테고리 별로 shop 반환
 
     public List<Map<String,Object>> getAuthContents(SafetyRequestDto requestDto){   // 50미터 안에 있는 컨텐츠,shop 불러오는 함수
         List<ContentsEntity> allContents=contentsRepository.findAll();

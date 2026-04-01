@@ -23,7 +23,19 @@ public class SafetyController {
 
     @GetMapping("/contents") public ResponseEntity<?> getContents(@ModelAttribute SafetyRequestDto requestDto){
         return ResponseEntity.ok(safetyService.getContents(requestDto));
-    }
+    }   // 모든 컨텐츠 조회
+
+    @GetMapping("/contents/category") public ResponseEntity<?> getContentsByCategory(
+            @ModelAttribute SafetyRequestDto requestDto,
+            @RequestParam Integer categoryId){
+        return ResponseEntity.ok(safetyService.getContentsByCategory(requestDto,categoryId));
+    }   // contents 카테고리별로 분류
+
+    @GetMapping("/shop/category") public ResponseEntity<?> getShopByCategory(
+            @ModelAttribute SafetyRequestDto requestDto,
+            @RequestParam String shopCategory){
+        return ResponseEntity.ok(safetyService.getShopByCategory(requestDto,shopCategory));
+    }   // shop 카테고리별로 분류
 
     // 50m 반경 contents,shop 목록 가져오는 코드 (인증용)
     @GetMapping("/auth-contents")
