@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor @NoArgsConstructor @Builder @Data
 public class UserProofDto {
     private String imageUrl;
+    private Integer contentId;
+    private MultipartFile uploadimg;
 
     private Integer proofId;
     private Integer userId;
@@ -22,9 +24,6 @@ public class UserProofDto {
     private Integer adminId;
     private String rejectReason;
     private LocalDateTime reviewedAt;
-
-    private Integer contentId;
-    private MultipartFile uploadimg;
 
     public UserproofEntity toEntity(UserEntity user, ContentsEntity content) {
         return UserproofEntity.builder()

@@ -1,5 +1,6 @@
 package com.hamoyeah.user.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hamoyeah.user.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +21,7 @@ public class UserDto {
                 .email(email)
                 .password(password)
                 .nickname(nickname)
+                .isAdmin(isAdmin != null ? isAdmin : false)
                 .build();
     }
 }
