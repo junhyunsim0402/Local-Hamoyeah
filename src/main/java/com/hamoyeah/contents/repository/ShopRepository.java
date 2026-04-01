@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface ShopRepository extends JpaRepository<ShopEntity, Long> {
-    List<ShopEntity> findByShopCategory(ShopCategory shopCategory); // 카테고리별로 shopEntity로 가져오기
+    List<ShopEntity> findByShopCategory(ShopCategory shopCategory); // 카테고리 분류를 리스트화
 }

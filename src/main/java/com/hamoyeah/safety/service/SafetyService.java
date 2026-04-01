@@ -194,8 +194,8 @@ public class SafetyService {
     }   // 카테고리 아이디 별로 contents 반환
 
     public List<Map<String,Object>> getShopByCategory(SafetyRequestDto requestDto,String shopCategory){
-        ShopCategory category=ShopCategory.valueOf(shopCategory);
-        List<ShopEntity> shops=shopRepository.findByShopCategory(category);
+        ShopCategory category=ShopCategory.valueOf(shopCategory);   // 매개변수로 받은 shop의 카테고리(ETC,FOOD 등) 값을 가져와서
+        List<ShopEntity> shops=shopRepository.findByShopCategory(category); // 리포지토리에 있는 카테고리 리스트
         return distanceCalculator.getShop(requestDto.getLat(), requestDto.getLng(), requestDto.getRadius(), shops);
     }   // 카테고리 별로 shop 반환
 
