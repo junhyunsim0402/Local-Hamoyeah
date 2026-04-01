@@ -43,7 +43,6 @@ public class UserproofEntity extends BaseTime {
     @Column(name = "reviewed_at")
     private LocalDateTime reviewedAt;
 
-    // ToDto 메서드
     public UserProofDto toDto() {
         return UserProofDto.builder()
                 .proofId(this.proofId)
