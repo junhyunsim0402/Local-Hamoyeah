@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Entity @Table(name = "User")
 @NoArgsConstructor @AllArgsConstructor @Builder @Data
-public class UserEntity extends BaseTime{
+public class UserEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Integer userId;

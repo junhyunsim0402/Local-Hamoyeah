@@ -47,12 +47,12 @@ public class UserproofEntity extends BaseTime {
     public UserProofDto toDto() {
         return UserProofDto.builder()
                 .proofId(this.proofId)
-                .userId(this.userEntity.getUserId())
                 .contentId(this.contentsEntity.getContentId())
                 .imageUrl(this.imageUrl)
                 .status(this.status)
                 .createdAt(this.getCreatedAt())
-                .adminId(this.adminEntity.getUserId())
+                .userId(this.userEntity != null ? this.userEntity.getUserId() : null)
+                .adminId(this.adminEntity != null ? this.adminEntity.getUserId() : null)
                 .rejectReason(this.rejectReason)
                 .reviewedAt(this.reviewedAt)
                 .build();
