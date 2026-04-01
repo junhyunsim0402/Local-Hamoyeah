@@ -61,6 +61,7 @@ public class DistanceCalculator {
                     contents.put("categoryId",item.getCategory().getCategoryId());
                     contents.put("lat",item.getLatitude());
                     contents.put("lng",item.getLongitude());
+                    contents.put("contentDes",item.getContentDes());
                     result.add(contents);   // 컨텐츠 아이디/제목, 위도 경도 저장
                 }
             } catch (Exception e) { System.out.println("e = " + e); }
@@ -82,6 +83,7 @@ public class DistanceCalculator {
                     contents.put("shopTitle",item.getName());
                     contents.put("shopCategory",item.getShopCategory() != null ?
                             item.getShopCategory().name() : "ETC"); // 없으면 ETC
+                    contents.put("rawCategory", item.getRawCategory());
                     contents.put("lat",item.getLatitude());
                     contents.put("lng",item.getLongitude());
                     result.add(contents);   // 컨텐츠 아이디/제목, 위도 경도 저장

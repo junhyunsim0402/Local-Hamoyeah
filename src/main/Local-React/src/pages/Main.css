@@ -79,3 +79,86 @@
   color: #adb5bd;
   font-weight: bold;
 }
+
+
+/* --- 지도 인포윈도우(팝업) 스타일 --- */
+.map-info-window {
+  padding: 10px;
+   width: 220px;           
+  box-sizing: border-box;
+}
+
+.info-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-title {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #333;
+    margin-bottom: 8px;
+    text-align: center;
+    
+    white-space: normal;      /* 줄바꿈 허용 */
+    word-break: break-all;    /* 너무 길면 강제로 자름 */
+    max-width: 200px;         /* 인포윈도우 너비에 맞춰 제한 */
+    line-height: 1.3;         /* 줄 간격 조절 */
+}
+
+.info-description {
+    font-size: 0.85rem;
+    color: #666;
+    text-align: center;
+    line-height: 1.4;
+    margin: 8px 0 12px 0;
+
+   
+    display: -webkit-box;
+    -webkit-line-clamp: 4;    /* 3줄까지만 보여줌 (숫자 조절 가능) */
+    -webkit-box-orient: vertical;
+    overflow: hidden;         /* 넘치는 부분 숨김 */
+    text-overflow: ellipsis;  /* 끝에 ... 붙임 */
+    word-break: break-all;    /* 단어 단위가 아닌 글자 단위로 자름 */
+}
+
+.info-action-area {
+  width: 100%;
+  margin-top: 5px;
+  border-top: 1px solid #f1f3f5;
+  padding-top: 10px;
+}
+
+/* 인증하기 버튼 */
+.info-auth-btn {
+  width: 100%;
+  padding: 8px 0;
+  background-color: #FFF186; 
+  color: #333;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* 인증 불가 안내 */
+.info-disauth-wrap {
+  text-align: center;
+}
+
+.info-dist-text {
+  font-size: 0.7rem;
+  color: #bbb;
+}
+
+.info-notice {
+  font-size: 0.8rem;
+  color: #ff6b6b;
+  font-weight: 600;
+  margin: 2px 0 0 0;
+}

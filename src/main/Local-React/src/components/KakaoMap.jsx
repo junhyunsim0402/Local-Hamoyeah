@@ -10,8 +10,8 @@ import pharmacyIcon from '../assets/pharmacy.png';
 import buildingIcon from '../assets/building.png';
 import cultureIcon from '../assets/culture.png';
 import peopleIcon from '../assets/people.png';
-
-function KakaoMap({ viewType }) {       // 함수 시작
+ // 함수 시작
+function KakaoMap({viewType, onAuthBtnClick}) {       // 함수 시작
     const mapRef = useRef(null);        // 지도를 그릴 div를 나중에 찾기 위한 변수, 처음엔 비어있음(null)
     const getMarkerIcon = (content) => {
         if (content.categoryId) {
@@ -94,6 +94,7 @@ function KakaoMap({ viewType }) {       // 함수 시작
                             contents.forEach(content => {       // 마커 생성하거 클러스터 적용 하는 부분
                                 const title = content.contentsTitle ?? content.shopTitle;
                                 const id = content.contentsId ?? content.shopId;
+                                const description = content.contentDes || content.contentsDes || content.rawCategory || "상세 정보 준비 중";
 
                                 // 아이콘 추가
                                 const iconUrl = getMarkerIcon(content);
@@ -123,12 +124,25 @@ function KakaoMap({ viewType }) {       // 함수 시작
 
                                 const infowindow = new window.kakao.maps.InfoWindow({   // 윈포윈도우(인증창) 설정
                                     content: `
-                                        <div style="padding:10px; min-width:200px">
-                                            <b>${title}</b><br/>
-                                            ${isAuthable
-                                            ? `<button id="auth-btn-${id}" ...>인증하기</button>`
-                                            : `<p style="color:gray">50m 밖 - 인증 불가</p>`
-                                        }
+                                        <div class="map-info-window">
+                                            <div class="info-body">
+                                                <strong class="info-title">${title}</strong>
+                                                
+                                                ${description 
+                                                    ? `<p class="info-description">${description}</p>` 
+                                                    : '' 
+                                                }
+
+                                                <div class="info-action-area">
+                                                    ${isAuthable 
+                                                        ? `<button id="auth-btn-${id}" class="info-auth-btn">인증하기 📸</button>`
+                                                        : `<div class="info-disauth-wrap">
+                                                            <span class="info-dist-text">📍 50m 밖</span>
+                                                            <p class="info-notice">인증 불가</p>
+                                                        </div>`
+                                                    }
+                                                </div>
+                                            </div>
                                         </div>
                                     `
                                 });         // 윈포윈도우(인증창) 설정 끝
@@ -143,9 +157,11 @@ function KakaoMap({ viewType }) {       // 함수 시작
                                         const btn = document.getElementById(`auth-btn-${id}`);
                                         if (btn) {
                                             btn.onclick = async () => {
-                                                // TODO : 인증하기 버튼 클릭시 실행할 코드
                                                 console.log("인증하기 클릭:", title);
-                                                alert(`${title} 인증 완료!`);
+                                                // TODO: 인증 API 호출
+                                                if (onAuthBtnClick) {
+                                                    onAuthBtnClick(title);
+                                                }
                                             };
                                         }
                                     }, 100);
@@ -199,6 +215,7 @@ function KakaoMap({ viewType }) {       // 함수 시작
                             contents.forEach(content => {
                                 const title = content.contentsTitle ?? content.shopTitle;
                                 const id = content.contentsId ?? content.shopId;
+                                const description = content.contentDes || content.contentsDes || content.rawCategory || "상세 정보 준비 중";
                                 const iconUrl = getMarkerIcon(content);
 
                                 const markerImage = iconUrl
@@ -224,17 +241,26 @@ function KakaoMap({ viewType }) {       // 함수 시작
 
                                 const infowindow = new window.kakao.maps.InfoWindow({ // 인증하기 모달 부분
                                     content: `
-                                        <div style="padding:10px; min-width:200px">
-                                            <b>${title}</b><br/>
-                                            ${isAuthable
-                                            ? `<button id="auth-btn-${id}"
-                                            style="margin-top:8px; padding:4px 8px; cursor:pointer;
-                                               background:#4CAF50; color:white; border:none; border-radius:4px">
-                                            인증하기
-                                            </button>`
-                                            : `<p style="color:gray; font-size:12px; margin-top:8px">50m 밖 - 인증 불가</p>`
-                                        }
-                                         </div>
+                                       <div class="map-info-window">
+                                            <div class="info-body">
+                                                <strong class="info-title">${title}</strong>
+                                                
+                                                ${description 
+                                                    ? `<p class="info-description">${description}</p>` 
+                                                    : '' 
+                                                }
+
+                                                <div class="info-action-area">
+                                                    ${isAuthable 
+                                                        ? `<button id="auth-btn-${id}" class="info-auth-btn">인증하기 📸</button>`
+                                                        : `<div class="info-disauth-wrap">
+                                                            <span class="info-dist-text">📍 50m 밖</span>
+                                                            <p class="info-notice">인증 불가</p>
+                                                        </div>`
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
                                         `
                                 });
                                 infowindows.push(infowindow);
@@ -247,9 +273,10 @@ function KakaoMap({ viewType }) {       // 함수 시작
                                         const btn = document.getElementById(`auth-btn-${id}`);
                                         if (btn) {
                                             btn.onclick = async () => {
-                                                // TODO : 인증하기 버튼 클릭시 실행할 코드
                                                 console.log("인증하기 클릭:", title);
-                                                alert(`${title} 인증 완료!`);
+                                                if (onAuthBtnClick) {
+                                                    onAuthBtnClick(title);
+                                                }
                                             };
                                         }
                                     }, 100);
