@@ -40,8 +40,10 @@ public class UserproofController {
             if (token == null || !token.startsWith("Bearer ")) {
                 return ResponseEntity.status(401).body("토큰이 유효하지 않습니다.");
             }
-            String pureToken = token.substring(7);
-            String email = userService.getClaim(pureToken);
+            String statusToken = token.substring(7);
+            System.out.println("UserproofController.status");
+            String email = userService.getClaim(statusToken);
+            System.out.println("UserproofController.status");
             if (email == null) {
                 return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
             }
@@ -53,7 +55,7 @@ public class UserproofController {
             userproofService.status(userProofDto, user.getUserId());
             return ResponseEntity.ok(userProofDto.getStatus() + " 처리가 완료되었습니다.");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("오류 발생: " + e.getMessage());
+            return null;
         }
     }
 }

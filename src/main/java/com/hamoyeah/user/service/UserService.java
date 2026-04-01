@@ -19,6 +19,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,9 +35,7 @@ public class UserService {
     private Key secretKey;
 
     @PostConstruct // 생성자 호출됨
-    public void init() {
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-    }
+    public void init() {this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));}
 
     // 토큰 발급
     public String createToken(String email){
@@ -59,7 +58,6 @@ public class UserService {
                     .getBody();
             return (String) claims.get("email");
         } catch (Exception e) {
-            System.out.println("토큰 파싱 에러: " + e.getMessage()); // 콘솔에 에러 원인 출력
             return null;
         }
     }

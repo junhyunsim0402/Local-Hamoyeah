@@ -51,15 +51,16 @@ public class UserproofService {
                 .orElseThrow(()-> new IllegalArgumentException("해당 인증 내역이 없습니다."));
         UserEntity admin=userRepository.findById(adminId)
                 .orElseThrow(()-> new IllegalArgumentException("관리자 내역이 없습니다."));
-        if("반려됨".equals(userProofDto.getStatus())){
+        if("반려".equals(userProofDto.getStatus())){
             if(userProofDto.getRejectReason()==null||userProofDto.getRejectReason().trim().isEmpty()){
                 throw new IllegalArgumentException("반려 사유 작성해야 합니다.");
-            }
-            proof.setStatus("반려됨");
+            } proof.setStatus("반려");
             proof.setRejectReason(userProofDto.getRejectReason());
-        } else if("승인됨".equals(userProofDto.getStatus())){
-            proof.setStatus("승인됨");
+        } else if("승인".equals(userProofDto.getStatus())){
+            proof.setStatus("승인");
             proof.setRejectReason(null);
+        } else {
+            throw new IllegalArgumentException("'승인' 또는 '반려'만 가능합니다.");
         }
         proof.setAdminEntity(admin);
         proof.setReviewedAt(LocalDateTime.now());
