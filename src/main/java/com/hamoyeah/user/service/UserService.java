@@ -31,7 +31,6 @@ public class UserService {
 
     @Value("${api.service.key}")
     private String secret;
-
     private Key secretKey;
 
     @PostConstruct // 생성자 호출됨

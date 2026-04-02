@@ -2,6 +2,7 @@ package com.hamoyeah.userproof.service;
 
 import com.hamoyeah.contents.Entity.ContentsEntity;
 import com.hamoyeah.contents.repository.ContentsRepository;
+import com.hamoyeah.user.dto.UserDto;
 import com.hamoyeah.user.entity.UserEntity;
 import com.hamoyeah.user.repository.UserRepository;
 import com.hamoyeah.userproof.dto.UserProofDto;
@@ -13,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -64,5 +67,21 @@ public class UserproofService {
         }
         proof.setAdminEntity(admin);
         proof.setReviewedAt(LocalDateTime.now());
+    }
+
+    // 관리자 인증한 사용자 전체 조회
+    public List<UserProofDto> verifyuser() {
+        List<UserproofEntity> approved = userproofRepository.findAllByStatus("승인");
+        return approved.stream()
+                .map(UserproofEntity::toDto)
+                .collect(Collectors.toList());
+    }
+
+    // 관리자 인증한 사용자 개별 조회
+    public List<UserProofDto> detailuser(Integer userId){
+        return userproofRepository.findByUserEntity_UserIdAndStatus(userId, "승인")
+                .stream()
+                .map(UserproofEntity::toDto)
+                .collect(Collectors.toList());
     }
 }
