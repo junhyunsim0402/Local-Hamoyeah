@@ -2,7 +2,6 @@ package com.hamoyeah.userproof.service;
 
 import com.hamoyeah.contents.Entity.ContentsEntity;
 import com.hamoyeah.contents.repository.ContentsRepository;
-import com.hamoyeah.user.dto.UserDto;
 import com.hamoyeah.user.entity.UserEntity;
 import com.hamoyeah.user.repository.UserRepository;
 import com.hamoyeah.userproof.dto.UserProofDto;
@@ -33,7 +32,9 @@ public class UserproofService {
         Optional<UserEntity> userproof = userRepository.findByEmail(email);
         Optional<ContentsEntity> contentproof = contentsRepository.findById(userProofDto.getContentId());
 
+        System.out.println(userProofDto.getUploadimg());
         String filename = fileService.upload(userProofDto.getUploadimg());
+        System.out.println("filename = " + filename);
         if(filename==null){return null;}
 
         if (userproof.isPresent() && contentproof.isPresent()) {
@@ -84,4 +85,14 @@ public class UserproofService {
                 .map(UserproofEntity::toDto)
                 .collect(Collectors.toList());
     }
+
+    // 유저가 인증 신청한 기록 전체 조회
+    public List<UserProofDto> usermylist(String email){
+        List<UserproofEntity> entities=userproofRepository.findByUserEntity_Email(email);
+        return entities.stream()
+                .map(UserproofEntity::toDto)
+                .collect(Collectors.toList());
+    }
+
+
 }

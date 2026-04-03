@@ -14,6 +14,7 @@ public class FileService {
     private String uploadDir=baseDir+"/build/resources/main/static/upload/"; // 상세 경로 추가
 
     public String upload(MultipartFile uploadFile){
+        System.out.println("uploadFile = " + uploadFile);
         if(uploadFile.isEmpty()==true){return null;}
         File uploadPath=new File(uploadDir);
         if(uploadPath.exists()==false){

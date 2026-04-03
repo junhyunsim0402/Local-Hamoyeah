@@ -6,6 +6,7 @@ import com.hamoyeah.user.service.UserService;
 import com.hamoyeah.userproof.dto.UserProofDto;
 import com.hamoyeah.userproof.service.UserproofService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,9 +23,9 @@ public class UserproofController {
 
     // 유저 사진 등록 기능
     @PostMapping("/verify")
-    public ResponseEntity<String> verify(
+    public ResponseEntity<?> verify(
             @RequestHeader(value="Authorization", required=false) String bearerToken,
-            @RequestBody UserProofDto userProofDto){
+            UserProofDto userProofDto){
         if(bearerToken==null||!bearerToken.startsWith("Bearer ")){
             return ResponseEntity.status(500).body("토큰이 없거나 형식이 잘못되었습니다.");
         }
@@ -33,8 +34,7 @@ public class UserproofController {
         if(email==null){
             return ResponseEntity.status(500).body("유효하지 않은 토큰입니다.");
         }
-        userproofService.verify(email, userProofDto);
-        return ResponseEntity.ok("인증 등록하였습니다.");
+        return ResponseEntity.ok(userproofService.verify(email, userProofDto));
     }
 
     // 관리자 승인/반려 기능
@@ -82,7 +82,7 @@ public class UserproofController {
             List<UserProofDto> result=userproofService.verifyuser();
             return ResponseEntity.ok(result);
         } catch(Exception e){
-            return ResponseEntity.status(500).body("사용자 전체 조회 처리 중 오류 발생");
+            return ResponseEntity.status(500).body("인증한 사용자 전체 조회 처리 중 오류 발생");
         }
     }
 
@@ -106,9 +106,21 @@ public class UserproofController {
             List<UserProofDto> result=userproofService.detailuser(userId);
             return ResponseEntity.ok(result);
         } catch(Exception e){
-            return ResponseEntity.status(500).body("사용자 개별 조회 처리 중 오류 발생");
+            return ResponseEntity.status(500).body(" 인증한 사용자 개별 조회 처리 중 오류 발생");
         }
     }
 
+    // 유저 인증 신청한 기록 전체 조회
+    @GetMapping("/usermylist")
+    public ResponseEntity<?> usermylist(@RequestHeader("Authorization")String token){
+        if(token==null||!token.startsWith("Bearer ")){
+            return ResponseEntity.ok(false);
+        }
+        token=token.replace("Bearer ","");
+        String userEmail=userService.getClaim(token);
+
+        if(userEmail==null) return ResponseEntity.ok(false);
+        return ResponseEntity.ok(userproofService.usermylist(userEmail));
+    }
 
 }
