@@ -4,6 +4,7 @@ import topBg from '../assets/top_bg.png';
 import bottomBg from '../assets/bottom_bg.png';
 import logo from '../assets/logo.png';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 function JoinPage() {
   const [formData, setFormData] = useState({
     name: '',
@@ -15,27 +16,47 @@ function JoinPage() {
   const navigate = useNavigate();
 
   // 이메일 인증번호 발송 함수
-  const sendVerificationEmail = () => {
-    console.log(`${formData.id}로 인증번호를 발송합니다.`);
-    alert("인증번호가 발송되었습니다!");
+  const sendVerificationEmail = async () => {
+    console.log(email);
+    try{
+      const response=await axios.post(`http://localhost:8080/email/send?email=${formData.email}`);
+      console.log(response.data.message);
+      alert(response.data.message);
+    } catch(error){
+      console.error("에러 발생", error);
+      alert("이메일 전송 오류")
+    }
   };
+
   // 인증번호 확인 함수
-  const checkVerificationCode = () => {
+  const checkVerificationCode = async () => {
     console.log(`인증번호 ${formData.emailVerify} 확인 시도`);
     alert("인증되었습니다.");
   };
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleJoin = (e) => {
+  const handleJoin = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       alert("비밀번호가 일치하지 않아요!");
       return;
     }
-    console.log("회원가입 시도:", formData);
+    try{
+      const{userId,password,nickname}=formData;
+      const obj={userId:userId, password:password, nickname:nickname}
+      const response=await axios.post("http://localhost:8080/user/signup",obj);
+      const data=response.data;
+      if(data==true){
+      alert("회원가입 성공");
+      navigate("/login");
+    } else{alert("회원가입 실패");}
+    } catch(error){
+      console.error("에러 발생", error);}
+
+    
   };
 
   return (
