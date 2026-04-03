@@ -160,14 +160,14 @@ INSERT INTO userproof (user_id, content_id, image_url, status, created_at, admin
 (2, 1, 'https://example.com/p1.jpg', '승인', '2026-03-25 10:00:00', 10, NULL, '2026-03-25 14:00:00'),
 (5, 3, 'https://example.com/p4.jpg', '승인', '2026-03-26 13:45:00', 10, NULL, '2026-03-26 17:00:00'),
 (2, 4, 'https://example.com/p5.jpg', '승인', '2026-03-27 10:20:00', 10, NULL, '2026-03-27 11:30:00'),
-(4, 9, 'https://example.com/p8.jpg', '승인', '2026-03-28 14:20:00', 10, NULL, '2026-03-28 16:45:00'),
-(3, 10, 'https://example.com/p10.jpg', '승인', '2026-03-29 16:30:00', 10, NULL, '2026-03-30 09:00:00');
+(4, 5, 'https://example.com/p8.jpg', '승인', '2026-03-28 14:20:00', 10, NULL, '2026-03-28 16:45:00'),
+(3, 2, 'https://example.com/p10.jpg', '승인', '2026-03-29 16:30:00', 10, NULL, '2026-03-30 09:00:00');
 
 -- [2. 검토 대기중 데이터 - 3건]
 INSERT INTO userproof (user_id, content_id, image_url, status, created_at, admin_id, reject_reason, reviewed_at) VALUES
-(4, 1, 'https://example.com/p3.jpg', '대기중', '2026-03-26 09:15:00', 10, NULL, NULL),
-(5, 8, 'https://example.com/p7.jpg', '대기중', '2026-03-28 08:00:00', 10, NULL, NULL),
-(2, 7, 'https://example.com/p9.jpg', '대기중', '2026-03-29 11:10:00', 10, NULL, NULL);
+(4, 6, 'https://example.com/p3.jpg', '대기중', '2026-03-26 09:15:00', 10, NULL, NULL),
+(5, 3, 'https://example.com/p7.jpg', '대기중', '2026-03-28 08:00:00', 10, NULL, NULL),
+(2, 1, 'https://example.com/p9.jpg', '대기중', '2026-03-29 11:10:00', 10, NULL, NULL);
 
 -- [3. 반려됨 데이터 - 2건]
 INSERT INTO userproof (user_id, content_id, image_url, status, created_at, admin_id, reject_reason, reviewed_at) VALUES
