@@ -27,6 +27,7 @@ public class UserProofDto {
 
     private String nickname;
     private String contentTitle;
+    private String adminNickname;
 
     public UserproofEntity toEntity(UserEntity user, ContentsEntity content) {
         return UserproofEntity.builder()
