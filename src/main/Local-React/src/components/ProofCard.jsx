@@ -35,13 +35,19 @@ function ProofCard({ proof, index, onReview }) {
 
       {/* 3. 오른쪽: 액션 & 관리자 영역 */}
       <div className="proof-action-section">
-        <button className="review-btn" onClick={onReview}>검토하기</button>
+  
+        {/* '대기중'일 때만 검토하기 버튼 노출 */}
+        {proof.status === '대기중' && (
+          <button className="review-btn" onClick={onReview}>검토하기</button>
+        )}
         
         <div className="admin-info">
-          {proof.status !== '대기' && (
+          {/* '대기중'이 아닐 때만(승인/반려 건) 관리자 정보 노출 */}
+          {proof.status !== '대기중' && (
             <>
               {proof.status === '반려' && <p className="reject-reason">{proof.rejectReason}</p>}
-              <p className="admin-name">{proof.admin_name || '관리자'}</p>
+              {/* DB에서 가져온 adminId나 이름을 보여줍니다. */}
+              <p className="admin-name">처리: {proof.adminNickname || '미지정'}</p>
             </>
           )}
         </div>
