@@ -13,8 +13,8 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class EmailService {
     private final JavaMailSender javaMailSender;
-    private final Map<String, String> authCodeMap=new HashMap<>();
-    private final Map<String, Boolean> verifiedEmail=new HashMap<>();
+    private static final Map<String, String> authCodeMap=new HashMap<>();
+    private static final Map<String, Boolean> verifiedEmail=new HashMap<>();
 
     public void sendAuthCode(String toEmail) {
         // 6자리 인증번호 생성
