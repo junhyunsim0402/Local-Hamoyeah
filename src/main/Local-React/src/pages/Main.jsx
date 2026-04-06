@@ -11,6 +11,9 @@ function MainPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMyPageOpen, setIsMyPageOpen] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
+  const [shopCategory, setShopCategory] = useState('0');      // shop 마커 기본값 전체
+  const [contentCategory, setContentCategory] = useState('0');  // contents 기본값 전체
+
 
   const openAuthModal = (title) => {
     setSelectedPlace(title);
@@ -19,11 +22,11 @@ function MainPage() {
 
   const handleOpenMyPage = async () => {
     setIsMenuOpen(false); // 1. 열려있던 설정 드롭다운을 닫기
-    
+
     // 2. 서버에서 내 정보를 가져옵니다. (나중에 API 연결)
     // const res = await axios.get('/api/user/me');
     // setUserInfo(res.data);
-    
+
     setIsMyPageOpen(true); // 3. 모달을 켭니다.
   };
 
@@ -73,26 +76,28 @@ function MainPage() {
         </div>
       </header>
 
-      {/* 3. 중하단: 카테고리 선택 영역 */}
+      {/* 3. 카테고리 선택 영역 */}
       <div>
-        <select defaultValue="">
-          <option value="" disabled>가맹점 선택</option>
-          <option value="1">음식점</option>
-          <option value="2">카페/디저트</option>
-          <option value="3">편의점/마트</option>
-          <option value="4">약국/약국</option>
-          <option value="5">생활/미용</option>
-          <option value="6">기타</option>
+        <select value={shopCategory} onChange={(e) => setShopCategory(e.target.value)}>
+          <option value="0">가맹점 전체</option>
+          <option value="FOOD">음식점</option>
+          <option value="CAFE">카페/디저트</option>
+          <option value="STORE">편의점/마트</option>
+          <option value="MEDICAL">의료/약국</option>
+          <option value="LIFE">생활/미용</option>
+          <option value="ETC">기타</option>
+          <option value="NONE">선택 안함</option>
         </select>
-        {/* contents 카테고리 */}
-        <select defaultValue="">
-          <option value="" disabled>관광/문화 선택</option>
+
+        <select value={contentCategory} onChange={(e) => setContentCategory(e.target.value)}>
+          <option value="0">관광/문화 전체</option>
           <option value="1">관광</option>
           <option value="2">축제</option>
           <option value="3">문화재</option>
           <option value="4">공공 체육시설</option>
           <option value="5">건축 미술</option>
           <option value="6">공공 미술</option>
+          <option value="NONE">선택 안함</option>
         </select>
       </div>
 
@@ -102,17 +107,22 @@ function MainPage() {
           {viewType === 'noise' ? '🔊 정주여건 로딩 중...' : '🛍️ 지역탐방 로딩 중...'}
 
         </div>
-        <Kakaomap viewType={viewType} onAuthBtnClick={openAuthModal} />
+        <Kakaomap
+          viewType={viewType}
+          onAuthBtnClick={openAuthModal}
+          shopCategory={shopCategory}      // ✅ props 전달
+          contentCategory={contentCategory} // ✅ props 전달
+        />
       </main>
       <AuthModal 
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)} 
         targetTitle={selectedPlace} 
       />
-      <MyPageModal 
-        isOpen={isMyPageOpen} 
-        onClose={() => setIsMyPageOpen(false)} 
-        userInfo={userInfo} 
+      <MyPageModal
+        isOpen={isMyPageOpen}
+        onClose={() => setIsMyPageOpen(false)}
+        userInfo={userInfo}
       />
     </div>
   );

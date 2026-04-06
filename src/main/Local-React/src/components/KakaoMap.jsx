@@ -10,9 +10,17 @@ import pharmacyIcon from '../assets/pharmacy.png';
 import buildingIcon from '../assets/building.png';
 import cultureIcon from '../assets/culture.png';
 import peopleIcon from '../assets/people.png';
- // 함수 시작
-function KakaoMap({viewType, onAuthBtnClick}) {       // 함수 시작
+// 함수 시작
+function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick }) {       // 함수 시작
     const mapRef = useRef(null);        // 지도를 그릴 div를 나중에 찾기 위한 변수, 처음엔 비어있음(null)
+    const mapInstanceRef = useRef(null);        // map 객체 저장용
+    const clustererRef = useRef(null);          // clusterer 저장용
+    const contentMarkersRef = useRef([]);       // contents 마커 저장용
+    const infowindowsRef = useRef([]);          // 인포윈도우 저장용
+    const authContentsRef = useRef([]);         // 인증 가능 목록 저장용
+    const shopCategoryRef = useRef('0');
+    const contentCategoryRef = useRef('0');
+
     const getMarkerIcon = (content) => {
         if (content.categoryId) {
             const contentIconMap = {
@@ -37,6 +45,121 @@ function KakaoMap({viewType, onAuthBtnClick}) {       // 함수 시작
             return shopIconMap[content.shopCategory];
         }
     };
+
+    // 마커 생성 공통 함수
+    const createMarker = (content, map, clusterer) => {
+        const title = content.contentsTitle ?? content.shopTitle;
+        const id = content.contentsId ?? content.shopId;
+        const description = content.contentDes || content.contentsDes || content.rawCategory || "상세 정보 준비 중";
+        const iconUrl = getMarkerIcon(content);     // 아이콘 추가
+        const markerImage = iconUrl
+            ? new window.kakao.maps.MarkerImage(iconUrl, new window.kakao.maps.Size(27, 44))
+            : null;
+        const marker = new window.kakao.maps.Marker({
+            position: new window.kakao.maps.LatLng(content.lat, content.lng),
+            title: title,
+            image: markerImage
+        });
+
+        // 마커를 지도에 직접 추가하지 않고 클러스터러에 추가합니다
+        // 클러스터러가 지도 레벨에 따라 자동으로 마커를 묶어서 표시합니다
+        clusterer.addMarker(marker);    // 인포윈도우를 위해 지도에도 등록
+        marker.setMap(map);
+        contentMarkersRef.current.push(marker);
+
+        // 반경이내에 있으면 인증 가능
+        const isAuthable = authContentsRef.current.some(auth =>
+            (auth.contentsId && auth.contentsId === content.contentsId) ||
+            (auth.shopId && auth.shopId === content.shopId)
+        );
+
+        const infowindow = new window.kakao.maps.InfoWindow({   // 윈포윈도우(인증창) 설정
+            content: `
+                <div class="map-info-window">
+                    <div class="info-body">
+                        <strong class="info-title">${title}</strong>                        
+                            ${description
+                    ? `<p class="info-description">${description}</p>`
+                    : ''
+                }
+
+                            <div class="info-action-area">
+                            ${isAuthable
+                    ? `<button id="auth-btn-${id}" class="info-auth-btn">인증하기 📸</button>`
+                    : `<div class="info-disauth-wrap">
+                                <span class="info-dist-text">📍 50m 밖</span>
+                                <p class="info-notice">인증 불가</p>
+                                </div>`
+                }
+                        </div>
+                    </div>
+                </div>
+            `
+        }); // 윈포윈도우(인증창) 설정 끝
+        infowindowsRef.current.push(infowindow);    // 인증창 저장
+
+        window.kakao.maps.event.addListener(marker, 'click', () => {    // 마커 클릭 시 인포윈도우 열기
+            infowindowsRef.current.forEach(iw => iw.close());
+            infowindow.open(map, marker);
+            setTimeout(() => {
+                const btn = document.getElementById(`auth-btn-${id}`);
+                if (btn) {
+                    btn.onclick = async () => {
+                        console.log("인증하기 클릭:", title);
+                        if (onAuthBtnClick) onAuthBtnClick(title);
+                    };
+                }
+            }, 100);
+        }); // 인증 함수 끝
+    };  // 마커 생성 함수 끝
+
+    // 카테고리 기준 마커 호출 공통 함수
+    const fetchAndRenderMarkers = async (lat, lng, map, clusterer) => {
+        const fetchPromises = [];
+
+        if (shopCategoryRef.current === '0') {
+            fetchPromises.push(
+                fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`)
+                    .then(res => res.json())
+                    .then(contents => contents.filter(c => c.shopId))
+            );
+        } else if (shopCategoryRef.current !== 'NONE') {
+            fetchPromises.push(
+                fetch(`http://localhost:8080/api/safety/shop/category?lat=${lat}&lng=${lng}&radius=1000&shopCategory=${shopCategoryRef.current}`)
+                    .then(res => res.json())
+            );
+        }
+
+        if (contentCategoryRef.current === '0') {
+            fetchPromises.push(
+                fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`)
+                    .then(res => res.json())
+                    .then(contents => contents.filter(c => c.contentsId))
+            );
+        } else if (contentCategoryRef.current !== 'NONE') {
+            fetchPromises.push(
+                fetch(`http://localhost:8080/api/safety/contents/category?lat=${lat}&lng=${lng}&radius=1000&categoryId=${contentCategoryRef.current}`)
+                    .then(res => res.json())
+            );
+        }
+
+        Promise.all(fetchPromises).then(results => {
+            const allContents = results.flat();
+            allContents.forEach(content => createMarker(content, map, clusterer));
+        });
+    };
+
+
+    // 마커 전부 제거 공통 함수
+    const clearMarkers = (clusterer) => {
+        contentMarkersRef.current.forEach(m => m.setMap(null));
+        contentMarkersRef.current = [];
+        clusterer.clear();
+        infowindowsRef.current.forEach(iw => iw.close());
+        infowindowsRef.current = [];
+    };
+
+
     useEffect(() => {       // 함수 시작
         const script = document.createElement("script");        // scipt를 만들고
         script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_KEY}&autoload=false&libraries=clusterer`;
@@ -60,6 +183,7 @@ function KakaoMap({viewType, onAuthBtnClick}) {       // 함수 시작
                         //     level: 3,                                       // 화면 확대 레벨
                         // };
                         const map = new window.kakao.maps.Map(mapRef.current, options); // 맵 화면 띄울변수
+                        mapInstanceRef.current = map;
 
 
                         // 마커 클러스터러를 생성합니다
@@ -72,6 +196,8 @@ function KakaoMap({viewType, onAuthBtnClick}) {       // 함수 시작
                             minLevel: 2,        // 클러스터 할 최소 지도 레벨
                             disableClickZoom: true // 클러스터 마커를 클릭했을 때 지도가 자동 확대되지 않도록 설정
                         });
+                        clustererRef.current = clusterer;
+
                         // 클러스터 마커를 클릭했을 때 해당 클러스터 중심을 기준으로 지도를 1레벨씩 확대합니다
                         window.kakao.maps.event.addListener(clusterer, 'clusterclick', function (cluster) {
                             // 현재 지도 레벨에서 1레벨 확대한 레벨
@@ -79,238 +205,74 @@ function KakaoMap({viewType, onAuthBtnClick}) {       // 함수 시작
                             // 클릭된 클러스터의 중심 위치를 기준으로 지도를 확대합니다
                             map.setLevel(level, { anchor: cluster.getCenter() });
                         });
-
-
-                        let contentMarkers = [];  // contents 마커들을 저장할 배열 추가
-                        let infowindows = [];   // 인포윈도우(인증 창) 배열
-                        let authContents = [];   // 인증 가능한 배열
                         console.log("요청 좌표", lat, lng);
 
-                        Promise.all([   // 현재위치를 기준으로 주변 컨텐츠, 인증가능한 컨텐츠 호출
+                        Promise.all([   // // 초기 로드 - 전체 contents + 인증 가능 목록
                             fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`).then(res => res.json()),
                             fetch(`http://localhost:8080/api/safety/auth-contents?lat=${currentlat}&lng=${currentlng}&radius=50`).then(res => res.json())
                         ]).then(([contents, auth]) => {
-                            authContents = auth;  // 저장해두면 클릭 이벤트에서도 쓸 수 있음
-                            contents.forEach(content => {       // 마커 생성하거 클러스터 적용 하는 부분
-                                const title = content.contentsTitle ?? content.shopTitle;
-                                const id = content.contentsId ?? content.shopId;
-                                const description = content.contentDes || content.contentsDes || content.rawCategory || "상세 정보 준비 중";
-
-                                // 아이콘 추가
-                                const iconUrl = getMarkerIcon(content);
-                                const markerImage = iconUrl
-                                    ? new window.kakao.maps.MarkerImage(
-                                        iconUrl,
-                                        new window.kakao.maps.Size(27, 44)
-                                    )
-                                    : null;
-                                const marker = new window.kakao.maps.Marker({
-                                    position: new window.kakao.maps.LatLng(content.lat, content.lng),
-                                    title: title,
-                                    image: markerImage
-                                });
-                                // 마커를 지도에 직접 추가하지 않고 클러스터러에 추가합니다
-                                // 클러스터러가 지도 레벨에 따라 자동으로 마커를 묶어서 표시합니다
-                                clusterer.addMarker(marker);
-                                marker.setMap(map);  // 인포윈도우를 위해 지도에도 등록
-                                contentMarkers.push(marker);
-
-
-                                // 반경이내에 있으면 인증 가능
-                                const isAuthable = authContents.some(auth =>
-                                    (auth.contentsId && auth.contentsId === content.contentsId) ||
-                                    (auth.shopId && auth.shopId === content.shopId)
-                                );
-
-                                const infowindow = new window.kakao.maps.InfoWindow({   // 윈포윈도우(인증창) 설정
-                                    content: `
-                                        <div class="map-info-window">
-                                            <div class="info-body">
-                                                <strong class="info-title">${title}</strong>
-                                                
-                                                ${description 
-                                                    ? `<p class="info-description">${description}</p>` 
-                                                    : '' 
-                                                }
-
-                                                <div class="info-action-area">
-                                                    ${isAuthable 
-                                                        ? `<button id="auth-btn-${id}" class="info-auth-btn">인증하기 📸</button>`
-                                                        : `<div class="info-disauth-wrap">
-                                                            <span class="info-dist-text">📍 50m 밖</span>
-                                                            <p class="info-notice">인증 불가</p>
-                                                        </div>`
-                                                    }
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `
-                                });         // 윈포윈도우(인증창) 설정 끝
-                                infowindows.push(infowindow);   // 인증창 저장
-
-                                // 마커 클릭 시 인포윈도우 열기
-                                window.kakao.maps.event.addListener(marker, 'click', () => {
-                                    infowindows.forEach(iw => iw.close());  // 기존 인포윈도우 전부 닫기
-                                    infowindow.open(map, marker);
-
-                                    setTimeout(() => {  // 초기 로드 시 마커 클릭 이벤트
-                                        const btn = document.getElementById(`auth-btn-${id}`);
-                                        if (btn) {
-                                            btn.onclick = async () => {
-                                                console.log("인증하기 클릭:", title);
-                                                // TODO: 인증 API 호출
-                                                if (onAuthBtnClick) {
-                                                    onAuthBtnClick(title);
-                                                }
-                                            };
-                                        }
-                                    }, 100);
-                                });     // 원포윈도우 끝
-                            });     // // 마커 생성하거 클러스터 적용 하는 부분 끝
+                            authContentsRef.current = auth;
+                            contents.forEach(content => {
+                                createMarker(content, map, clusterer);
+                            });
                         });
 
+                        // 현재 위치 마커
                         const makerPosition = new window.kakao.maps.LatLng(lat, lng);
-                        const UserImage = new window.kakao.maps.MarkerImage(
-                            peopleIcon,
-                            new window.kakao.maps.Size(27, 44)
-                        );
-                        const maker = new window.kakao.maps.Marker({
-                            position: makerPosition,
-                            image: UserImage
-                        });
+                        const UserImage = new window.kakao.maps.MarkerImage(peopleIcon, new window.kakao.maps.Size(27, 44));
+                        const maker = new window.kakao.maps.Marker({ position: makerPosition, image: UserImage });
                         maker.setMap(map);
 
-                        let clickMaker = null;    // 클릭 마커 선언(처음은 없음)
+                        let clickMaker = null;
                         window.kakao.maps.event.addListener(map, 'click', async (mouseEvent) => {   // 사용자가 클릭했을 때 적용되는 함수
-                            const lat = mouseEvent.latLng.getLat(); // 클릭한 위도
-                            const lng = mouseEvent.latLng.getLng(); // 클릭한 경도
+                            const lat = mouseEvent.latLng.getLat();
+                            const lng = mouseEvent.latLng.getLng();
 
-                            if (clickMaker) { clickMaker.setMap(null); }        // 기존 클릭 마커 제거
+                            if (clickMaker) { clickMaker.setMap(null); }    // 기존 클릭 마커 제거
 
-                            contentMarkers.forEach(m => m.setMap(null));
-                            contentMarkers = [];    // 클릭할때 마다 이전 contents마커 전부 제거
-                            clusterer.clear(); // 클러스터러에 등록된 마커들을 모두 제거합니다
-                            infowindows.forEach(iw => iw.close());  // 기존 인포윈도우 전부 닫기
-                            infowindows = [];
+                            clearMarkers(clusterer);    // 공통 함수 사용
 
                             clickMaker = new window.kakao.maps.Marker({
-                                position: new window.kakao.maps.LatLng(lat, lng),   // 새 마커 생성
+                                position: new window.kakao.maps.LatLng(lat, lng),
                             });
                             clickMaker.setMap(map);
 
+                            fetchAndRenderMarkers(lat, lng, map, clusterer);
+
                             const response = await fetch("http://localhost:8080/api/safety/", {
                                 method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                },
-                                body: JSON.stringify({
-                                    lat: lat,
-                                    lng: lng,
-                                    radius: 500,    // 반경 500m
-                                }),         // http://localhost:8080/api/safety/에 POST매핑으로 헤더에 콘텐츠 타입을 json타입으로 하고 전달은 위도,경도, 그에따른 반경 500로 전달
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ lat, lng, radius: 500 }), // 니가 말한 위도, 경도, 반경
                             });
-                            const response2 = await fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`);
-
-                            const contents = await response2.json();
-                            contents.forEach(content => {
-                                const title = content.contentsTitle ?? content.shopTitle;
-                                const id = content.contentsId ?? content.shopId;
-                                const description = content.contentDes || content.contentsDes || content.rawCategory || "상세 정보 준비 중";
-                                const iconUrl = getMarkerIcon(content);
-
-                                const markerImage = iconUrl
-                                    ? new window.kakao.maps.MarkerImage(
-                                        iconUrl,
-                                        new window.kakao.maps.Size(27, 44)
-                                    )
-                                    : null;
-                                const marker = new window.kakao.maps.Marker({
-                                    position: new window.kakao.maps.LatLng(content.lat, content.lng),
-                                    title: title,
-                                    image: markerImage
-                                });
-
-                                marker.setMap(map);
-                                contentMarkers.push(marker);
-                                clusterer.addMarker(marker);    // 클러스터 적용
-
-                                const isAuthable = authContents.some(auth =>
-                                    (auth.contentsId && auth.contentsId === content.contentsId) ||
-                                    (auth.shopId && auth.shopId === content.shopId)
-                                );
-
-                                const infowindow = new window.kakao.maps.InfoWindow({ // 인증하기 모달 부분
-                                    content: `
-                                       <div class="map-info-window">
-                                            <div class="info-body">
-                                                <strong class="info-title">${title}</strong>
-                                                
-                                                ${description 
-                                                    ? `<p class="info-description">${description}</p>` 
-                                                    : '' 
-                                                }
-
-                                                <div class="info-action-area">
-                                                    ${isAuthable 
-                                                        ? `<button id="auth-btn-${id}" class="info-auth-btn">인증하기 📸</button>`
-                                                        : `<div class="info-disauth-wrap">
-                                                            <span class="info-dist-text">📍 50m 밖</span>
-                                                            <p class="info-notice">인증 불가</p>
-                                                        </div>`
-                                                    }
-                                                </div>
-                                            </div>
-                                        </div>
-                                        `
-                                });
-                                infowindows.push(infowindow);
-
-                                window.kakao.maps.event.addListener(marker, 'click', () => {
-                                    infowindows.forEach(iw => iw.close());
-                                    infowindow.open(map, marker);
-
-                                    setTimeout(() => {      // 클릭 이벤트 안 마커 클릭(인증) 이벤트
-                                        const btn = document.getElementById(`auth-btn-${id}`);
-                                        if (btn) {
-                                            btn.onclick = async () => {
-                                                console.log("인증하기 클릭:", title);
-                                                if (onAuthBtnClick) {
-                                                    onAuthBtnClick(title);
-                                                }
-                                            };
-                                        }
-                                    }, 100);
-                                });
-                            });
-                            console.log("클릭한 위치 - 위도:", lat, "경도:", lng);  // test용 위도 경도 확인차 콘솔 출력
                             const data = await response.json();
-                            console.log("안심등급 세부내용", data);
-                            console.log("1km내 있는 contents,shop", contents);
+                            console.log("결과", data);
                         });
-                    },      // GPS 성공 함수 끝
-                    () => { // GPS 실패 함수 시작
+                    },
+                    () => { // GPS 실패
                         const lat = 35.1798;
                         const lng = 128.1076;
-
-                        const options = {
-                            center: new window.kakao.maps.LatLng(lat, lng),
-                            level: 3,
-                        };
+                        const options = { center: new window.kakao.maps.LatLng(lat, lng), level: 3 };
                         const map = new window.kakao.maps.Map(mapRef.current, options);
-                        let contentMarkers = [];
+                        mapInstanceRef.current = map;   // 저장
 
-                        // 초기 contents만 호출 (authContents 없음)
+                        const clusterer = new window.kakao.maps.MarkerClusterer({
+                            map: map,
+                            averageCenter: true,
+                            minLevel: 2,
+                            disableClickZoom: true
+                        });
+                        clustererRef.current = clusterer;   // 저장
+
                         fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`)
                             .then(res => res.json())
                             .then(contents => {
-                                console.log("GPS 실패 초기 주변 컨텐츠", contents);
                                 contents.forEach(content => {
                                     const marker = new window.kakao.maps.Marker({
                                         position: new window.kakao.maps.LatLng(content.lat, content.lng),
                                         title: content.contentsTitle
                                     });
                                     marker.setMap(map);
-                                    contentMarkers.push(marker);
+                                    contentMarkersRef.current.push(marker);
                                 });
                             });
 
@@ -325,8 +287,7 @@ function KakaoMap({viewType, onAuthBtnClick}) {       // 함수 시작
 
                             if (clickMaker) { clickMaker.setMap(null); }
 
-                            contentMarkers.forEach(m => m.setMap(null));
-                            contentMarkers = [];
+                            clearMarkers(clusterer);    // 공통 함수 사용
 
                             clickMaker = new window.kakao.maps.Marker({
                                 position: new window.kakao.maps.LatLng(lat, lng),
@@ -338,31 +299,40 @@ function KakaoMap({viewType, onAuthBtnClick}) {       // 함수 시작
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({ lat, lng, radius: 500 }),
                             });
-
                             const response2 = await fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`);
                             const contents = await response2.json();
-
-                            // 마커만 찍고 인포윈도우 없음
                             contents.forEach(content => {
                                 const marker = new window.kakao.maps.Marker({
                                     position: new window.kakao.maps.LatLng(content.lat, content.lng),
                                     title: content.contentsTitle
                                 });
                                 marker.setMap(map);
-                                contentMarkers.push(marker);
+                                contentMarkersRef.current.push(marker);
                             });
 
                             console.log("클릭한 위치 - 위도:", lat, "경도:", lng);
-                            const data = await response.json();
-                            console.log("결과", data);
-                            console.log("1km내 있는 contents,shop", contents);
-                        });     // 마우스 클릭 이벤트 끝
-                    }   // GPS 실패 함수 끝
-                );      // GPS 성공/실패 함수 끝
-            });         // 맵 띄우는 함수 끝
-        };              // spript 끝
-        document.head.appendChild(script);  // <head>태그에 <script>태그를 넣는다
-    }, [viewType]);     // useEffect 함수 끝
+                        });
+                    }   // GPS실패 함수 끝
+                );  // 위치함수 끝
+            });     // window.kakao.maps.load(맵 띄우는 함수) 끝
+        };      // script.onload함수 끝
+        document.head.appendChild(script);
+    }, [viewType]);     // useEffect함수 끝
+    // 카테고리 변경 시 마커 업데이트 useEffect
+    useEffect(() => {
+        shopCategoryRef.current = shopCategory;
+        contentCategoryRef.current = contentCategory;
+        const map = mapInstanceRef.current;
+        const clusterer = clustererRef.current;
+        if (!map || !clusterer) return;
+
+        clearMarkers(clusterer);    // 기존 마커 전부 제거
+
+        const lat = map.getCenter().getLat();
+        const lng = map.getCenter().getLng();
+        fetchAndRenderMarkers(lat, lng, map, clusterer);
+
+    }, [shopCategory, contentCategory]);
 
     return <div ref={mapRef} style={{ width: "100%", height: "100%", position: "absolute" }} />;
 }
@@ -370,19 +340,29 @@ function KakaoMap({viewType, onAuthBtnClick}) {       // 함수 시작
 export default KakaoMap;
 /*
 1. useEffect, useRef 가져오고
-2. 맵 화면 변수 비어있게 선언 (mapRef = null)
-3. script 만들고 API키 넣고
-4. script가 다운로드 완료되면 (onload)
-5. 카카오맵 초기화하고
-6. GPS 실행
-7. GPS 성공 → 사용자 위도/경도로 지도 옵션 설정 → 지도 띄움
-   GPS 실패 → 진주 시청 좌표로 지도 띄움
-8. script를 <head>에 넣어서 다운로드 시작 ← (3번 직후에 일어남)
-9. div를 화면에 그려줌 (return)
-10. 다른 파일에서 쓸 수 있게 KakaoMap으로 내보냄
+2. mapRef(지도 div), mapInstanceRef(map 객체), clustererRef(클러스터러),
+   contentMarkersRef(마커 배열), infowindowsRef(인포윈도우 배열), authContentsRef(인증 목록) 선언
+3. getMarkerIcon() - 카테고리별 마커 아이콘 반환 함수
+4. createMarker() - 마커 생성 + 인포윈도우 + 인증하기 버튼 공통 함수
+5. clearMarkers() - 기존 마커/인포윈도우 전부 제거 공통 함수
+6. script 만들고 API키 + clusterer 라이브러리 넣고
+7. script가 다운로드 완료되면 카카오맵 초기화
+8. GPS 실행
+9. GPS 성공 → 진주시청 좌표로 지도 고정 (추후 position.coords로 변경 예정)
+         → 클러스터러 생성
+         → 초기 1km 반경 contents + 인증가능 목록(50m) 동시 호출
+         → 현재 위치 마커 표시
+         → 지도 클릭 시 클릭 위치 기준 1km 반경 contents 마커 업데이트
+   GPS 실패 → 진주시청 좌표로 지도 띄움 (인증 기능 없음)
+10. 카테고리 변경 useEffect - shopCategory, contentCategory 바뀌면
+         → 기존 마커 제거 후 선택한 카테고리 기준으로 마커 재호출
+11. script를 <head>에 넣어서 다운로드 시작
+12. div를 화면에 그려줌 (return)
+13. 다른 파일에서 쓸 수 있게 KakaoMap으로 내보냄
 
 참고
 1. 500m 반경의 안심등급
-2. 1km 반경의 contents 출력
+2. 1km 반경의 contents, shop 출력
 3. 50m 반경의 인증 기능
+4. 카테고리별 마커 아이콘: 관광/축제/문화재/체육/미술(노란색), 가맹점(파란색)
 */
