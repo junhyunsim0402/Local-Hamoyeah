@@ -18,6 +18,8 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick }) {
     const contentMarkersRef = useRef([]);       // contents 마커 저장용
     const infowindowsRef = useRef([]);          // 인포윈도우 저장용
     const authContentsRef = useRef([]);         // 인증 가능 목록 저장용
+    const shopCategoryRef = useRef('0');
+    const contentCategoryRef = useRef('0');
 
     const getMarkerIcon = (content) => {
         if (content.categoryId) {
@@ -58,7 +60,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick }) {
             title: title,
             image: markerImage
         });
-        
+
         // 마커를 지도에 직접 추가하지 않고 클러스터러에 추가합니다
         // 클러스터러가 지도 레벨에 따라 자동으로 마커를 묶어서 표시합니다
         clusterer.addMarker(marker);    // 인포윈도우를 위해 지도에도 등록
@@ -110,6 +112,43 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick }) {
             }, 100);
         }); // 인증 함수 끝
     };  // 마커 생성 함수 끝
+
+    // 카테고리 기준 마커 호출 공통 함수
+    const fetchAndRenderMarkers = async (lat, lng, map, clusterer) => {
+        const fetchPromises = [];
+
+        if (shopCategoryRef.current === '0') {
+            fetchPromises.push(
+                fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`)
+                    .then(res => res.json())
+                    .then(contents => contents.filter(c => c.shopId))
+            );
+        } else if (shopCategoryRef.current !== 'NONE') {
+            fetchPromises.push(
+                fetch(`http://localhost:8080/api/safety/shop/category?lat=${lat}&lng=${lng}&radius=1000&shopCategory=${shopCategoryRef.current}`)
+                    .then(res => res.json())
+            );
+        }
+
+        if (contentCategoryRef.current === '0') {
+            fetchPromises.push(
+                fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`)
+                    .then(res => res.json())
+                    .then(contents => contents.filter(c => c.contentsId))
+            );
+        } else if (contentCategoryRef.current !== 'NONE') {
+            fetchPromises.push(
+                fetch(`http://localhost:8080/api/safety/contents/category?lat=${lat}&lng=${lng}&radius=1000&categoryId=${contentCategoryRef.current}`)
+                    .then(res => res.json())
+            );
+        }
+
+        Promise.all(fetchPromises).then(results => {
+            const allContents = results.flat();
+            allContents.forEach(content => createMarker(content, map, clusterer));
+        });
+    };
+
 
     // 마커 전부 제거 공통 함수
     const clearMarkers = (clusterer) => {
@@ -198,18 +237,15 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick }) {
                             });
                             clickMaker.setMap(map);
 
+                            fetchAndRenderMarkers(lat, lng, map, clusterer);
+
                             const response = await fetch("http://localhost:8080/api/safety/", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ lat, lng, radius: 500 }),
-                            }); // http://localhost:8080/api/safety/에 위도,경도,반경 전달
-                            const response2 = await fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`);
-                            const contents = await response2.json();
-                            contents.forEach(content => createMarker(content, map, clusterer)); // 1km내 contents마커 생성
-
-                            console.log("클릭한 위치 - 위도:", lat, "경도:", lng);
+                                body: JSON.stringify({ lat, lng, radius: 500 }), // 니가 말한 위도, 경도, 반경
+                            });
                             const data = await response.json();
-                            console.log("안심등급 세부내용", data);
+                            console.log("결과", data);
                         });
                     },
                     () => { // GPS 실패
@@ -275,8 +311,6 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick }) {
                             });
 
                             console.log("클릭한 위치 - 위도:", lat, "경도:", lng);
-                            const data = await response.json();
-                            console.log("결과", data);
                         });
                     }   // GPS실패 함수 끝
                 );  // 위치함수 끝
@@ -286,6 +320,8 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick }) {
     }, [viewType]);     // useEffect함수 끝
     // 카테고리 변경 시 마커 업데이트 useEffect
     useEffect(() => {
+        shopCategoryRef.current = shopCategory;
+        contentCategoryRef.current = contentCategory;
         const map = mapInstanceRef.current;
         const clusterer = clustererRef.current;
         if (!map || !clusterer) return;
@@ -294,46 +330,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick }) {
 
         const lat = map.getCenter().getLat();
         const lng = map.getCenter().getLng();
-
-        const fetchPromises = [];   // 여러 API 동시 호출용
-
-        // shop 카테고리 처리
-        if (shopCategory === '0') {
-            // 전체 shop
-            fetchPromises.push(
-                fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`)
-                    .then(res => res.json())
-                    .then(contents => contents.filter(c => c.shopId))  // shop만 필터
-            );
-        } else if (shopCategory !== 'NONE') {
-            // 특정 shop 카테고리
-            fetchPromises.push(
-                fetch(`http://localhost:8080/api/safety/shop/category?lat=${lat}&lng=${lng}&radius=1000&shopCategory=${shopCategory}`)
-                    .then(res => res.json())
-            );
-        }
-
-        // contents 카테고리 처리
-        if (contentCategory === '0') {
-            // 전체 contents
-            fetchPromises.push(
-                fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`)
-                    .then(res => res.json())
-                    .then(contents => contents.filter(c => c.contentsId))  // contents만 필터
-            );
-        } else if (contentCategory !== 'NONE') {
-            // 특정 contents 카테고리
-            fetchPromises.push(
-                fetch(`http://localhost:8080/api/safety/contents/category?lat=${lat}&lng=${lng}&radius=1000&categoryId=${contentCategory}`)
-                    .then(res => res.json())
-            );
-        }
-
-        // 모든 API 호출 완료 후 마커 표시
-        Promise.all(fetchPromises).then(results => {
-            const allContents = results.flat();  // 배열 합치기
-            allContents.forEach(content => createMarker(content, map, clusterer));
-        });
+        fetchAndRenderMarkers(lat, lng, map, clusterer);
 
     }, [shopCategory, contentCategory]);
 
