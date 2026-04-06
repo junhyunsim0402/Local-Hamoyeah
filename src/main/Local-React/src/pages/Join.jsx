@@ -79,7 +79,7 @@ function JoinPage() {
       const obj = {email: id, password: password, nickname: name};
       const response = await axios.post("http://localhost:8080/user/signup", obj);
       if (response.data === true) { 
-        alert("회원가입 성공!");
+        alert("회원가입 성공");
         navigate("/login");
       } else {
         alert("회원가입 실패: 이미 존재하는 계정이거나 정보가 잘못되었습니다.");
