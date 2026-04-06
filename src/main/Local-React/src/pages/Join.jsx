@@ -4,38 +4,91 @@ import topBg from '../assets/top_bg.png';
 import bottomBg from '../assets/bottom_bg.png';
 import logo from '../assets/logo.png';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 function JoinPage() {
   const [formData, setFormData] = useState({
     name: '',
     id: '', // 이메일
     emailVerify: '', // 인증번호
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    isAdmin: false
   });
+
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
   const navigate = useNavigate();
 
-  // 이메일 인증번호 발송 함수
-  const sendVerificationEmail = () => {
-    console.log(`${formData.id}로 인증번호를 발송합니다.`);
-    alert("인증번호가 발송되었습니다!");
+  // 이메일 인증 번호 발송 함수
+  const sendVerificationEmail = async () => {
+    const targetEmail = formData.id; 
+    if (!targetEmail) {
+      alert("이메일을 입력해주세요.");
+      return;
+    }
+    try {
+      const response = await axios.post(`http://localhost:8080/email/send?email=${targetEmail}`);
+      alert(response.data.message || "인증번호가 발송되었습니다.");
+    } catch (error) {
+      console.error("발송 에러:", error);
+      alert(error.response?.data?.message || "인증번호 발송에 실패했습니다.");
+    }
   };
+
   // 인증번호 확인 함수
-  const checkVerificationCode = () => {
-    console.log(`인증번호 ${formData.emailVerify} 확인 시도`);
-    alert("인증되었습니다.");
+  const checkVerificationCode = async () => {
+    if (!formData.id || !formData.emailVerify) {
+      alert("이메일과 인증번호를 모두 입력해주세요.");
+      return;
+    }
+    try {
+      const response = await axios.post(`http://localhost:8080/email/verify?email=${formData.id}&code=${formData.emailVerify}`);
+
+      if (response.data === true || response.data.success === true) { 
+        alert("인증에 성공했습니다.");
+        setIsEmailVerified(true);
+      } else {
+        alert("인증번호가 일치하지 않습니다.");
+        setIsEmailVerified(false);
+      }
+    } catch (error) {
+      console.error("인증 확인 에러:", error);
+      alert("인증번호가 틀렸거나 확인 중 오류가 발생했습니다.");
+      setIsEmailVerified(false);
+    }
   };
+
+  // 입력한 값 대입 함수
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleJoin = (e) => {
+  // 회원가입 함수
+  const handleJoin = async (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("비밀번호가 일치하지 않아요!");
+    if (!isEmailVerified) {
+      alert("이메일 인증을 먼저 완료해주세요.");
       return;
     }
-    console.log("회원가입 시도:", formData);
+    if (!formData.password || formData.password !== formData.confirmPassword) {
+      alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+    try {
+      const { name, id, password } = formData;
+      const obj = {email: id, password: password, nickname: name};
+      const response = await axios.post("http://localhost:8080/user/signup", obj);
+      if (response.data === true) { 
+        alert("회원가입 성공!");
+        navigate("/login");
+      } else {
+        alert("회원가입 실패: 이미 존재하는 계정이거나 정보가 잘못되었습니다.");
+      }
+    } catch (error) {
+      console.error("서버 에러 상세:", error.response?.data);
+      const errorMsg = error.response?.data?.message || "서버 통신 중 오류가 발생했습니다.";
+      alert(errorMsg);
+    }
   };
 
   return (
