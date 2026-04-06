@@ -25,6 +25,10 @@ public class UserProofDto {
     private String rejectReason;
     private LocalDateTime reviewedAt;
 
+    private String nickname;
+    private String contentTitle;
+    private String adminNickname;
+
     public UserproofEntity toEntity(UserEntity user, ContentsEntity content) {
         return UserproofEntity.builder()
                 .imageUrl(this.imageUrl)

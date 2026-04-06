@@ -54,6 +54,9 @@ public class UserproofEntity extends BaseTime {
                 .adminId(this.adminEntity != null ? this.adminEntity.getUserId() : null)
                 .rejectReason(this.rejectReason)
                 .reviewedAt(this.reviewedAt)
+                .nickname(this.userEntity.getNickname())
+                .contentTitle(this.contentsEntity.getContentTitle())
+                .adminNickname(this.adminEntity != null ? this.adminEntity.getNickname() : null)
                 .build();
     }
 }
