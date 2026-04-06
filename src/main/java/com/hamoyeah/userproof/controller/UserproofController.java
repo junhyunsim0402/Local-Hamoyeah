@@ -6,11 +6,11 @@ import com.hamoyeah.user.service.UserService;
 import com.hamoyeah.userproof.dto.UserProofDto;
 import com.hamoyeah.userproof.service.UserproofService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @RestController
@@ -27,12 +27,12 @@ public class UserproofController {
             @RequestHeader(value="Authorization", required=false) String bearerToken,
             UserProofDto userProofDto){
         if(bearerToken==null||!bearerToken.startsWith("Bearer ")){
-            return ResponseEntity.status(500).body("토큰이 없거나 형식이 잘못되었습니다.");
+            return ResponseEntity.status(400).body("토큰이 없거나 형식이 잘못되었습니다.");
         }
         String token=bearerToken.substring(7);
         String email=userService.getClaim(token);
         if(email==null){
-            return ResponseEntity.status(500).body("유효하지 않은 토큰입니다.");
+            return ResponseEntity.status(401).body("유효하지 않은 토큰입니다.");
         }
         return ResponseEntity.ok(userproofService.verify(email, userProofDto));
     }
@@ -43,17 +43,20 @@ public class UserproofController {
 
         try {
             if(token==null||!token.startsWith("Bearer ")){
-                return ResponseEntity.status(500).body("토큰이 유효하지 않습니다.");
+                return ResponseEntity.status(401).body("토큰이 유효하지 않습니다.");
             }
             String statusToken=token.substring(7);
             String email=userService.getClaim(statusToken);
             if(email==null){
-                return ResponseEntity.status(500).body("인증 정보가 만료되었습니다.");
+                return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
             }
-            UserEntity user=userRepository.findByEmail(email)
-                    .orElseThrow(()-> new RuntimeException("사용자를 찾을 수 없습니다."));
+            Optional<UserEntity> userOpt1= userRepository.findByEmail(email);
+            if (!userOpt1.isPresent()) {
+                return ResponseEntity.status(401).body("사용자를 찾을 수 없습니다.");
+            }
+            UserEntity user = userOpt1.get();
             if(!user.isAdmin()){
-                return ResponseEntity.status(500).body("관리자 권한이 없습니다.");
+                return ResponseEntity.status(403).body("관리자 권한이 없습니다.");
             }
             userproofService.status(userProofDto, user.getUserId());
             return ResponseEntity.ok(userProofDto.getStatus()+" 처리가 완료되었습니다.");
@@ -67,17 +70,20 @@ public class UserproofController {
     public ResponseEntity<?> verifyuser(@RequestHeader("Authorization") String token) {
         try {
             if(token==null||!token.startsWith("Bearer ")){
-                return ResponseEntity.status(500).body("토큰이 유효하지 않습니다.");
+                return ResponseEntity.status(401).body("토큰이 유효하지 않습니다.");
             }
             String statusToken=token.substring(7);
             String email=userService.getClaim(statusToken);
             if(email==null){
-                return ResponseEntity.status(500).body("인증 정보가 만료되었습니다.");
+                return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
             }
-            UserEntity user=userRepository.findByEmail(email)
-                    .orElseThrow(()-> new RuntimeException("사용자를 찾을 수 없습니다."));
+            Optional<UserEntity> userOpt2 = userRepository.findByEmail(email);
+            if (userOpt2.isEmpty()) {
+                return ResponseEntity.status(401).body("사용자를 찾을 수 없습니다.");
+            }
+            UserEntity user = userOpt2.get();
             if(!user.isAdmin()){
-                return ResponseEntity.status(500).body("관리자 권한이 없습니다.");
+                return ResponseEntity.status(403).body("관리자 권한이 없습니다.");
             }
             List<UserProofDto> result=userproofService.verifyuser();
             return ResponseEntity.ok(result);
@@ -91,17 +97,20 @@ public class UserproofController {
     public ResponseEntity<?> detailuser(@RequestHeader("Authorization") String token, @RequestParam Integer userId) {
         try {
             if(token == null||!token.startsWith("Bearer ")) {
-                return ResponseEntity.status(500).body("토큰이 유효하지 않습니다.");
+                return ResponseEntity.status(401).body("토큰이 유효하지 않습니다.");
             }
             String statusToken=token.substring(7);
             String email=userService.getClaim(statusToken);
             if(email==null) {
-                return ResponseEntity.status(500).body("인증 정보가 만료되었습니다.");
+                return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
             }
-            UserEntity user=userRepository.findByEmail(email)
-                    .orElseThrow(()-> new RuntimeException("사용자를 찾을 수 없습니다."));
+            Optional<UserEntity> userOpt3 = userRepository.findByEmail(email);
+            if (userOpt3.isEmpty()) {
+                return ResponseEntity.status(401).body("존재하지 않는 사용자입니다.");
+            }
+            UserEntity user = userOpt3.get();
             if(!user.isAdmin()){
-                return ResponseEntity.status(500).body("관리자 권한이 없습니다.");
+                return ResponseEntity.status(403).body("관리자 권한이 없습니다.");
             }
             List<UserProofDto> result=userproofService.detailuser(userId);
             return ResponseEntity.ok(result);
@@ -122,5 +131,4 @@ public class UserproofController {
         if(userEmail==null) return ResponseEntity.ok(false);
         return ResponseEntity.ok(userproofService.usermylist(userEmail));
     }
-
 }
