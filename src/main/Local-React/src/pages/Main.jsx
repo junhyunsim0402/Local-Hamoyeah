@@ -54,7 +54,7 @@ const handleScoreReady = (data) => {
                 👤 마이페이지
               </div>
               <div className="menu-item logout" onClick={() => {
-                localStorage.removeItem('accessToken');
+                localStorage.removeItem('token');
                 window.location.href = '/login';
               }}>
                 🚪 로그아웃
