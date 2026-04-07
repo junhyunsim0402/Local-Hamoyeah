@@ -6,6 +6,29 @@
     z-index: 3100; 
 }
 
+.mypage-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    font-weight: bold;
+    color: #999;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    z-index: 10; 
+}
+
+.mypage-close:hover {
+    color: #333;
+}
+
 .mypage-content {
     background: white;
     width: 90%; 
@@ -20,7 +43,11 @@
 }
 
 
-.mypage-header { margin-bottom: 30px; text-align: center; }
+.mypage-header { 
+    margin-top: 10px;
+    margin-bottom: 30px; 
+    text-align: center; 
+}
 .user-avatar { font-size: 50px; margin-bottom: 10px; }
 .user-nickname { font-size: 1.5rem; color: #333; margin: 0; }
 .user-email { font-size: 0.9rem; color: #999; }
