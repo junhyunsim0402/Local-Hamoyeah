@@ -29,24 +29,31 @@ public class UserproofService {
 
     // 유저 사진 등록 기능
     public UserproofEntity verify(String email, UserProofDto userProofDto) {
+        if (userProofDto == null || userProofDto.getContentId() == null || userProofDto.getUploadimg() == null) {
+            System.out.println("오류: 전달된 데이터나 ID, 파일이 null입니다.");
+            return null;
+        }
         Optional<UserEntity> userproof = userRepository.findByEmail(email);
         Optional<ContentsEntity> contentproof = contentsRepository.findById(userProofDto.getContentId());
 
-        System.out.println(userProofDto.getUploadimg());
-        String filename = fileService.upload(userProofDto.getUploadimg());
-        System.out.println("filename = " + filename);
-        if(filename==null){return null;}
-
         if (userproof.isPresent() && contentproof.isPresent()) {
-            UserproofEntity entity = UserproofEntity.builder()
-                    .userEntity(userproof.get())
-                    .contentsEntity(contentproof.get())
-                    .imageUrl(filename)
-                    .status("대기중")
-                    .build();
-            return userproofRepository.save(entity);
+            String filename = fileService.upload(userProofDto.getUploadimg());
+            if (filename != null) {
+                UserproofEntity entity = UserproofEntity.builder()
+                        .userEntity(userproof.get())
+                        .contentsEntity(contentproof.get())
+                        .imageUrl(filename)
+                        .status("대기중")
+                        .build();
+                return userproofRepository.save(entity);
+            } else {
+                System.out.println("오류: 파일 업로드에 실패했습니다.");
+                return null;
+            }
+        } else {
+            System.out.println("오류: 유저 또는 콘텐츠 정보를 찾을 수 없습니다.");
+            return null;
         }
-        return null;
     }
 
     // 관리자 승인/반려 기능

@@ -9,7 +9,7 @@ import ScorePanel from '../components/ScorePanel';
 function MainPage() {
   const [viewType, setViewType] = useState('noise');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState('');
+  const [selectedPlaceId, setSelectedPlaceId] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMyPageOpen, setIsMyPageOpen] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
@@ -26,8 +26,8 @@ function MainPage() {
     setIsPanelOpen(false); // 정주여건 패널 성공
   };  // 정주여건 패널 점수 함수
 
-  const openAuthModal = (title) => {
-    setSelectedPlace(title);
+  const openAuthModal = (id) => {
+    setSelectedPlaceId(id);
     setIsAuthModalOpen(true);
   };
 
@@ -143,7 +143,7 @@ function MainPage() {
           setIsPanelOpen(false);
           setToastVisible(false); // 패널 닫으면 토스트도 숨김
         }}
-        targetTitle={selectedPlace}
+        targetId={selectedPlaceId}
       />
       <MyPageModal
         isOpen={isMyPageOpen}
