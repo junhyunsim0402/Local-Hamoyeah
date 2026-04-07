@@ -24,6 +24,7 @@ function ScorePanel({ isOpen, onClose, scoreData }) {
 
   return (
     <>
+      {/* isOpen이 true일 때만 패널 띄움, 클릭하면 패널 닫힘 */}
       {isOpen && <div className="score-panel-overlay" onClick={onClose} />}
       <div className={`score-panel ${isOpen ? 'open' : ''}`}>
         <div className="score-panel-handle-wrap" onClick={onClose}>

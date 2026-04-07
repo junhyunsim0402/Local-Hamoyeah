@@ -1,12 +1,14 @@
 .score-panel {
   position: fixed;
   bottom: -100%;
-  left: 0;
+  left: 50%;
   right: 0;
   height: 55%;
+  width: 430px; 
   background: #ffffff;
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  transform: translateX(-50%);
   transition: bottom 0.35s cubic-bezier(0.32, 0.72, 0, 1);
   z-index: 200;
   padding: 0 16px 24px;
@@ -14,7 +16,7 @@
 }
 
 .score-panel.open {
-  bottom: 0;
+  bottom: 40px;
 }
 
 .score-panel-overlay {

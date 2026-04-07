@@ -84,33 +84,32 @@ function MainPage() {
         </div>
       </header>
 
-      {/* 3. 카테고리 선택 영역 */}
-      <div>
-        <select value={shopCategory} onChange={(e) => setShopCategory(e.target.value)}>
-          <option value="0">가맹점 전체</option>
-          <option value="FOOD">음식점</option>
-          <option value="CAFE">카페/디저트</option>
-          <option value="STORE">편의점/마트</option>
-          <option value="MEDICAL">의료/약국</option>
-          <option value="LIFE">생활/미용</option>
-          <option value="ETC">기타</option>
-          <option value="NONE">선택 안함</option>
-        </select>
-
-        <select value={contentCategory} onChange={(e) => setContentCategory(e.target.value)}>
-          <option value="0">관광/문화 전체</option>
-          <option value="1">관광</option>
-          <option value="2">축제</option>
-          <option value="3">문화재</option>
-          <option value="4">공공 체육시설</option>
-          <option value="5">건축 미술</option>
-          <option value="6">공공 미술</option>
-          <option value="NONE">선택 안함</option>
-        </select>
-      </div>
-
       {/* 4. 하단: 지도 영역 */}
       <main className="map-section">
+        {/* 3. 카테고리 선택 영역 */}
+        <div className="category-select-wrap">
+          <select value={shopCategory} onChange={(e) => setShopCategory(e.target.value)}>
+            <option value="0">가맹점 전체</option>
+            <option value="FOOD">음식점</option>
+            <option value="CAFE">카페/디저트</option>
+            <option value="STORE">편의점/마트</option>
+            <option value="MEDICAL">의료/약국</option>
+            <option value="LIFE">생활/미용</option>
+            <option value="ETC">기타</option>
+            <option value="NONE">선택 안함</option>
+          </select>
+
+          <select value={contentCategory} onChange={(e) => setContentCategory(e.target.value)}>
+            <option value="0">관광/문화 전체</option>
+            <option value="1">관광</option>
+            <option value="2">축제</option>
+            <option value="3">문화재</option>
+            <option value="4">공공 체육시설</option>
+            <option value="5">건축 미술</option>
+            <option value="6">공공 미술</option>
+            <option value="NONE">선택 안함</option>
+          </select>
+        </div>
         <div className="map-placeholder">
           {viewType === 'noise' ? '🔊 정주여건 로딩 중...' : '🛍️ 지역탐방 로딩 중...'}
 
