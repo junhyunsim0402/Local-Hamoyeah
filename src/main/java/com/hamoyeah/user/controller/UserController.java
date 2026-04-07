@@ -24,7 +24,7 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
         String token = userService.login(loginDto);
         if (token != null) {
-            return ResponseEntity.ok(token);
+            return ResponseEntity.ok("Bearer "+token);
         } else {
             return ResponseEntity.status(401).body("아이디 또는 비밀번호가 틀립니다.");
         }
