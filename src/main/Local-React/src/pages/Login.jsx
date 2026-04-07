@@ -22,10 +22,22 @@ function LoginPage() {
     try{
       const obj={email: id, password: password};
       const response = await axios.post("http://localhost:8080/user/login", obj);
-    if (response.data) { 
-      localStorage.setItem("token", response.data);
-      alert("로그인 성공");
-      navigate("/main");
+      const token = response.data;
+    if (token) { 
+      localStorage.setItem("token", token);
+
+      const infoResponse = await axios.get("http://localhost:8080/user/myinfo", {
+        headers: { Authorization: token }
+      });
+
+      const userInfo = infoResponse.data;
+
+      alert(`${userInfo.nickname}님, 환영합니다!`);
+      if (userInfo.isAdmin) {
+        navigate("/admin"); 
+      } else {
+        navigate("/main");  
+      }
     } 
   } catch(error){
       const errorMsg = error.response?.data || "로그인 실패";
