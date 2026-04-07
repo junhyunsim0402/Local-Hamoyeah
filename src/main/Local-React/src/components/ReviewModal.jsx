@@ -16,7 +16,7 @@ function ReviewModal({ proof, onClose, onConfirm }) {
         <div className="modal-body">
           {/* 1. 이미지 크게 보기 */}
           <div className="modal-image-wrap">
-            <img src={proof.image_url || 'placeholder.png'} alt="원본 인증샷" />
+            <img src={proof.imageUrl ? `http://localhost:8080/upload/${proof.imageUrl}` : 'https://placehold.co/600x400'} alt="원본 인증샷" />
           </div>
 
           {/* 2. 유저 정보 요약 */}
@@ -40,13 +40,13 @@ function ReviewModal({ proof, onClose, onConfirm }) {
         <div className="modal-footer-btns">
           <button 
             className="btn-reject" 
-            onClick={() => onConfirm(proof.id, '반려', rejectReason)}
+            onClick={() => onConfirm(proof.proofId, '반려', rejectReason)}
           >
             반려하기
           </button>
           <button 
             className="btn-approve" 
-            onClick={() => onConfirm(proof.id, '승인')}
+            onClick={() => onConfirm(proof.proofId, '승인')}
           >
             승인하기
           </button>

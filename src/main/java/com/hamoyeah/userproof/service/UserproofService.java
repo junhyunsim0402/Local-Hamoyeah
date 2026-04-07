@@ -72,8 +72,8 @@ public class UserproofService {
 
     // 관리자 인증한 사용자 전체 조회
     public List<UserProofDto> verifyuser() {
-        List<UserproofEntity> approved = userproofRepository.findAllByStatus("승인");
-        return approved.stream()
+        List<UserproofEntity> entities = userproofRepository.findAllWithDetails();
+        return  entities.stream()
                 .map(UserproofEntity::toDto)
                 .collect(Collectors.toList());
     }
@@ -93,6 +93,4 @@ public class UserproofService {
                 .map(UserproofEntity::toDto)
                 .collect(Collectors.toList());
     }
-
-
 }
