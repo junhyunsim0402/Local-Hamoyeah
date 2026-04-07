@@ -105,8 +105,8 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                 const btn = document.getElementById(`auth-btn-${id}`);
                 if (btn) {
                     btn.onclick = async () => {
-                        console.log("인증하기 클릭:", title);
-                        if (onAuthBtnClick) onAuthBtnClick(title);
+                        console.log("인증하기 클릭:", id);
+                        if (onAuthBtnClick) onAuthBtnClick(id);
                     };
                 }
             }, 100);

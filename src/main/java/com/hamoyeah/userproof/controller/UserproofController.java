@@ -6,6 +6,7 @@ import com.hamoyeah.user.service.UserService;
 import com.hamoyeah.userproof.dto.UserProofDto;
 import com.hamoyeah.userproof.service.UserproofService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,10 +23,10 @@ public class UserproofController {
     private final UserRepository userRepository;
 
     // 유저 사진 등록 기능
-    @PostMapping("/verify")
+    @PostMapping(value = "/verify", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> verify(
             @RequestHeader(value="Authorization", required=false) String bearerToken,
-            UserProofDto userProofDto){
+            @ModelAttribute UserProofDto userProofDto){
         if(bearerToken==null||!bearerToken.startsWith("Bearer ")){
             return ResponseEntity.status(400).body("토큰이 없거나 형식이 잘못되었습니다.");
         }

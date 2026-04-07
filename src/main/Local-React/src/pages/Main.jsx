@@ -7,7 +7,7 @@ import MyPageModal from '../components/MyPageModal';
 function MainPage() {
   const [viewType, setViewType] = useState('noise');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState('');
+  const [selectedPlaceId, setSelectedPlaceId] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMyPageOpen, setIsMyPageOpen] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
@@ -21,8 +21,8 @@ const handleScoreReady = (data) => {
   setIsPanelOpen(true); // 정주여건 패널 성공
 };  // 정주여건 패널 점수 함수
 
-  const openAuthModal = (title) => {
-    setSelectedPlace(title);
+  const openAuthModal = (id) => {
+    setSelectedPlaceId(id);
     setIsAuthModalOpen(true);
   };
 
@@ -124,7 +124,7 @@ const handleScoreReady = (data) => {
       <AuthModal 
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)} 
-        targetTitle={selectedPlace} 
+        targetId={selectedPlaceId}
       />
       <MyPageModal
         isOpen={isMyPageOpen}
