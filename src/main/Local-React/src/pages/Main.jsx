@@ -17,10 +17,13 @@ function MainPage() {
   const [contentCategory, setContentCategory] = useState('0');  // contents 기본값 전체
   const [isPanelOpen, setIsPanelOpen] = useState(false);  // 정주여건 패널 열림/닫힘
   const [scoreData, setScoreData] = useState(null); // 정주여건 점수 데이터
+  const [toastVisible, setToastVisible] = useState(false); // 토스트 바 표시 여부
+
 
   const handleScoreReady = (data) => {
     setScoreData(data); // 정주여건 점수 저장
-    setIsPanelOpen(true); // 정주여건 패널 성공
+    setToastVisible(true);   // 패널 바로 열지 않고 토스트만 표시
+    setIsPanelOpen(false); // 정주여건 패널 성공
   };  // 정주여건 패널 점수 함수
 
   const openAuthModal = (title) => {
@@ -110,6 +113,18 @@ function MainPage() {
             <option value="NONE">선택 안함</option>
           </select>
         </div>
+        {/* 토스트 바 */}
+        {toastVisible && (
+          <div className="score-toast">
+            <span>📍 이 지역의 정주여건을 확인해보세요</span>
+            <button onClick={() => {
+              setIsPanelOpen(true);
+              setToastVisible(false);
+            }}>
+              정주여건 확인
+            </button>
+          </div>
+        )}
         <div className="map-placeholder">
           {viewType === 'noise' ? '🔊 정주여건 로딩 중...' : '🛍️ 지역탐방 로딩 중...'}
 
@@ -124,7 +139,10 @@ function MainPage() {
       </main>
       <AuthModal
         isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
+        onClose={() => {
+          setIsPanelOpen(false);
+          setToastVisible(false); // 패널 닫으면 토스트도 숨김
+        }}
         targetTitle={selectedPlace}
       />
       <MyPageModal
