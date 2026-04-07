@@ -48,7 +48,7 @@ function MyPageModal({ isOpen, onClose }) {
                 ) : (
                     <>
                         <div className="mypage-header">
-                            <div className="user-avatar">👤</div>
+                            {/* <div className="user-avatar">👤</div>*/}
                             <h2 className="user-nickname">{userInfo?.nickname} 님</h2>
                             <p className="user-email">{userInfo?.email}</p>
                         </div>

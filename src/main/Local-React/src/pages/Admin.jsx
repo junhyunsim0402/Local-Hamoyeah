@@ -15,8 +15,7 @@ function AdminPage() {
 
     const fetchProofs = async () => {
         try{
-            const token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTc3NTIwNDc4MSwiZXhwIjoxNzc1MjkxMTgxfQ.TZFIR6oQiN_Lb4taWoWYKvD6glk2tpB8klNjBUiLu6E"
-            //const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token');
             const response = await axios.get("http://localhost:8080/userproof/verifyuser", 
                 {headers: {Authorization: token}}
             );
@@ -33,11 +32,9 @@ function AdminPage() {
         fetchProofs();
     },[]);
 
-    // 1. 상태 업데이트 로직 나중에 API 연결
     const handleReviewConfirm = async (proofId, newStatus, reason = '') => {
         try{
-            const token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTc3NTIwNDc4MSwiZXhwIjoxNzc1MjkxMTgxfQ.TZFIR6oQiN_Lb4taWoWYKvD6glk2tpB8klNjBUiLu6E"
-            // const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token');
             const requestData = {
                 proofId: proofId,
                 status: newStatus, // "승인" 또는 "반려"
