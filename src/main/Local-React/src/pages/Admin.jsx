@@ -110,6 +110,7 @@ function AdminPage() {
                             proof={proof} 
                             index={index} 
                             onReview={() => setSelectedProof(proof)} 
+                            isAdmin={true}
                         />
                     ))
                 ) : (
