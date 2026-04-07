@@ -11,16 +11,16 @@ function ScorePanel({ isOpen, onClose, scoreData }) {
   const bars = [
     { label: 'CCTV', score: cctvScore, color: '#378ADD' },
     { label: '가로등', score: streetLampScore, color: '#1D9E75' },
-    { label: '소음', score: noiseScore, color: '#EF9F27' },
+    ...(noiseAvg !== 0 ? [{ label: '소음', score: noiseScore, color: '#EF9F27' }] : []),
     { label: '대기질', score: airScore, color: '#E24B4A' },
-  ];
+  ];  // 점수 바 설정
 
   const gradeColor = {
     'A': { bg: '#E6F1FB', text: '#0C447C' },
     'B': { bg: '#EAF3DE', text: '#3B6D11' },
     'C': { bg: '#FAEEDA', text: '#854F0B' },
     'D': { bg: '#FCEBEB', text: '#A32D2D' },
-  }[grade] || { bg: '#F1EFE8', text: '#5F5E5A' };
+  }[grade] || { bg: '#F1EFE8', text: '#5F5E5A' }; // 등급 바 설정
 
   return (
     <>
@@ -80,10 +80,12 @@ function ScorePanel({ isOpen, onClose, scoreData }) {
             <div className="detail-label">가로등 수</div>
             <div className="detail-value">{streetLampCount}개</div>
           </div>
+          {noiseAvg !== 0 && (  // 소음 데이터가 있으면 실행
           <div className="detail-card">
             <div className="detail-label">소음 평균</div>
             <div className="detail-value">{noiseAvg}dB</div>
           </div>
+          )}
           <div className="detail-card">
             <div className="detail-label">미세먼지 PM10</div>
             <div className="detail-value">{pm10}</div>
