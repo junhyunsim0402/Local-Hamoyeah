@@ -11,7 +11,7 @@ import buildingIcon from '../assets/building.png';
 import cultureIcon from '../assets/culture.png';
 import peopleIcon from '../assets/people.png';
 // 함수 시작
-function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick }) {       // 함수 시작
+function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onScoreReady }) {       // 함수 시작
     const mapRef = useRef(null);        // 지도를 그릴 div를 나중에 찾기 위한 변수, 처음엔 비어있음(null)
     const mapInstanceRef = useRef(null);        // map 객체 저장용
     const clustererRef = useRef(null);          // clusterer 저장용
@@ -246,6 +246,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick }) {
                             });
                             const data = await response.json();
                             console.log("결과", data);
+                            if(onScoreReady) onScoreReady(data);    // 점수데이터가 있으면 전달
                         });
                     },
                     () => { // GPS 실패
@@ -318,6 +319,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick }) {
         };      // script.onload함수 끝
         document.head.appendChild(script);
     }, [viewType]);     // useEffect함수 끝
+    
     // 카테고리 변경 시 마커 업데이트 useEffect
     useEffect(() => {
         shopCategoryRef.current = shopCategory;

@@ -13,7 +13,13 @@ function MainPage() {
   const [userInfo, setUserInfo] = useState(null);
   const [shopCategory, setShopCategory] = useState('0');      // shop 마커 기본값 전체
   const [contentCategory, setContentCategory] = useState('0');  // contents 기본값 전체
+  const [isPanelOpen, setIsPanelOpen] = useState(false);  // 정주여건 패널 열림/닫힘
+  const [scoreData, setScoreData] = useState(null); // 정주여건 점수 데이터
 
+const handleScoreReady = (data) => {
+  setScoreData(data); // 정주여건 점수 저장
+  setIsPanelOpen(true); // 정주여건 패널 성공
+};  // 정주여건 패널 점수 함수
 
   const openAuthModal = (title) => {
     setSelectedPlace(title);
@@ -110,8 +116,9 @@ function MainPage() {
         <Kakaomap
           viewType={viewType}
           onAuthBtnClick={openAuthModal}
-          shopCategory={shopCategory}      // ✅ props 전달
-          contentCategory={contentCategory} // ✅ props 전달
+          shopCategory={shopCategory}
+          contentCategory={contentCategory}
+          onScoreReady={handleScoreReady}
         />
       </main>
       <AuthModal 

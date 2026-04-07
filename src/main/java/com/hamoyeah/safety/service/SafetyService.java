@@ -324,7 +324,7 @@ public class SafetyService {
                     }
                 }
             }catch (Exception e){
-                System.out.println(e);
+                System.out.println("air쪽 문제"+e);
                 return false;
             }
         }
