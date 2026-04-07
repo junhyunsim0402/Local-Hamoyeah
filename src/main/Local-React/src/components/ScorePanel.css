@@ -1,0 +1,164 @@
+.score-panel {
+  position: fixed;
+  bottom: -100%;
+  left: 50%;
+  right: 0;
+  height: 55%;
+  width: 430px; 
+  background: #ffffff;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  transform: translateX(-50%);
+  transition: bottom 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  z-index: 200;
+  padding: 0 16px 24px;
+  overflow-y: auto;
+}
+
+.score-panel.open {
+  bottom: 40px;
+}
+
+.score-panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 199;
+}
+
+.score-panel-handle-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 8px;
+  cursor: pointer;
+}
+
+.score-panel-handle {
+  width: 36px;
+  height: 4px;
+  background: #d1d1d1;
+  border-radius: 2px;
+}
+
+.score-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.score-panel-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.grade-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 17px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.score-panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.score-panel-sub {
+  font-size: 11px;
+  color: #999;
+  margin-top: 1px;
+}
+
+.score-total {
+  font-size: 13px;
+  color: #888;
+}
+
+.score-total span {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-left: 2px;
+}
+
+/* 막대 차트 */
+.score-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.score-item {}
+
+.score-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.score-label-row span:last-child {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.bar-bg {
+  height: 7px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+/* 구분선 */
+.score-divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 14px 0 10px;
+}
+
+.score-detail-title {
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 8px;
+}
+
+/* 상세 카드 */
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.detail-card {
+  background: #f7f7f7;
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+}
+
+.detail-label {
+  font-size: 11px;
+  color: #999;
+}
+
+.detail-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-top: 3px;
+}
