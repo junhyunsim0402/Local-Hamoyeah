@@ -35,7 +35,7 @@ public class UserEntity {
         return UserDto.builder()
                 .email(email)
                 .nickname(nickname)
-                .totalPoints(0)
+                .totalPoints(totalPoints)
                 .isAdmin(isAdmin)
                 .build();
     }

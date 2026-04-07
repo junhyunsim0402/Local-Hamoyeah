@@ -1,7 +1,7 @@
 import React from 'react';
 import './ProofCard.css';
 
-function ProofCard({ proof, index, onReview }) {
+function ProofCard({ proof, index, onReview, isAdmin = false }) {
   // 상태에 따른 CSS 클래스 결정
   let statusClass = '';
   
@@ -37,7 +37,7 @@ function ProofCard({ proof, index, onReview }) {
       <div className="proof-action-section">
   
         {/* '대기중'일 때만 검토하기 버튼 노출 */}
-        {proof.status === '대기중' && (
+        {isAdmin && proof.status === '대기중' && (
           <button className="review-btn" onClick={onReview}>검토하기</button>
         )}
         
