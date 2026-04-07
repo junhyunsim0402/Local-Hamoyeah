@@ -1,30 +1,33 @@
 .mypage-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.7); /* 배경을 조금 더 어둡게 해서 집중도 UP */
+    background: rgba(0, 0, 0, 0.7); 
     display: flex; justify-content: center; align-items: center;
-    z-index: 3100; /* 설정 메뉴보다 높게! */
+    z-index: 3100; 
 }
 
 .mypage-content {
     background: white;
-    width: 90%; max-width: 400px;
-    max-height: 80vh; /* 화면 높이의 80%까지만! */
+    width: 90%; 
+    max-width: 420px; 
+    max-height: 85vh;
     border-radius: 30px;
-    padding: 40px 20px;
+    padding: 30px 15px; 
     position: relative;
-    overflow-y: auto; /* 내용 많으면 스크롤 */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
 }
 
-/* 헤더: 프로필 이미지와 이름 */
+
 .mypage-header { margin-bottom: 30px; text-align: center; }
 .user-avatar { font-size: 50px; margin-bottom: 10px; }
 .user-nickname { font-size: 1.5rem; color: #333; margin: 0; }
 .user-email { font-size: 0.9rem; color: #999; }
 
-/* 바디: 카드 형태의 정보 창 */
+
 .info-card {
-    background: #FFF186; /* 하모예 옐로우! */
+    background: #FFF186; 
     padding: 20px;
     border-radius: 20px;
     display: flex; justify-content: space-between; align-items: center;
@@ -34,3 +37,37 @@
 
 .activity-section h3 { font-size: 1.1rem; margin-bottom: 15px; text-align: left; }
 .empty-msg { color: #ccc; padding: 20px 0; }
+
+.activity-list {
+    flex: 1; 
+    overflow-y: auto; 
+    padding: 10px 5px;
+
+    scrollbar-width: thin;
+}
+
+
+.activity-list .proof-card {
+    padding: 15px !important;
+    flex-direction: column !important; 
+    align-items: flex-start !important;
+    gap: 10px !important;
+}
+
+.activity-list .proof-image-section {
+    width: 100% !important; 
+    margin-right: 0 !important;
+    flex-direction: row !important; 
+    justify-content: space-between;
+}
+
+.activity-list .proof-info-section {
+    padding-left: 0 !important; 
+    width: 100%;
+}
+
+.activity-list .proof-action-section {
+    width: 100% !important;
+    height: auto !important;
+    align-items: flex-end !important;
+}

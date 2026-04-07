@@ -89,4 +89,15 @@ public class UserService {
             else{return false;}
         } return false;
     }
+
+    // 마이 페이지
+    public UserDto myinfo(String loginEmail){
+        // 로그인된 mid 받아서 리포지토리에서 찾는다.
+        Optional<UserEntity> optionalMember = userRepository.findByEmail(loginEmail);
+        // 존재하면 dto 변환 하고 반환
+        if (optionalMember.isPresent()){
+            return optionalMember.get().toDto();
+        }
+        return null;
+    }
 }
