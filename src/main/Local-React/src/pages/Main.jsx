@@ -4,6 +4,8 @@ import logo from '../assets/logo.png';
 import Kakaomap from '../components/KakaoMap'
 import AuthModal from '../components/AuthModal';
 import MyPageModal from '../components/MyPageModal';
+import ScorePanel from '../components/ScorePanel';
+
 function MainPage() {
   const [viewType, setViewType] = useState('noise');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -16,10 +18,10 @@ function MainPage() {
   const [isPanelOpen, setIsPanelOpen] = useState(false);  // 정주여건 패널 열림/닫힘
   const [scoreData, setScoreData] = useState(null); // 정주여건 점수 데이터
 
-const handleScoreReady = (data) => {
-  setScoreData(data); // 정주여건 점수 저장
-  setIsPanelOpen(true); // 정주여건 패널 성공
-};  // 정주여건 패널 점수 함수
+  const handleScoreReady = (data) => {
+    setScoreData(data); // 정주여건 점수 저장
+    setIsPanelOpen(true); // 정주여건 패널 성공
+  };  // 정주여건 패널 점수 함수
 
   const openAuthModal = (title) => {
     setSelectedPlace(title);
@@ -42,11 +44,11 @@ const handleScoreReady = (data) => {
       <div className="top-bar">
         <img src={logo} alt="Project Logo" className="project-logo" />
         {/* 설정 버튼 클릭 시 토글 */}
-      <button className="settings-btn" onClick={() => setIsMenuOpen(!isMenuOpen)}>⚙️</button>
+        <button className="settings-btn" onClick={() => setIsMenuOpen(!isMenuOpen)}>⚙️</button>
 
-      {/* 메뉴가 열려있을 때만 렌더링 */}
-      {isMenuOpen && (
-        <>
+        {/* 메뉴가 열려있을 때만 렌더링 */}
+        {isMenuOpen && (
+          <>
             {/* 메뉴 바깥 클릭 시 닫히게 하는 투명 레이어 */}
             <div className="menu-overlay" onClick={() => setIsMenuOpen(false)}></div>
             <div className="settings-menu">
@@ -61,7 +63,7 @@ const handleScoreReady = (data) => {
               </div>
             </div>
           </>
-      )}
+        )}
       </div>
 
       {/* 2. 중간: 토글 버튼 */}
@@ -121,15 +123,20 @@ const handleScoreReady = (data) => {
           onScoreReady={handleScoreReady}
         />
       </main>
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onClose={() => setIsAuthModalOpen(false)} 
-        targetTitle={selectedPlace} 
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        targetTitle={selectedPlace}
       />
       <MyPageModal
         isOpen={isMyPageOpen}
         onClose={() => setIsMyPageOpen(false)}
         userInfo={userInfo}
+      />
+      <ScorePanel
+        isOpen={isPanelOpen}
+        onClose={() => setIsPanelOpen(false)}
+        scoreData={scoreData}
       />
     </div>
   );
