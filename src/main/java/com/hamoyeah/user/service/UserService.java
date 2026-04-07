@@ -17,10 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
-import java.util.TimeZone;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -80,14 +77,15 @@ public class UserService {
     }
 
     // 유저 로그인
-    public boolean login(LoginDto loginDto){
-        Optional<UserEntity> optionalUser=userRepository.findByEmail(loginDto.getEmail());
-        if(optionalUser.isPresent()){
-            UserEntity userEntity=optionalUser.get();
-            boolean result=passwordEncoder.matches(loginDto.getPassword(), userEntity.getPassword());
-            if(result==true){return true;}
-            else{return false;}
-        } return false;
+    public String login(LoginDto loginDto) {
+        Optional<UserEntity> optionalUser = userRepository.findByEmail(loginDto.getEmail());
+        if (optionalUser.isPresent()) {
+            UserEntity userEntity = optionalUser.get();
+            if (passwordEncoder.matches(loginDto.getPassword(), userEntity.getPassword())) {
+                return createToken(userEntity.getEmail());
+            }
+        }
+        return null;
     }
 
     // 마이 페이지

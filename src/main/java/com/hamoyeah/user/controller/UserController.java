@@ -21,14 +21,13 @@ public class UserController {
 
     // 유저 로그인(이메일, 비밀번호)
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginDto loginDto){
-        boolean result=userService.login(loginDto);
-        if(result) {
-            String token=userService.createToken(loginDto.getEmail());
-            return ResponseEntity.ok()
-                    .header("Authorization","Bearer "+token)
-                    .body(true);
-        } return ResponseEntity.ok(false);
+    public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
+        String token = userService.login(loginDto);
+        if (token != null) {
+            return ResponseEntity.ok(token);
+        } else {
+            return ResponseEntity.status(401).body("아이디 또는 비밀번호가 틀립니다.");
+        }
     }
 
 

@@ -5,16 +5,32 @@ import topBg from '../assets/top_bg.png';
 import bottomBg from '../assets/bottom_bg.png';
 import logo from '../assets/logo.png';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 function LoginPage() {
+  const [loginData, setLoginData]=useState({
+    id:'',
+    password:''
+  });
+
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
 
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    
-    navigate('/main'); 
+    try{
+      const obj={email: id, password: password};
+      const response = await axios.post("http://localhost:8080/user/login", obj);
+    if (response.data) { 
+      localStorage.setItem("token", response.data);
+      alert("로그인 성공");
+      navigate("/main");
+    } 
+  } catch(error){
+      const errorMsg = error.response?.data || "로그인 실패";
+      alert(errorMsg);
+    }
 };
 
   return (
