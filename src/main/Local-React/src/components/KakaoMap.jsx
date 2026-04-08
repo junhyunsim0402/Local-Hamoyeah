@@ -74,36 +74,40 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
             (auth.shopId && auth.shopId === content.shopId)
         );
 
-        const infowindow = new window.kakao.maps.InfoWindow({   // 윈포윈도우(인증창) 설정
+        const infowindow = new window.kakao.maps.InfoWindow({
             content: `
-                <div class="map-info-window">
-                    <div class="info-body">
-                        <strong class="info-title">${title}</strong>                        
-                            ${description
-                    ? `<p class="info-description">${description}</p>`
+        <div class="map-info-window">
+            <div class="info-body">
+                <div class="info-header">
+                    <strong class="info-title">${title}</strong>
+                    ${content.shopId
+                    ? `<span class="local-currency-badge">지역화폐 가맹점</span>`
                     : ''
                 }
+                </div>
+                
+                ${description ? `<p class="info-description">${description}</p>` : ''}
 
-                            <div class="info-action-area">
-                            ${isAuthable
+                <div class="info-action-area">
+                    ${isAuthable
                     ? `<button id="auth-btn-${id}" class="info-auth-btn">인증하기 📸</button>`
                     : `<div class="info-disauth-wrap">
                                 <span class="info-dist-text">📍 50m 밖</span>
                                 <p class="info-notice">인증 불가</p>
-                                </div>`
+                           </div>`
                 }
-                        </div>
-                    </div>
                 </div>
-            `
-        }); // 윈포윈도우(인증창) 설정 끝
+            </div>
+        </div>
+    `
+        });
         infowindowsRef.current.push(infowindow);    // 인증창 저장
 
         window.kakao.maps.event.addListener(marker, 'click', () => {    // 마커 클릭 시 인포윈도우 열기
             isMarkerClickedRef.current = true;
             setTimeout(() => { isMarkerClickedRef.current = false; }, 300);
             if (onMarkerClick) onMarkerClick();
-            
+
             infowindowsRef.current.forEach(iw => iw.close());
             infowindow.open(map, marker);
             setTimeout(() => {
