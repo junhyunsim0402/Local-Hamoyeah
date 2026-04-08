@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './AuthModal.css';
 import axios from 'axios';
 
-function AuthModal({ isOpen, onClose, targetId, targetType }) {
+function AuthModal({ isOpen, onClose, targetId, targetType, targetTitle}) {
     const [preview, setPreview] = useState(null); // 이미지 미리보기 주소
     const [uploadFile, setUploadFile] = useState(null); // 실제 서버에 보낼 파일
 
@@ -26,9 +26,10 @@ function AuthModal({ isOpen, onClose, targetId, targetType }) {
         try{
         const formData=new FormData();
         formData.append("uploadimg", uploadFile);
-        if(targetType=="content"){
+        console.log(targetId, targetType);
+        if(targetType=="CONTENT"){
             formData.append("contentId", Number(targetId));
-        } else if(targetType=="shop"){
+        } else if(targetType=="SHOP"){
             formData.append("shopId", Number(targetId));
         } else{
             alert("ID 정보가 없습니다.");
@@ -58,8 +59,8 @@ function AuthModal({ isOpen, onClose, targetId, targetType }) {
             <div className="auth-modal-content" onClick={(e) => e.stopPropagation()}>
                 <button className="auth-modal-close" onClick={onClose}>&times;</button>
                 
-                <h2 className="auth-modal-title">📸 인증샷 올리기</h2>
-                <p className="auth-modal-subtitle">[{targetId}] </p>
+                <h2 className="auth-modal-title">📸 인증샷 올리기</h2>  
+                <p className="auth-modal-subtitle">[{targetTitle}] </p>
 
                 <div className="auth-upload-section">
                     <label htmlFor="auth-file-input" className="auth-drop-zone">
