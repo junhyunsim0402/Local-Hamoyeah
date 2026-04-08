@@ -128,6 +128,38 @@
    width: 220px;           
   box-sizing: border-box;
 }
+.multiple-list {
+    min-width: 200px;
+    max-height: 300px;
+    display: flex;
+    flex-direction: column;
+}
+
+.info-header {
+    background: #f8f9fa;
+    padding: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    border-bottom: 1px solid #eee;
+}
+
+.info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto; /* ⭐ 스크롤 핵심 */
+    max-height: 200px;
+}
+
+.info-list-item {
+    padding: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.info-list-item:hover { background: #fff9c4; }
+.info-list-item span { font-size: 11px; color: #007bff; float: right; }
 
 .info-body {
   display: flex;
