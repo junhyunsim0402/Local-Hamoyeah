@@ -141,13 +141,23 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                         };
                     });
                 } else {
-                    const cId = content.contentsId ?? content.shopId;
-                    const cTitle = content.contentsTitle ?? content.shopTitle;
-                    const authBtn = document.getElementById(`auth-btn-${cId}`);
+                    const isShop = !!content.shopId; // shopId가 있으면 true
+                    const finalId = isShop ? content.shopId : content.contentsId;
+                    const finalType = isShop ? 'SHOP' : 'CONTENT';
+                    const finalTitle = content.contentsTitle ?? content.shopTitle;
+                    const authBtn = document.getElementById(`auth-btn-${finalId}`);
                     if (authBtn) {
                         authBtn.onclick = () => {
-                            console.log("인증 클릭:", cTitle);
-                            if (onAuthBtnClick) onAuthBtnClick(cTitle);
+                            console.log(`[${finalType}] 인증 클릭 ID: ${finalId}`);
+                            
+
+                            if (onAuthBtnClick) {
+                                onAuthBtnClick({
+                                    id: finalId,
+                                    type: finalType,
+                                    title: finalTitle
+                                });
+                            }
                         };
                     }
                     const backBtn = document.getElementById("btn-back");

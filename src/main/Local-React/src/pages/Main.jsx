@@ -7,7 +7,7 @@ import MyPageModal from '../components/MyPageModal';
 function MainPage() {
   const [viewType, setViewType] = useState('noise');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState('');
+  const [authData, setAuthData] = useState({ id: null, type: '', title: '' });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMyPageOpen, setIsMyPageOpen] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
@@ -16,13 +16,13 @@ function MainPage() {
   const [isPanelOpen, setIsPanelOpen] = useState(false);  // 정주여건 패널 열림/닫힘
   const [scoreData, setScoreData] = useState(null); // 정주여건 점수 데이터
 
-const handleScoreReady = (data) => {
-  setScoreData(data); // 정주여건 점수 저장
-  setIsPanelOpen(true); // 정주여건 패널 성공
-};  // 정주여건 패널 점수 함수
+  const handleScoreReady = (data) => {
+    setScoreData(data); // 정주여건 점수 저장
+    setIsPanelOpen(true); // 정주여건 패널 성공
+  };  // 정주여건 패널 점수 함수
 
-  const openAuthModal = (title) => {
-    setSelectedPlace(title);
+  const openAuthModal = (data) => {
+    setAuthData(data); 
     setIsAuthModalOpen(true);
   };
 
@@ -124,7 +124,9 @@ const handleScoreReady = (data) => {
       <AuthModal 
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)} 
-        targetTitle={selectedPlace} 
+        targetId={authData.id}      
+        targetType={authData.type} 
+        targetTitle={authData.title} 
       />
       <MyPageModal
         isOpen={isMyPageOpen}
