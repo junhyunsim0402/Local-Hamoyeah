@@ -12,7 +12,7 @@ import cultureIcon from '../assets/culture.png';
 import peopleIcon from '../assets/people.png';
 import groupIcon from '../assets/group.png';
 // 함수 시작
-function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onScoreReady }) {       // 함수 시작
+function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onScoreReady, onMarkerClick }) {       // 함수 시작
     const mapRef = useRef(null);        // 지도를 그릴 div를 나중에 찾기 위한 변수, 처음엔 비어있음(null)
     const mapInstanceRef = useRef(null);        // map 객체 저장용
     const clustererRef = useRef(null);          // clusterer 저장용
@@ -21,6 +21,8 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
     const authContentsRef = useRef([]);         // 인증 가능 목록 저장용
     const shopCategoryRef = useRef('0');
     const contentCategoryRef = useRef('0');
+    const isMarkerClickedRef = useRef(false);   // 유저 클릭여부
+
     const groupNearbyContents = (contents) => {
     return contents.reduce((acc, item) => {
         const latFixed = parseFloat(item.lat).toFixed(4); // 약 11m 반경 그룹화
@@ -65,8 +67,8 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
         const title = firstItem.contentsTitle ?? firstItem.shopTitle;
         const iconUrl = isMultiple ? groupIcon : getMarkerIcon(firstItem);
         const markerImage = new window.kakao.maps.MarkerImage(
-            iconUrl, 
-            new window.kakao.maps.Size(32, 48) 
+            iconUrl,
+            new window.kakao.maps.Size(32, 48)
         );
 
         const marker = new window.kakao.maps.Marker({
@@ -76,10 +78,10 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
         });
         if (isMultiple) {
             // 1. 그룹화된 마커는 클러스터러에 넣지 않고 직접 지도에 표시
-            marker.setMap(map); 
+            marker.setMap(map);
         } else {
             // 2. 낱개 마커만 클러스터러에 넣어서 축소 시 숫자로 뭉치게 함
-            clusterer.addMarker(marker); 
+            clusterer.addMarker(marker);
         }
         //marker.setMap(map);
         contentMarkersRef.current.push(marker);
@@ -92,9 +94,9 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
         const title = content.contentsTitle ?? content.shopTitle;
         const id = content.contentsId ?? content.shopId;
         const description = content.contentDes || content.contentsDes || content.rawCategory || "상세 정보 준비 중";
-        
-        const isAuthable = authContentsRef.current.some(auth => 
-            (auth.contentsId && auth.contentsId === content.contentsId) || 
+
+        const isAuthable = authContentsRef.current.some(auth =>
+            (auth.contentsId && auth.contentsId === content.contentsId) ||
             (auth.shopId && auth.shopId === content.shopId)
         );
 
@@ -103,10 +105,11 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                 ${showBack ? `<button id="btn-back" style="border:none; background:none; color:#007bff; cursor:pointer; font-size:12px; margin-bottom:5px; padding:0;">⬅ 목록으로 돌아가기</button>` : ''}
                 <div class="info-body">
                     <strong class="info-title" style="display:block; margin-bottom:5px;">${title}</strong>
+                    ${content.shopId ? `<span class="local-currency-badge">지역화폐 가맹점</span>` : ''}
                     <p class="info-description" style="font-size:13px; color:#666; margin-bottom:10px;">${description}</p>
                     <div class="info-action-area">
-                        ${isAuthable 
-                            ? `<button id="auth-btn-${id}" class="info-auth-btn">인증하기 📸</button>` 
+                        ${isAuthable
+                            ? `<button id="auth-btn-${id}" class="info-auth-btn">인증하기 📸</button>`
                             : `<div class="info-disauth-wrap"><span class="info-dist-text">📍 50m 밖 (인증 불가)</span></div>`
                         }
                     </div>
@@ -232,7 +235,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
         contentMarkersRef.current.forEach(m => m.setMap(null));
         contentMarkersRef.current = [];
         if (clusterer) {
-            clusterer.clear(); 
+            clusterer.clear();
         }
         infowindowsRef.current.forEach(iw => iw.close());
         infowindowsRef.current = [];
@@ -313,7 +316,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
 
                             // 1. 기존 마커 및 클러스터러 비우기
                             if (clickMaker) { clickMaker.setMap(null); }
-                            clearMarkers(clusterer); 
+                            clearMarkers(clusterer);
 
                             // 2. 클릭 지점 마커 표시
                             clickMaker = new window.kakao.maps.Marker({
@@ -332,8 +335,10 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                             });
                             const data = await response.json();
                             if(onScoreReady) onScoreReady(data);
-                            
+
                             console.log("클릭 위치 갱신 완료:", lat, lng);
+                            console.log("결과", data);
+                            if (onScoreReady) onScoreReady(data);    // 점수데이터가 있으면 전달
                         });
                     },
                     () => { // GPS 실패
@@ -379,7 +384,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                             });
                             clickMaker.setMap(map);
 
-                            // 3. 공통 함수 호출 
+                            // 3. 공통 함수 호출
                             fetchAndRenderMarkers(lat, lng, map, clusterer);
 
                             // 4. 정주여건 점수 데이터 가져오기
@@ -390,7 +395,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                             });
                             const data = await response.json();
                             if(onScoreReady) onScoreReady(data);
-                            
+
                             console.log("클릭 위치 갱신 완료:", lat, lng);
                         });
                     }   // GPS실패 함수 끝
@@ -399,7 +404,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
         };      // script.onload함수 끝
         document.head.appendChild(script);
     }, [viewType]);     // useEffect함수 끝
-    
+
     // 카테고리 변경 시 마커 업데이트 useEffect
     useEffect(() => {
         shopCategoryRef.current = shopCategory;

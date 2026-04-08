@@ -111,7 +111,6 @@ public class SafetyService {
                     requestDto.getLat(),requestDto.getLng(),
                     nosie.getLatitude(),nosie.getLongitude()
             );
-            System.out.println("측정된 소음 지점과의 거리 = " + nosieDist);
             if(nosieDist<noiseMinDist){
                 noiseMinDist=nosieDist;
                 nearNoise=nosie;

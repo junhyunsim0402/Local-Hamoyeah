@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import './AuthModal.css';
+import axios from 'axios';
 
-function AuthModal({ isOpen, onClose, targetTitle }) {
+function AuthModal({ isOpen, onClose, targetId }) {
     const [preview, setPreview] = useState(null); // 이미지 미리보기 주소
     const [uploadFile, setUploadFile] = useState(null); // 실제 서버에 보낼 파일
 
@@ -17,15 +18,32 @@ function AuthModal({ isOpen, onClose, targetTitle }) {
         }
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!uploadFile) {
-            alert("인증샷을 찍거나 선택해 주세요! 📸");
+            alert("인증샷을 선택해 주세요.");
             return;
         }
-        // TODO: 여기서 백엔드로 전송하는 로직 (Axios 등)
-        console.log("제출 파일:", uploadFile);
-        alert(`${targetTitle} 인증샷이 제출되었습니다! 관리자 승인을 기다려주세요.`);
-        onClose();
+        try{
+        const formData=new FormData();
+        formData.append("uploadimg", uploadFile);
+        formData.append("contentId", Number(targetId));
+
+        const token=localStorage.getItem("token");
+        if(!token){alert("로그인이 필요합니다."); return;}
+        const authHeader=token.startsWith("Bearer ")?token:`Bearer ${token}`;
+        const response=await axios.post("http://localhost:8080/userproof/verify", formData, {
+            headers: {
+                "Authorization": authHeader,
+            }
+        });
+        if(response.data){
+            alert("인증샷이 제출되었습니다. 관리자 승인을 기다려주세요.");
+            onClose();
+            
+        }
+        }catch (error) {
+            alert("에러 발생: " + (error.response?.data || "제출 실패"));
+        }
     };
 
     return (
@@ -34,7 +52,7 @@ function AuthModal({ isOpen, onClose, targetTitle }) {
                 <button className="auth-modal-close" onClick={onClose}>&times;</button>
                 
                 <h2 className="auth-modal-title">📸 인증샷 올리기</h2>
-                <p className="auth-modal-subtitle">[{targetTitle}] </p>
+                <p className="auth-modal-subtitle">[{targetId}] </p>
 
                 <div className="auth-upload-section">
                     <label htmlFor="auth-file-input" className="auth-drop-zone">

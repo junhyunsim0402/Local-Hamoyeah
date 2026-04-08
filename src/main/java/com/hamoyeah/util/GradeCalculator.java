@@ -45,10 +45,10 @@ public class GradeCalculator {
     }
     public Map<String,Object> noNoiseScore(int pm10,int pm25){  // 반경 500미터 안에 소음 측정한 데이터가 없을시
         Map<String,Object> minusResult=new HashMap<>();
+        System.out.println("pm10 = " + pm10);
+        System.out.println("pm25 = " + pm25);
         int pm10Score = pm10 <= 30 ? 0 : pm10 <= 80 ? 10 : pm10 <= 150 ? 15 : 20;  // 환경부 공식 기준(미세먼지)
         int pm25Score = pm25 <= 15 ? 0 : pm25 <= 35 ? 10 : pm25 <= 75 ? 15 : 20;  // 초미세먼지
-        System.out.println("pm10Score = " + pm10Score);
-        System.out.println("pm25Score = " + pm25Score);
         minusResult.put("pm10Score",pm10Score); minusResult.put("pm25Score",pm25Score);
         return minusResult;
     }
