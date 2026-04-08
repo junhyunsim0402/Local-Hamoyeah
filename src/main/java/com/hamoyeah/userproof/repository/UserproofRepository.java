@@ -17,7 +17,8 @@ public interface UserproofRepository extends JpaRepository<UserproofEntity, Inte
     List<UserproofEntity> findByUserEntity_Email(String email);
     @Query("SELECT p FROM UserproofEntity p " +
             "JOIN FETCH p.userEntity " +
-            "JOIN FETCH p.contentsEntity " +
+            "LEFT JOIN FETCH p.contentsEntity " +
+            "LEFT JOIN FETCH p.shopEntity " +
             "ORDER BY p.createdAt DESC")
     List<UserproofEntity> findAllWithDetails();
 }
