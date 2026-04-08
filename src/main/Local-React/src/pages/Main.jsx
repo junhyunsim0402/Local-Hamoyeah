@@ -135,6 +135,7 @@ function MainPage() {
           shopCategory={shopCategory}
           contentCategory={contentCategory}
           onScoreReady={handleScoreReady}
+          onMarkerClick={() => setToastVisible(false)}
         />
       </main>
       <AuthModal
