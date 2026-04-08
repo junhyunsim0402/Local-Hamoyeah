@@ -61,8 +61,10 @@ function AdminPage() {
     const filteredProofs = proofs
         .filter(p => selectedStatus === '전체' || p.status === selectedStatus)
         .sort((a, b) => {
-            if (sortOrder === '최신순') return new Date(b.createdAt) - new Date(a.createdAt);
-            return new Date(a.createdAt) - new Date(b.createdAt);
+            const dateA = new Date(a.createdAt);
+            const dateB = new Date(b.createdAt);
+            if (sortOrder === '최신순') return dateB - dateA;
+            return dateA - dateB;
         });
 
     
@@ -103,7 +105,7 @@ function AdminPage() {
                 {filteredProofs.length > 0 ? (
                     filteredProofs.map((proof, index) => (
                         <ProofCard 
-                            key={proof.proofId} // id -> proofId
+                            key={proof.proofId}
                             proof={proof} 
                             index={index} 
                             onReview={() => setSelectedProof(proof)} 
