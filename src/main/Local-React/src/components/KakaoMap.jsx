@@ -10,6 +10,7 @@ import pharmacyIcon from '../assets/pharmacy.png';
 import buildingIcon from '../assets/building.png';
 import cultureIcon from '../assets/culture.png';
 import peopleIcon from '../assets/people.png';
+import groupIcon from '../assets/group.png';
 // 함수 시작
 function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onScoreReady, onMarkerClick }) {       // 함수 시작
     const mapRef = useRef(null);        // 지도를 그릴 div를 나중에 찾기 위한 변수, 처음엔 비어있음(null)
@@ -68,14 +69,24 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
         const markerImage = iconUrl
         ? new window.kakao.maps.MarkerImage(iconUrl, new window.kakao.maps.Size(30, 45))
         : null;
+        const iconUrl = isMultiple ? groupIcon : getMarkerIcon(firstItem);
+        const markerImage = new window.kakao.maps.MarkerImage(
+            iconUrl,
+            new window.kakao.maps.Size(32, 48)
+        );
 
         const marker = new window.kakao.maps.Marker({
-        position: new window.kakao.maps.LatLng(firstItem.lat, firstItem.lng),
-        title: isMultiple ? `${firstItem.contentsTitle ?? firstItem.shopTitle} 외 ${items.length - 1}건` : (firstItem.contentsTitle ?? firstItem.shopTitle),
-        image: markerImage
-    });
-
-        clusterer.addMarker(marker);
+            position: new window.kakao.maps.LatLng(firstItem.lat, firstItem.lng),
+            title: isMultiple ? `${firstItem.contentsTitle ?? firstItem.shopTitle} 외 ${items.length - 1}건` : (firstItem.contentsTitle ?? firstItem.shopTitle),
+            image: markerImage
+        });
+        if (isMultiple) {
+            // 1. 그룹화된 마커는 클러스터러에 넣지 않고 직접 지도에 표시
+            marker.setMap(map);
+        } else {
+            // 2. 낱개 마커만 클러스터러에 넣어서 축소 시 숫자로 뭉치게 함
+            clusterer.addMarker(marker);
+        }
         //marker.setMap(map);
         contentMarkersRef.current.push(marker);
 

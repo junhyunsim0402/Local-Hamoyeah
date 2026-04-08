@@ -61,8 +61,8 @@ function AdminPage() {
     const filteredProofs = proofs
         .filter(p => selectedStatus === '전체' || p.status === selectedStatus)
         .sort((a, b) => {
-            if (sortOrder === '최신순') return new Date(b.created_at) - new Date(a.created_at);
-            return new Date(a.created_at) - new Date(b.created_at);
+            if (sortOrder === '최신순') return new Date(b.createdAt) - new Date(a.createdAt);
+            return new Date(a.createdAt) - new Date(b.createdAt);
         });
 
     
