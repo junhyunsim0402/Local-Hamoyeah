@@ -22,6 +22,16 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
     const contentCategoryRef = useRef('0');
     const isMarkerClickedRef = useRef(false);   // 유저 클릭여부
 
+    const groupNearbyContents = (contents) => {
+    return contents.reduce((acc, item) => {
+        const latFixed = parseFloat(item.lat).toFixed(4); // 약 11m 반경 그룹화
+        const lngFixed = parseFloat(item.lng).toFixed(4);
+        const key = `${latFixed}_${lngFixed}`;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(item);
+        return acc;
+    }, {});
+};
     const getMarkerIcon = (content) => {
         if (content.categoryId) {
             const contentIconMap = {
@@ -48,79 +58,117 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
     };
 
     // 마커 생성 공통 함수
-    const createMarker = (content, map, clusterer) => {
+    const createMarker = (contentGroup, map, clusterer) => {
+        const items = Array.isArray(contentGroup) ? contentGroup : [contentGroup];
+        const firstItem = items[0];
+        const isMultiple = items.length > 1;
+
+        const title = firstItem.contentsTitle ?? firstItem.shopTitle;
+        const iconUrl = isMultiple ? cultureIcon : getMarkerIcon(firstItem);
+        const markerImage = iconUrl
+        ? new window.kakao.maps.MarkerImage(iconUrl, new window.kakao.maps.Size(30, 45))
+        : null;
+
+        const marker = new window.kakao.maps.Marker({
+        position: new window.kakao.maps.LatLng(firstItem.lat, firstItem.lng),
+        title: isMultiple ? `${firstItem.contentsTitle ?? firstItem.shopTitle} 외 ${items.length - 1}건` : (firstItem.contentsTitle ?? firstItem.shopTitle),
+        image: markerImage
+    });
+
+        clusterer.addMarker(marker);
+        //marker.setMap(map);
+        contentMarkersRef.current.push(marker);
+
+        const infowindow = new window.kakao.maps.InfoWindow({ zIndex: 10 });
+        infowindowsRef.current.push(infowindow);
+
+        // [상세 보기 HTML 생성]
+        const renderDetail = (content, showBack = false) => {
         const title = content.contentsTitle ?? content.shopTitle;
         const id = content.contentsId ?? content.shopId;
         const description = content.contentDes || content.contentsDes || content.rawCategory || "상세 정보 준비 중";
-        const iconUrl = getMarkerIcon(content);     // 아이콘 추가
-        const markerImage = iconUrl
-            ? new window.kakao.maps.MarkerImage(iconUrl, new window.kakao.maps.Size(27, 44))
-            : null;
-        const marker = new window.kakao.maps.Marker({
-            position: new window.kakao.maps.LatLng(content.lat, content.lng),
-            title: title,
-            image: markerImage
-        });
 
-        // 마커를 지도에 직접 추가하지 않고 클러스터러에 추가합니다
-        // 클러스터러가 지도 레벨에 따라 자동으로 마커를 묶어서 표시합니다
-        clusterer.addMarker(marker);    // 인포윈도우를 위해 지도에도 등록
-        marker.setMap(map);
-        contentMarkersRef.current.push(marker);
-
-        // 반경이내에 있으면 인증 가능
         const isAuthable = authContentsRef.current.some(auth =>
             (auth.contentsId && auth.contentsId === content.contentsId) ||
             (auth.shopId && auth.shopId === content.shopId)
         );
 
-        const infowindow = new window.kakao.maps.InfoWindow({
-            content: `
-        <div class="map-info-window">
-            <div class="info-body">
-                <div class="info-header">
-                    <strong class="info-title">${title}</strong>
-                    ${content.shopId
-                    ? `<span class="local-currency-badge">지역화폐 가맹점</span>`
-                    : ''
-                }
+        return `
+            <div class="map-info-window">
+                ${showBack ? `<button id="btn-back" style="border:none; background:none; color:#007bff; cursor:pointer; font-size:12px; margin-bottom:5px; padding:0;">⬅ 목록으로 돌아가기</button>` : ''}
+                <div class="info-body">
+                    <strong class="info-title" style="display:block; margin-bottom:5px;">${title}</strong>
+                    <p class="info-description" style="font-size:13px; color:#666; margin-bottom:10px;">${description}</p>
+                    <div class="info-action-area">
+                        ${isAuthable
+                            ? `<button id="auth-btn-${id}" class="info-auth-btn">인증하기 📸</button>`
+                            : `<div class="info-disauth-wrap"><span class="info-dist-text">📍 50m 밖 (인증 불가)</span></div>`
+                        }
+                    </div>
                 </div>
-                
-                ${description ? `<p class="info-description">${description}</p>` : ''}
+            </div>`;
+    };
 
-                <div class="info-action-area">
-                    ${isAuthable
-                    ? `<button id="auth-btn-${id}" class="info-auth-btn">인증하기 📸</button>`
-                    : `<div class="info-disauth-wrap">
-                                <span class="info-dist-text">📍 50m 밖</span>
-                                <p class="info-notice">인증 불가</p>
-                           </div>`
-                }
+        // [리스트 HTML 생성]
+        const renderList = () => `
+            <div class="map-info-window multiple-list" style="width:220px;">
+                <div class="info-header" style="background:#f8f9fa; padding:10px; font-size:13px; border-bottom:1px solid #eee;">
+                    📍 이 근처에 <strong>${items.length}개</strong>의 장소가 있어요
                 </div>
-            </div>
-        </div>
-    `
-        });
-        infowindowsRef.current.push(infowindow);    // 인증창 저장
+                <ul class="info-list" style="list-style:none; padding:0; margin:0; max-height:180px; overflow-y:auto;">
+                    ${items.map((item, idx) => `
+                        <li class="info-list-item" id="item-${idx}" style="padding:10px; border-bottom:1px solid #f0f0f0; cursor:pointer;">
+                            <div style="font-weight:bold; font-size:14px;">${item.contentsTitle ?? item.shopTitle}</div>
+                            <div style="font-size:11px; color:#888;">${item.rawCategory || '상세보기 >'}</div>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>`;
 
-        window.kakao.maps.event.addListener(marker, 'click', () => {    // 마커 클릭 시 인포윈도우 열기
-            isMarkerClickedRef.current = true;
-            setTimeout(() => { isMarkerClickedRef.current = false; }, 300);
-            if (onMarkerClick) onMarkerClick();
-
-            infowindowsRef.current.forEach(iw => iw.close());
-            infowindow.open(map, marker);
+        const setupEvents = (content, mode) => {
             setTimeout(() => {
-                const btn = document.getElementById(`auth-btn-${id}`);
-                if (btn) {
-                    btn.onclick = async () => {
-                        console.log("인증하기 클릭:", id);
-                        if (onAuthBtnClick) onAuthBtnClick(id);
-                    };
+                if (mode === 'list') {
+                    items.forEach((item, idx) => {
+                        const el = document.getElementById(`item-${idx}`);
+                        if (el) el.onclick = () => {
+                            infowindow.setContent(renderDetail(item, true));
+                            setupEvents(item, 'detail');
+                        };
+                    });
+                } else {
+                    const cId = content.contentsId ?? content.shopId;
+                    const cTitle = content.contentsTitle ?? content.shopTitle;
+                    const authBtn = document.getElementById(`auth-btn-${cId}`);
+                    if (authBtn) {
+                        authBtn.onclick = () => {
+                            console.log("인증 클릭:", cTitle);
+                            if (onAuthBtnClick) onAuthBtnClick(cTitle);
+                        };
+                    }
+                    const backBtn = document.getElementById("btn-back");
+                    if (backBtn) {
+                        backBtn.onclick = () => {
+                            infowindow.setContent(renderList());
+                            setupEvents(null, 'list');
+                        };
+                    }
                 }
             }, 100);
-        }); // 인증 함수 끝
-    };  // 마커 생성 함수 끝
+        };
+
+        window.kakao.maps.event.addListener(marker, 'click', () => {
+            infowindowsRef.current.forEach(iw => iw.close());
+            if (isMultiple) {
+                infowindow.setContent(renderList());
+                infowindow.open(map, marker);
+                setupEvents(null, 'list');
+            } else {
+                infowindow.setContent(renderDetail(firstItem));
+                infowindow.open(map, marker);
+                setupEvents(firstItem, 'detail');
+            }
+        });
+    };
 
     // 카테고리 기준 마커 호출 공통 함수
     const fetchAndRenderMarkers = async (lat, lng, map, clusterer) => {
@@ -154,7 +202,12 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
 
         Promise.all(fetchPromises).then(results => {
             const allContents = results.flat();
-            allContents.forEach(content => createMarker(content, map, clusterer));
+
+            // 그룹화 로직 적용
+            const grouped = groupNearbyContents(allContents);
+            Object.values(grouped).forEach(group => {
+                createMarker(group, map, clusterer);
+            });
         });
     };
 
@@ -163,7 +216,9 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
     const clearMarkers = (clusterer) => {
         contentMarkersRef.current.forEach(m => m.setMap(null));
         contentMarkersRef.current = [];
-        clusterer.clear();
+        if (clusterer) {
+            clusterer.clear();
+        }
         infowindowsRef.current.forEach(iw => iw.close());
         infowindowsRef.current = [];
     };
@@ -203,7 +258,8 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                             map: map,           // 마커들을 클러스터로 관리하고 표시할 지도 객체
                             averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
                             minLevel: 2,        // 클러스터 할 최소 지도 레벨
-                            disableClickZoom: true // 클러스터 마커를 클릭했을 때 지도가 자동 확대되지 않도록 설정
+                            disableClickZoom: true, // 클러스터 마커를 클릭했을 때 지도가 자동 확대되지 않도록 설정
+                            calculator: [10, 30, 50],
                         });
                         clustererRef.current = clusterer;
 
@@ -221,8 +277,11 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                             fetch(`http://localhost:8080/api/safety/auth-contents?lat=${currentlat}&lng=${currentlng}&radius=50`).then(res => res.json())
                         ]).then(([contents, auth]) => {
                             authContentsRef.current = auth;
-                            contents.forEach(content => {
-                                createMarker(content, map, clusterer);
+
+                            // 그룹화 로직 적용
+                            const grouped = groupNearbyContents(contents);
+                            Object.values(grouped).forEach(group => {
+                                createMarker(group, map, clusterer);
                             });
                         });
 
@@ -233,28 +292,33 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                         maker.setMap(map);
 
                         let clickMaker = null;
-                        window.kakao.maps.event.addListener(map, 'click', async (mouseEvent) => {   // 사용자가 클릭했을 때 적용되는 함수
+                        window.kakao.maps.event.addListener(map, 'click', async (mouseEvent) => {
                             const lat = mouseEvent.latLng.getLat();
                             const lng = mouseEvent.latLng.getLng();
 
-                            if (isMarkerClickedRef.current) return;   // 마커 클릭하면 스킵
-                            if (clickMaker) { clickMaker.setMap(null); }    // 기존 클릭 마커 제거
+                            // 1. 기존 마커 및 클러스터러 비우기
+                            if (clickMaker) { clickMaker.setMap(null); }
+                            clearMarkers(clusterer);
 
-                            clearMarkers(clusterer);    // 공통 함수 사용
-
+                            // 2. 클릭 지점 마커 표시
                             clickMaker = new window.kakao.maps.Marker({
                                 position: new window.kakao.maps.LatLng(lat, lng),
                             });
                             clickMaker.setMap(map);
 
+                            // 3. 공통 함수 호출
                             fetchAndRenderMarkers(lat, lng, map, clusterer);
 
+                            // 4. 정주여건 점수 데이터 가져오기
                             const response = await fetch("http://localhost:8080/api/safety/", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ lat, lng, radius: 500 }), // 니가 말한 위도, 경도, 반경
+                                body: JSON.stringify({ lat, lng, radius: 500 }),
                             });
                             const data = await response.json();
+                            if(onScoreReady) onScoreReady(data);
+
+                            console.log("클릭 위치 갱신 완료:", lat, lng);
                             console.log("결과", data);
                             if (onScoreReady) onScoreReady(data);    // 점수데이터가 있으면 전달
                         });
@@ -277,13 +341,9 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                         fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`)
                             .then(res => res.json())
                             .then(contents => {
-                                contents.forEach(content => {
-                                    const marker = new window.kakao.maps.Marker({
-                                        position: new window.kakao.maps.LatLng(content.lat, content.lng),
-                                        title: content.contentsTitle
-                                    });
-                                    marker.setMap(map);
-                                    contentMarkersRef.current.push(marker);
+                                const grouped = groupNearbyContents(contents);
+                                Object.values(grouped).forEach(group => {
+                                    createMarker(group, map, clusterer);
                                 });
                             });
 
@@ -296,32 +356,29 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                             const lat = mouseEvent.latLng.getLat();
                             const lng = mouseEvent.latLng.getLng();
 
+                            // 1. 기존 마커 및 클러스터러 비우기
                             if (clickMaker) { clickMaker.setMap(null); }
+                            clearMarkers(clusterer);
 
-                            clearMarkers(clusterer);    // 공통 함수 사용
-
+                            // 2. 클릭 지점 마커 표시
                             clickMaker = new window.kakao.maps.Marker({
                                 position: new window.kakao.maps.LatLng(lat, lng),
                             });
                             clickMaker.setMap(map);
 
+                            // 3. 공통 함수 호출
+                            fetchAndRenderMarkers(lat, lng, map, clusterer);
+
+                            // 4. 정주여건 점수 데이터 가져오기
                             const response = await fetch("http://localhost:8080/api/safety/", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({ lat, lng, radius: 500 }),
                             });
-                            const response2 = await fetch(`http://localhost:8080/api/safety/contents?lat=${lat}&lng=${lng}&radius=1000`);
-                            const contents = await response2.json();
-                            contents.forEach(content => {
-                                const marker = new window.kakao.maps.Marker({
-                                    position: new window.kakao.maps.LatLng(content.lat, content.lng),
-                                    title: content.contentsTitle
-                                });
-                                marker.setMap(map);
-                                contentMarkersRef.current.push(marker);
-                            });
+                            const data = await response.json();
+                            if(onScoreReady) onScoreReady(data);
 
-                            console.log("클릭한 위치 - 위도:", lat, "경도:", lng);
+                            console.log("클릭 위치 갱신 완료:", lat, lng);
                         });
                     }   // GPS실패 함수 끝
                 );  // 위치함수 끝
