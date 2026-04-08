@@ -39,6 +39,7 @@ function AuthModal({ isOpen, onClose, targetId }) {
         if(response.data){
             alert("인증샷이 제출되었습니다. 관리자 승인을 기다려주세요.");
             onClose();
+            
         }
         }catch (error) {
             alert("에러 발생: " + (error.response?.data || "제출 실패"));

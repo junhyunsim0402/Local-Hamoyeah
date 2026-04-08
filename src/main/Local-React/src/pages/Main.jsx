@@ -143,6 +143,7 @@ function MainPage() {
         onClose={() => {
           setIsPanelOpen(false);
           setToastVisible(false); // 패널 닫으면 토스트도 숨김
+          setIsAuthModalOpen(false);
         }}
         targetId={selectedPlaceId}
       />
