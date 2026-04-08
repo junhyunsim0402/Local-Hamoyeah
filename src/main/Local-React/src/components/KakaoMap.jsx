@@ -65,10 +65,6 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
         const isMultiple = items.length > 1;
 
         const title = firstItem.contentsTitle ?? firstItem.shopTitle;
-        const iconUrl = isMultiple ? cultureIcon : getMarkerIcon(firstItem);
-        const markerImage = iconUrl
-        ? new window.kakao.maps.MarkerImage(iconUrl, new window.kakao.maps.Size(30, 45))
-        : null;
         const iconUrl = isMultiple ? groupIcon : getMarkerIcon(firstItem);
         const markerImage = new window.kakao.maps.MarkerImage(
             iconUrl,
