@@ -105,6 +105,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                 ${showBack ? `<button id="btn-back" style="border:none; background:none; color:#007bff; cursor:pointer; font-size:12px; margin-bottom:5px; padding:0;">⬅ 목록으로 돌아가기</button>` : ''}
                 <div class="info-body">
                     <strong class="info-title" style="display:block; margin-bottom:5px;">${title}</strong>
+                    ${content.shopId ? `<span class="local-currency-badge">지역화폐 가맹점</span>` : ''}
                     <p class="info-description" style="font-size:13px; color:#666; margin-bottom:10px;">${description}</p>
                     <div class="info-action-area">
                         ${isAuthable
