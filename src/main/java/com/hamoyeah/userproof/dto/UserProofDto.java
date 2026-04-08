@@ -1,6 +1,7 @@
 package com.hamoyeah.userproof.dto;
 
 import com.hamoyeah.contents.Entity.ContentsEntity;
+import com.hamoyeah.contents.Entity.ShopEntity;
 import com.hamoyeah.user.entity.UserEntity;
 import com.hamoyeah.userproof.entity.UserproofEntity;
 import lombok.AllArgsConstructor;
@@ -27,13 +28,15 @@ public class UserProofDto {
 
     private String nickname;
     private String contentTitle;
+    private Integer shopId;
     private String adminNickname;
 
-    public UserproofEntity toEntity(UserEntity user, ContentsEntity content) {
+    public UserproofEntity toEntity(UserEntity user, ContentsEntity content, ShopEntity shop) {
         return UserproofEntity.builder()
                 .imageUrl(this.imageUrl)
                 .userEntity(user)
                 .contentsEntity(content)
+                .shopEntity(shop)
                 .status("대기중") // 처음은 고정
                 .build();
     }

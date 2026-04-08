@@ -1,6 +1,7 @@
 package com.hamoyeah.userproof.entity;
 
 import com.hamoyeah.contents.Entity.ContentsEntity;
+import com.hamoyeah.contents.Entity.ShopEntity;
 import com.hamoyeah.user.entity.UserEntity;
 import com.hamoyeah.userproof.dto.UserProofDto;
 import jakarta.persistence.*;
@@ -24,8 +25,12 @@ public class UserproofEntity extends BaseTime {
     private UserEntity userEntity;
 
     @ManyToOne
-    @JoinColumn(name = "content_id", nullable = false)
+    @JoinColumn(name = "content_id", nullable = true)
     private ContentsEntity contentsEntity;
+
+    @ManyToOne
+    @JoinColumn(name="shop_id", nullable = true)
+    private ShopEntity shopEntity;
 
     @Column(name = "image_url", nullable = false, length = 255)
     private String imageUrl;
@@ -44,18 +49,28 @@ public class UserproofEntity extends BaseTime {
     private LocalDateTime reviewedAt;
 
     public UserProofDto toDto() {
+        String targetTitle="알 수 없음";
+        Integer targetId=null;
+        if(contentsEntity!=null){
+            targetId=this.contentsEntity.getContentId();
+            targetTitle=this.contentsEntity.getContentTitle();
+        } else if(shopEntity!=null){
+            targetId=this.shopEntity.getShopId();
+            targetTitle=this.shopEntity.getName();
+        }
+
         return UserProofDto.builder()
                 .proofId(this.proofId)
-                .contentId(this.contentsEntity.getContentId())
                 .imageUrl(this.imageUrl)
                 .status(this.status)
                 .createdAt(this.getCreatedAt())
                 .userId(this.userEntity != null ? this.userEntity.getUserId() : null)
                 .adminId(this.adminEntity != null ? this.adminEntity.getUserId() : null)
                 .rejectReason(this.rejectReason)
+                .contentId(targetId)
+                .contentTitle(targetTitle)
                 .reviewedAt(this.reviewedAt)
                 .nickname(this.userEntity.getNickname())
-                .contentTitle(this.contentsEntity.getContentTitle())
                 .adminNickname(this.adminEntity != null ? this.adminEntity.getNickname() : null)
                 .build();
     }

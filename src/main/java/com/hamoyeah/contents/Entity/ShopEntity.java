@@ -17,7 +17,7 @@ public class ShopEntity implements LocationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "shop_id")
-    private Long shopId;
+    private Integer shopId;
 
     @Column(nullable = false)
     private String name;        // 가맹점명

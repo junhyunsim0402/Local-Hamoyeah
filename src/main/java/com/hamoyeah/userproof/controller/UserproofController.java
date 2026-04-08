@@ -4,6 +4,7 @@ import com.hamoyeah.user.entity.UserEntity;
 import com.hamoyeah.user.repository.UserRepository;
 import com.hamoyeah.user.service.UserService;
 import com.hamoyeah.userproof.dto.UserProofDto;
+import com.hamoyeah.userproof.entity.UserproofEntity;
 import com.hamoyeah.userproof.service.UserproofService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -35,7 +36,12 @@ public class UserproofController {
         if(email==null){
             return ResponseEntity.status(401).body("유효하지 않은 토큰입니다.");
         }
-        return ResponseEntity.ok(userproofService.verify(email, userProofDto));
+        UserproofEntity result=userproofService.verify(email, userProofDto);
+        if(result!=null){
+            return ResponseEntity.ok("인증 사진이 등록되었습니다.");
+        } else{
+            return ResponseEntity.status(500).body("인증 사진 등록에 실패했습니다.");
+        }
     }
 
     // 관리자 승인/반려 기능

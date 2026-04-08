@@ -1,7 +1,9 @@
 package com.hamoyeah.userproof.service;
 
 import com.hamoyeah.contents.Entity.ContentsEntity;
+import com.hamoyeah.contents.Entity.ShopEntity;
 import com.hamoyeah.contents.repository.ContentsRepository;
+import com.hamoyeah.contents.repository.ShopRepository;
 import com.hamoyeah.user.entity.UserEntity;
 import com.hamoyeah.user.repository.UserRepository;
 import com.hamoyeah.userproof.dto.UserProofDto;
@@ -25,35 +27,31 @@ public class UserproofService {
     private final UserproofRepository userproofRepository;
     private final UserRepository userRepository;
     private final ContentsRepository contentsRepository;
+    private final ShopRepository shopRepository;
     private final FileService fileService;
 
     // 유저 사진 등록 기능
     public UserproofEntity verify(String email, UserProofDto userProofDto) {
-        if (userProofDto == null || userProofDto.getContentId() == null || userProofDto.getUploadimg() == null) {
-            System.out.println("오류: 전달된 데이터나 ID, 파일이 null입니다.");
-            return null;
-        }
-        Optional<UserEntity> userproof = userRepository.findByEmail(email);
-        Optional<ContentsEntity> contentproof = contentsRepository.findById(userProofDto.getContentId());
+        UserEntity user = userRepository.findByEmail(email).get();
+        ContentsEntity content = null;
+        ShopEntity shop = null;
 
-        if (userproof.isPresent() && contentproof.isPresent()) {
-            String filename = fileService.upload(userProofDto.getUploadimg());
-            if (filename != null) {
-                UserproofEntity entity = UserproofEntity.builder()
-                        .userEntity(userproof.get())
-                        .contentsEntity(contentproof.get())
-                        .imageUrl(filename)
-                        .status("대기중")
-                        .build();
-                return userproofRepository.save(entity);
-            } else {
-                System.out.println("오류: 파일 업로드에 실패했습니다.");
-                return null;
-            }
-        } else {
-            System.out.println("오류: 유저 또는 콘텐츠 정보를 찾을 수 없습니다.");
-            return null;
+        if (userProofDto.getContentId()!=null) {
+            // contentId 전달 됐을 때
+            content = contentsRepository.findById(userProofDto.getContentId()).get();
+        } else if (userProofDto.getShopId()!=null) {
+            // shopId로 전달 됐을 때
+            shop = shopRepository.findById(userProofDto.getShopId()).get();
         }
+        String filename = fileService.upload(userProofDto.getUploadimg());
+        UserproofEntity entity = UserproofEntity.builder()
+                .userEntity(user)
+                .contentsEntity(content)
+                .shopEntity(shop)
+                .imageUrl(filename)
+                .status("대기중")
+                .build();
+        return userproofRepository.save(entity);
     }
 
     // 관리자 승인/반려 기능

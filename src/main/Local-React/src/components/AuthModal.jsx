@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './AuthModal.css';
 import axios from 'axios';
 
-function AuthModal({ isOpen, onClose, targetId }) {
+function AuthModal({ isOpen, onClose, targetId, targetType }) {
     const [preview, setPreview] = useState(null); // 이미지 미리보기 주소
     const [uploadFile, setUploadFile] = useState(null); // 실제 서버에 보낼 파일
 
@@ -26,8 +26,14 @@ function AuthModal({ isOpen, onClose, targetId }) {
         try{
         const formData=new FormData();
         formData.append("uploadimg", uploadFile);
-        formData.append("contentId", Number(targetId));
-
+        if(targetType=="content"){
+            formData.append("contentId", Number(targetId));
+        } else if(targetType=="shop"){
+            formData.append("shopId", Number(targetId));
+        } else{
+            alert("ID 정보가 없습니다.");
+            return;
+        }
         const token=localStorage.getItem("token");
         if(!token){alert("로그인이 필요합니다."); return;}
         const authHeader=token.startsWith("Bearer ")?token:`Bearer ${token}`;
@@ -36,14 +42,15 @@ function AuthModal({ isOpen, onClose, targetId }) {
                 "Authorization": authHeader,
             }
         });
-        if(response.data){
-            alert("인증샷이 제출되었습니다. 관리자 승인을 기다려주세요.");
+        if (response.status === 200) {
+            alert("인증샷이 제출되었습니다!");
             onClose();
-            
         }
-        }catch (error) {
-            alert("에러 발생: " + (error.response?.data || "제출 실패"));
-        }
+    } catch (error) {
+        const serverError = error.response?.data;
+        console.error("서버 에러 상세:", error.response);
+        alert("에러 발생: " + (typeof serverError === 'string' ? serverError : "제출 실패"));
+    }
     };
 
     return (
