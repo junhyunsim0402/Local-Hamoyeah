@@ -9,9 +9,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.netty.http.client.HttpClient;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 @Slf4j
@@ -21,7 +24,14 @@ import java.util.Map;
 public class ContentsService {
     private final ContentsRepository contentsRepository;
     private final CategoryRepository categoryRepository;
-    private final WebClient webClient = WebClient.builder().build();
+    private final WebClient webClient = WebClient.builder()
+            .clientConnector(
+                    new ReactorClientHttpConnector(
+                            HttpClient.create()
+                                    .responseTimeout(Duration.ofSeconds(10))
+                    )
+            )
+            .build();
     private final GeocodingService geocodingService;
 
     @Value("${api.service.key}")
@@ -151,6 +161,7 @@ public class ContentsService {
                     .address(String.valueOf(item.get("address")))
                     .latitude(parseSafeDouble(item.get("xposition")))
                     .longitude(parseSafeDouble(item.get("yposition")))
+                    .imgUrl(String.valueOf(item.get("images")))
                     .category(category)
                     .build();
 

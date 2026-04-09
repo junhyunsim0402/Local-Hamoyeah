@@ -26,6 +26,8 @@ public class ContentsDto {
     private Double latitude;
     private Double longitude;
 
+    private String imgUrl;
+
     public ContentsEntity toEntity() {
         return ContentsEntity.builder()
                 .contentTitle(this.contentTitle)
@@ -33,6 +35,7 @@ public class ContentsDto {
                 .address(this.address)
                 .latitude(this.latitude)
                 .longitude(this.longitude)
+                .imgUrl(this.imgUrl)
                 .category(CategoryEntity.builder().categoryId(this.categoryId).build())
                 .build();
     }

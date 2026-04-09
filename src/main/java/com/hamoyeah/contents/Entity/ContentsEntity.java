@@ -47,6 +47,9 @@ public class ContentsEntity implements LocationEntity {
     @Column(nullable = false)
     private Double longitude;
 
+    @Column(columnDefinition = "TEXT", nullable = true)
+    private String imgUrl;
+
     public ContentsDto toDto() {
         return ContentsDto.builder()
                 .contentId(this.contentId)
@@ -57,6 +60,7 @@ public class ContentsEntity implements LocationEntity {
                 .address(this.address)
                 .latitude(this.latitude)
                 .longitude(this.longitude)
+                .imgUrl(this.imgUrl)
                 .build();
     }
     @Override
