@@ -31,9 +31,30 @@ public class FavController {
         }
         FavEntity result=favService.register(email, favDto);
         if(result!=null){
-            return ResponseEntity.ok("즐겨찾기 등록이 되었습니다.");
+            return ResponseEntity.ok("즐겨찾기가 등록되었습니다.");
         } else {
-            return ResponseEntity.status(500).body("즐겨찾기 등록이 실패하였습니다.");
+            return ResponseEntity.status(500).body("즐겨찾기 등록에 실패하였습니다.");
+        }
+    }
+
+    // 즐겨찾기 삭제
+    @DeleteMapping
+    public ResponseEntity<?> delete(
+            @RequestHeader(value="Authorization", required=false) String bearerToken,
+            @RequestParam Integer favId){
+        if(bearerToken==null||!bearerToken.startsWith("Bearer ")){
+            return ResponseEntity.status(400).body("토큰이 없거나 형식이 잘못되었습니다.");
+        }
+        String token=bearerToken.substring(7);
+        String email=userService.getClaim(token);
+        if(email==null){
+            return ResponseEntity.status(401).body("유효하지 않은 토큰입니다.");
+        }
+        FavEntity result=favService.delete(email, favId);
+        if(result!=null){
+            return ResponseEntity.ok("즐겨찾기가 삭제되었습니다.");
+        } else {
+            return ResponseEntity.status(500).body("즐겨찾기 삭제에 실패하였습니다.");
         }
     }
 }

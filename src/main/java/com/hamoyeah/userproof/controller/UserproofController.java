@@ -23,6 +23,19 @@ public class UserproofController {
     private final UserService userService;
     private final UserRepository userRepository;
 
+    private UserEntity getUserFromToken(String token){
+        if(token == null || !token.startsWith("Bearer ")){
+            return null;
+        }
+        String email = userService.getClaim(token.substring(7));
+        if(email == null){
+            return null;
+        }
+        Optional<UserEntity> optionalUser = userRepository.findByEmail(email);
+        if(optionalUser.isEmpty()){return null;}
+        return optionalUser.get();
+    }
+
     // 유저 사진 등록 기능
     @PostMapping(value = "/verify", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> verify(
@@ -57,11 +70,10 @@ public class UserproofController {
             if(email==null){
                 return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
             }
-            Optional<UserEntity> userOpt1= userRepository.findByEmail(email);
-            if (!userOpt1.isPresent()) {
+            UserEntity user = getUserFromToken(token);
+            if(user == null){
                 return ResponseEntity.status(401).body("사용자를 찾을 수 없습니다.");
             }
-            UserEntity user = userOpt1.get();
             if(!user.isAdmin()){
                 return ResponseEntity.status(403).body("관리자 권한이 없습니다.");
             }
@@ -84,11 +96,10 @@ public class UserproofController {
             if(email==null){
                 return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
             }
-            Optional<UserEntity> userOpt2 = userRepository.findByEmail(email);
-            if (userOpt2.isEmpty()) {
+            UserEntity user = getUserFromToken(token);
+            if(user == null){
                 return ResponseEntity.status(401).body("사용자를 찾을 수 없습니다.");
             }
-            UserEntity user = userOpt2.get();
             if(!user.isAdmin()){
                 return ResponseEntity.status(403).body("관리자 권한이 없습니다.");
             }
@@ -111,11 +122,10 @@ public class UserproofController {
             if(email==null) {
                 return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
             }
-            Optional<UserEntity> userOpt3 = userRepository.findByEmail(email);
-            if (userOpt3.isEmpty()) {
+            UserEntity user = getUserFromToken(token);
+            if(user == null){
                 return ResponseEntity.status(401).body("존재하지 않는 사용자입니다.");
             }
-            UserEntity user = userOpt3.get();
             if(!user.isAdmin()){
                 return ResponseEntity.status(403).body("관리자 권한이 없습니다.");
             }
@@ -130,12 +140,14 @@ public class UserproofController {
     @GetMapping("/usermylist")
     public ResponseEntity<?> usermylist(@RequestHeader("Authorization")String token){
         if(token==null||!token.startsWith("Bearer ")){
-            return ResponseEntity.ok(false);
+            return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
         }
         token=token.replace("Bearer ","");
         String userEmail=userService.getClaim(token);
 
-        if(userEmail==null) return ResponseEntity.ok(false);
+        if(userEmail==null){
+            return ResponseEntity.status(401).body("인증 정보가 없습니다.");
+        }
         return ResponseEntity.ok(userproofService.usermylist(userEmail));
     }
 }

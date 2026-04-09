@@ -12,6 +12,8 @@ import com.hamoyeah.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class FavService {
@@ -36,5 +38,17 @@ public class FavService {
                 .shopEntity(shop)
                 .build();
         return favRepository.save(entity);
+    }
+
+    // 즐겨찾기 삭제
+    public FavEntity delete(String email, Integer favId){
+        Optional<FavEntity> optionalFav=favRepository.findById(favId);
+        if(optionalFav.isPresent()){
+            FavEntity fav=optionalFav.get();
+            if(fav.getUserEntity().getEmail().equals(email)){
+                favRepository.delete(fav);
+                return fav;
+            } else{return null;}
+        } else{return null;}
     }
 }
