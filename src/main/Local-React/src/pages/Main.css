@@ -247,6 +247,8 @@
 .category-select-wrap select {
   padding: 6px 10px;
   border-radius: 20px;
+  width : 230px;
+  height: 60px;
   border: none;
   background: white;
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
