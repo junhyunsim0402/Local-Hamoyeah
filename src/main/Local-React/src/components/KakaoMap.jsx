@@ -21,18 +21,17 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
     const authContentsRef = useRef([]);         // 인증 가능 목록 저장용
     const shopCategoryRef = useRef('0');
     const contentCategoryRef = useRef('0');
-    const isMarkerClickedRef = useRef(false);   // 유저 클릭여부
 
     const groupNearbyContents = (contents) => {
-    return contents.reduce((acc, item) => {
-        const latFixed = parseFloat(item.lat).toFixed(4); // 약 11m 반경 그룹화
-        const lngFixed = parseFloat(item.lng).toFixed(4);
-        const key = `${latFixed}_${lngFixed}`;
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(item);
-        return acc;
-    }, {});
-};
+        return contents.reduce((acc, item) => {
+            const latFixed = parseFloat(item.lat).toFixed(4); // 약 11m 반경 그룹화
+            const lngFixed = parseFloat(item.lng).toFixed(4);
+            const key = `${latFixed}_${lngFixed}`;
+            if (!acc[key]) acc[key] = [];
+            acc[key].push(item);
+            return acc;
+        }, {});
+    };
     const getMarkerIcon = (content) => {
         if (content.categoryId) {
             const contentIconMap = {
@@ -91,16 +90,16 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
 
         // [상세 보기 HTML 생성]
         const renderDetail = (content, showBack = false) => {
-        const title = content.contentsTitle ?? content.shopTitle;
-        const id = content.contentsId ?? content.shopId;
-        const description = content.contentDes || content.contentsDes || content.rawCategory || "상세 정보 준비 중";
+            const title = content.contentsTitle ?? content.shopTitle;
+            const id = content.contentsId ?? content.shopId;
+            const description = content.contentDes || content.contentsDes || content.rawCategory || "상세 정보 준비 중";
 
-        const isAuthable = authContentsRef.current.some(auth =>
-            (auth.contentsId && auth.contentsId === content.contentsId) ||
-            (auth.shopId && auth.shopId === content.shopId)
-        );
+            const isAuthable = authContentsRef.current.some(auth =>
+                (auth.contentsId && auth.contentsId === content.contentsId) ||
+                (auth.shopId && auth.shopId === content.shopId)
+            );
 
-        return `
+            return `
             <div class="map-info-window">
                 ${showBack ? `<button id="btn-back" style="border:none; background:none; color:#007bff; cursor:pointer; font-size:12px; margin-bottom:5px; padding:0;">⬅ 목록으로 돌아가기</button>` : ''}
                 <div class="info-body">
@@ -109,13 +108,13 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                     <p class="info-description" style="font-size:13px; color:#666; margin-bottom:10px;">${description}</p>
                     <div class="info-action-area">
                         ${isAuthable
-                            ? `<button id="auth-btn-${id}" class="info-auth-btn">인증하기 📸</button>`
-                            : `<div class="info-disauth-wrap"><span class="info-dist-text">📍 50m 밖 (인증 불가)</span></div>`
-                        }
+                    ? `<button id="auth-btn-${id}" class="info-auth-btn">인증하기 📸</button>`
+                    : `<div class="info-disauth-wrap"><span class="info-dist-text">📍 50m 밖 (인증 불가)</span></div>`
+                }
                     </div>
                 </div>
             </div>`;
-    };
+        };
 
         // [리스트 HTML 생성]
         const renderList = () => `
@@ -152,7 +151,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                     if (authBtn) {
                         authBtn.onclick = () => {
                             console.log(`[${finalType}] 인증 클릭 ID: ${finalId}`);
-                            
+
 
                             if (onAuthBtnClick) {
                                 onAuthBtnClick({
@@ -334,7 +333,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                                 body: JSON.stringify({ lat, lng, radius: 500 }),
                             });
                             const data = await response.json();
-                            if(onScoreReady) onScoreReady(data);
+                            if (onScoreReady) onScoreReady(data);
 
                             console.log("클릭 위치 갱신 완료:", lat, lng);
                             console.log("결과", data);
@@ -394,7 +393,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                                 body: JSON.stringify({ lat, lng, radius: 500 }),
                             });
                             const data = await response.json();
-                            if(onScoreReady) onScoreReady(data);
+                            if (onScoreReady) onScoreReady(data);
 
                             console.log("클릭 위치 갱신 완료:", lat, lng);
                         });
