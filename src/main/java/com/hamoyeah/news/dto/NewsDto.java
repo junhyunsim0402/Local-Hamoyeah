@@ -10,4 +10,5 @@ public class NewsDto {
     private String title;
     private String url;
     private String date;
+    private String thumbnail;
 }

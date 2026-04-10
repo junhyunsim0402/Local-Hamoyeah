@@ -34,14 +34,15 @@ public class NewsService {
     private WebDriver createDriver(){         // 크롬 브라우저(뉴스 창) 설치/설정
         WebDriverManager.chromedriver().setup();    // 크롬 드라이버 설치
         ChromeOptions options=new ChromeOptions();
-        options.addArguments("--headless");     // 크롬 브라우저 창 숨기기
+        options.addArguments("--headless=new");
+        // options.addArguments("--headless");     // 크롬 브라우저 창 숨기기
         options.addArguments("--disable-gpu"); // GPU관련 오류 방지
         options.addArguments("--disable-dev-shm"); // 메모리 공유
         options.addArguments("--no-sandbox"); // 권한 부여
         return new ChromeDriver(options);
     }   // 크롬 브라우저(뉴스 창) 설치/설정 끝
 
-    public List<NewsDto> fetchNews(NewsCategory newsCategory) {  // 카테고리로 찾은 뉴스 함수
+    public List<NewsDto> fetchNews(NewsCategory newsCategory) {  // 카테고리로 찾은 뉴스 함수(스케줄링 포함)
         List<NewsDto> result=new ArrayList<>();
         WebDriver driver=createDriver();    // 크롬 브라우저 객체
 
@@ -52,10 +53,10 @@ public class NewsService {
                 String url=BASE_URL + "?sc_word="
                         + java.net.URLEncoder.encode(keyword, "UTF-8")
                         + "&view_type=sm";
-                driver.get(url);    // url 전달
+                driver.get(url);    // 키워드를 포함하여 url 전달
 
                 try {
-                    new WebDriverWait(driver, Duration.ofSeconds(5))    // 렌더링 5초 기다림
+                    new WebDriverWait(driver, Duration.ofSeconds(10))    // 렌더링 5초 기다림
                             .until(ExpectedConditions.presenceOfElementLocated( // 리스트 페이지 나올때까지 대기
                                     By.cssSelector("ul.type2 > li")));  // 뉴스 리스트
                 }catch (Exception e){
@@ -70,6 +71,7 @@ public class NewsService {
 
                     Element titleEl = article.selectFirst("h4.titles a");
                     Element dateEl = article.selectFirst("span.byline em:last-child");
+                    Element imgEl   = article.selectFirst("a.thumb img");
 
                     if (titleEl == null) continue;
 
@@ -82,6 +84,7 @@ public class NewsService {
                             .title(titleEl.text())
                             .url("https://www.jinjutv.com" + titleEl.attr("href"))
                             .date(dateEl != null ? dateEl.text() : "")
+                            .thumbnail(imgEl != null ? imgEl.attr("src") : "")
                             .build());
                 }
             }

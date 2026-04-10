@@ -40,8 +40,17 @@ function NewsPanel({ newsCategory }) {
                         rel="noreferrer"
                         className="news-item"
                     >
-                        <div className="news-title">{news.title}</div>
-                        <div className="news-date">{news.date}</div>
+                        {news.thumbnail && (
+                            <img
+                                src={news.thumbnail}
+                                alt={news.title}
+                                className="news-thumbnail"
+                            />
+                        )}
+                        <div className="news-content">
+                            <div className="news-title">{news.title}</div>
+                            <div className="news-date">{news.date}</div>
+                        </div>
                     </a>
                 ))
             )}
