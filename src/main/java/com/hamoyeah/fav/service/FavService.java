@@ -32,17 +32,21 @@ public class FavService {
         UserEntity user=optionalUser.get();
         ContentsEntity content=null;
         ShopEntity shop=null;
+
         if(favDto.getContentId()!=null){
             Optional<ContentsEntity> optionalContents=contentsRepository.findById(favDto.getContentId());
-            if (optionalContents.isPresent()){
-                content=optionalContents.get();
-            }
+            if (optionalContents.isEmpty()){
+                return null;
+            } content=optionalContents.get();
         }
         if(favDto.getShopId()!=null){
             Optional<ShopEntity> optionalShop=shopRepository.findById(favDto.getShopId());
-            if(optionalShop.isPresent()){
-                shop=optionalShop.get();
-            }
+            if(optionalShop.isEmpty()){
+                return null;
+            } shop=optionalShop.get();
+        }
+        if(content==null&&shop==null){
+            return null;
         }
         FavEntity entity= FavEntity.builder()
                 .userEntity(user)
@@ -63,5 +67,15 @@ public class FavService {
                 return fav;
             } else{return null;}
         } else{return null;}
+    }
+
+    // 즐겨찾기 갯수
+    public Integer favCount(FavDto favDto){
+        Integer totalCount=0;
+        if(favDto.getContentId()!=null){
+            totalCount=favRepository.countByContentsEntity_ContentId(favDto.getContentId());
+        } else if(favDto.getShopId()!=null){
+            totalCount=favRepository.countByShopEntity_ShopId(favDto.getShopId());
+        } return (totalCount==null)?0:totalCount;
     }
 }

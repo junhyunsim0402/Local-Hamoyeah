@@ -5,6 +5,7 @@ import com.hamoyeah.fav.entity.FavEntity;
 import com.hamoyeah.fav.service.FavService;
 import com.hamoyeah.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.config.RepositoryNameSpaceHandler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,5 +57,19 @@ public class FavController {
         } else {
             return ResponseEntity.status(500).body("즐겨찾기 삭제에 실패하였습니다.");
         }
+    }
+
+    // 즐겨찾기 갯수
+    @GetMapping("/count")
+    public ResponseEntity<?> favCount(
+            @RequestHeader(value="Authorization", required = false) String bearerToken,
+            @RequestParam(required = false) Integer contentId,
+            @RequestParam(required = false) Integer shopId){
+        FavDto favDto=FavDto.builder()
+                .contentId(contentId)
+                .shopId(shopId)
+                .build();
+        Integer count= favService.favCount(favDto);
+        return ResponseEntity.ok(count);
     }
 }
