@@ -5,6 +5,7 @@ import Kakaomap from '../components/KakaoMap'
 import AuthModal from '../components/AuthModal';
 import MyPageModal from '../components/MyPageModal';
 import ScorePanel from '../components/ScorePanel';
+import DetailModal from '../components/DetailModal';
 
 function MainPage() {
   const [viewType, setViewType] = useState('noise');
@@ -18,6 +19,8 @@ function MainPage() {
   const [isPanelOpen, setIsPanelOpen] = useState(false);  // 정주여건 패널 열림/닫힘
   const [scoreData, setScoreData] = useState(null); // 정주여건 점수 데이터
   const [toastVisible, setToastVisible] = useState(false); // 토스트 바 표시 여부
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false); // 상세 모달 열림 여부
+const [selectedPlaceInfo, setSelectedPlaceInfo] = useState(null);  // 클릭된 장소의 정보
 
 
   const handleScoreReady = (data) => {
@@ -26,24 +29,27 @@ function MainPage() {
     setIsPanelOpen(false); // 정주여건 패널 성공
   };  // 정주여건 패널 점수 함수
 
+  const handleMarkerClick = (data) => {
+    setToastVisible(false);        
+    setSelectedPlaceInfo(data);    
+    setIsDetailModalOpen(true);    
+  };
+
   const openAuthModal = (data) => {
     setAuthData(data);
+    setIsDetailModalOpen(false); 
     setIsAuthModalOpen(true);
   };
 
   const handleOpenMyPage = async () => {
-    setIsMenuOpen(false); // 1. 열려있던 설정 드롭다운을 닫기
+    setIsMenuOpen(false); 
 
-    // 2. 서버에서 내 정보를 가져옵니다. (나중에 API 연결)
-    // const res = await axios.get('/api/user/me');
-    // setUserInfo(res.data);
-
-    setIsMyPageOpen(true); // 3. 모달을 켭니다.
+    setIsMyPageOpen(true); 
   };
 
   return (
     <div className="main-page">
-      {/* 1. 최상단: 로고와 설정 버튼 */}
+      {/* 최상단: 로고와 설정 버튼 */}
       <div className="top-bar">
         <img src={logo} alt="Project Logo" className="project-logo" />
         {/* 설정 버튼 클릭 시 토글 */}
@@ -135,7 +141,7 @@ function MainPage() {
           shopCategory={shopCategory}
           contentCategory={contentCategory}
           onScoreReady={handleScoreReady}
-          onMarkerClick={() => setToastVisible(false)}
+          onMarkerClick={handleMarkerClick}
         />
       </main>
       <AuthModal
@@ -159,6 +165,14 @@ function MainPage() {
         onClose={() => setIsPanelOpen(false)}
         scoreData={scoreData}
       />
+      {isDetailModalOpen && (
+        <DetailModal 
+          isOpen={isDetailModalOpen}
+          data={selectedPlaceInfo} 
+          onClose={() => setIsDetailModalOpen(false)}
+          onAuthClick={openAuthModal}
+        />
+      )}  
     </div>
   );
 }

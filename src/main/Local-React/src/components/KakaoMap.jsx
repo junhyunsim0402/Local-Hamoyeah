@@ -17,7 +17,6 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
     const mapInstanceRef = useRef(null);        // map 객체 저장용
     const clustererRef = useRef(null);          // clusterer 저장용
     const contentMarkersRef = useRef([]);       // contents 마커 저장용
-    const infowindowsRef = useRef([]);          // 인포윈도우 저장용
     const authContentsRef = useRef([]);         // 인증 가능 목록 저장용
     const shopCategoryRef = useRef('0');
     const contentCategoryRef = useRef('0');
@@ -86,104 +85,22 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
         //marker.setMap(map);
         contentMarkersRef.current.push(marker);
 
-        const infowindow = new window.kakao.maps.InfoWindow({ zIndex: 10 });
-        infowindowsRef.current.push(infowindow);
-
-        // [상세 보기 HTML 생성]
-        const renderDetail = (content, showBack = false) => {
-        const title = content.contentsTitle ?? content.shopTitle;
-        const id = content.contentsId ?? content.shopId;
-        const description = content.contentDes || content.contentsDes || content.rawCategory || "상세 정보 준비 중";
-
-        const isAuthable = authContentsRef.current.some(auth =>
-            (auth.contentsId && auth.contentsId === content.contentsId) ||
-            (auth.shopId && auth.shopId === content.shopId)
-        );
-
-        return `
-            <div class="map-info-window">
-                ${showBack ? `<button id="btn-back" style="border:none; background:none; color:#007bff; cursor:pointer; font-size:12px; margin-bottom:5px; padding:0;">⬅ 목록으로 돌아가기</button>` : ''}
-                <div class="info-body">
-                    <strong class="info-title" style="display:block; margin-bottom:5px;">${title}</strong>
-                    ${content.shopId ? `<span class="local-currency-badge">지역화폐 가맹점</span>` : ''}
-                    <p class="info-description" style="font-size:13px; color:#666; margin-bottom:10px;">${description}</p>
-                    <div class="info-action-area">
-                        ${isAuthable
-                            ? `<button id="auth-btn-${id}" class="info-auth-btn">인증하기 📸</button>`
-                            : `<div class="info-disauth-wrap"><span class="info-dist-text">📍 50m 밖 (인증 불가)</span></div>`
-                        }
-                    </div>
-                </div>
-            </div>`;
-    };
-
-        // [리스트 HTML 생성]
-        const renderList = () => `
-            <div class="map-info-window multiple-list" style="width:220px;">
-                <div class="info-header" style="background:#f8f9fa; padding:10px; font-size:13px; border-bottom:1px solid #eee;">
-                    📍 이 근처에 <strong>${items.length}개</strong>의 장소가 있어요
-                </div>
-                <ul class="info-list" style="list-style:none; padding:0; margin:0; max-height:180px; overflow-y:auto;">
-                    ${items.map((item, idx) => `
-                        <li class="info-list-item" id="item-${idx}" style="padding:10px; border-bottom:1px solid #f0f0f0; cursor:pointer;">
-                            <div style="font-weight:bold; font-size:14px;">${item.contentsTitle ?? item.shopTitle}</div>
-                            <div style="font-size:11px; color:#888;">${item.rawCategory || '상세보기 >'}</div>
-                        </li>
-                    `).join('')}
-                </ul>
-            </div>`;
-
-        const setupEvents = (content, mode) => {
-            setTimeout(() => {
-                if (mode === 'list') {
-                    items.forEach((item, idx) => {
-                        const el = document.getElementById(`item-${idx}`);
-                        if (el) el.onclick = () => {
-                            infowindow.setContent(renderDetail(item, true));
-                            setupEvents(item, 'detail');
-                        };
-                    });
-                } else {
-                    const isShop = !!content.shopId; // shopId가 있으면 true
-                    const finalId = isShop ? content.shopId : content.contentsId;
-                    const finalType = isShop ? 'SHOP' : 'CONTENT';
-                    const finalTitle = content.contentsTitle ?? content.shopTitle;
-                    const authBtn = document.getElementById(`auth-btn-${finalId}`);
-                    if (authBtn) {
-                        authBtn.onclick = () => {
-                            console.log(`[${finalType}] 인증 클릭 ID: ${finalId}`);
-                            
-
-                            if (onAuthBtnClick) {
-                                onAuthBtnClick({
-                                    id: finalId,
-                                    type: finalType,
-                                    title: finalTitle
-                                });
-                            }
-                        };
-                    }
-                    const backBtn = document.getElementById("btn-back");
-                    if (backBtn) {
-                        backBtn.onclick = () => {
-                            infowindow.setContent(renderList());
-                            setupEvents(null, 'list');
-                        };
-                    }
-                }
-            }, 100);
-        };
+        
 
         window.kakao.maps.event.addListener(marker, 'click', () => {
-            infowindowsRef.current.forEach(iw => iw.close());
-            if (isMultiple) {
-                infowindow.setContent(renderList());
-                infowindow.open(map, marker);
-                setupEvents(null, 'list');
-            } else {
-                infowindow.setContent(renderDetail(firstItem));
-                infowindow.open(map, marker);
-                setupEvents(firstItem, 'detail');
+            const isAuthable = authContentsRef.current.some(auth =>
+                (auth.contentsId && auth.contentsId === firstItem.contentsId) ||
+                (auth.shopId && auth.shopId === firstItem.shopId)
+            );
+            if (onMarkerClick) {
+                onMarkerClick({
+                    isMultiple: isMultiple, // 여러 개 뭉쳐있는지 여부
+                    items: items,           // 뭉쳐있다면 그 리스트 전체
+                    selectedPlace: firstItem, // 하나라면 그 장소 정보
+                    targetType: firstItem.shopId ? 'SHOP' : 'CONTENT',
+                    targetId: firstItem.shopId ?? firstItem.contentsId,
+                    isAuthable
+                });
             }
         });
     };
@@ -237,8 +154,6 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
         if (clusterer) {
             clusterer.clear();
         }
-        infowindowsRef.current.forEach(iw => iw.close());
-        infowindowsRef.current = [];
     };
 
 
@@ -334,10 +249,11 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                                 body: JSON.stringify({ lat, lng, radius: 500 }),
                             });
                             const data = await response.json();
+                            
                             if(onScoreReady) onScoreReady(data);
-
-                            console.log("클릭 위치 갱신 완료:", lat, lng);
                             console.log("결과", data);
+                            console.log("클릭 위치 갱신 완료:", lat, lng);
+                            
                             if (onScoreReady) onScoreReady(data);    // 점수데이터가 있으면 전달
                         });
                     },
