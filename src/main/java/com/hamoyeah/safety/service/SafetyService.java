@@ -171,8 +171,8 @@ public class SafetyService {
                     .streetLampScore(streetLampScore)
                     .streetLampCount(lampCount)
                     .airScore(pm10Score+pm25Score)
-                    .pm10(pm10Score)
-                    .pm25(pm25Score)
+                    .pm10(pm10)
+                    .pm25(pm25)
                     // .contents(contentsList)  // 모든정보가 필요하면 쓰기
                     .build();
         }

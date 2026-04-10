@@ -2,9 +2,8 @@
   position: fixed;
   bottom: -100%;
   left: 50%;
-  right: 0;
-  height: 55%;
-  width: 430px; 
+  height: 55vh;
+  width: calc(min(100%, 430px) - 20px);
   background: #ffffff;
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
@@ -13,6 +12,7 @@
   z-index: 200;
   padding: 0 16px 24px;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .score-panel.open {

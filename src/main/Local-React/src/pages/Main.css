@@ -243,15 +243,22 @@
   z-index: 10;
   display: flex;
   gap: 8px;
+  width: calc(100% - 20px);
 }
 .category-select-wrap select {
-  padding: 6px 10px;
+  flex:1;
+  padding: 0.6em 1.2em;
+  min-height: 5vh;
+  max-height: 7vh;
   border-radius: 20px;
   border: none;
   background: white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  font-size: 0.85rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
   cursor: pointer;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
 }
 
 .score-toast {
