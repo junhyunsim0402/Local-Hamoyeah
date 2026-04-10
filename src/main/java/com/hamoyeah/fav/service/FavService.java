@@ -71,11 +71,12 @@ public class FavService {
 
     // 즐겨찾기 갯수
     public Integer favCount(FavDto favDto){
-        Integer totalCount=0;
         if(favDto.getContentId()!=null){
-            totalCount=favRepository.countByContentsEntity_ContentId(favDto.getContentId());
-        } else if(favDto.getShopId()!=null){
-            totalCount=favRepository.countByShopEntity_ShopId(favDto.getShopId());
-        } return (totalCount==null)?0:totalCount;
+            return favRepository.countByContentsEntity_ContentId(favDto.getContentId());
+        }
+        if(favDto.getShopId()!=null){
+            return favRepository.countByShopEntity_ShopId(favDto.getShopId());
+        }
+        return 0;
     }
 }
