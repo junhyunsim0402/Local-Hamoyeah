@@ -11,6 +11,7 @@ import com.hamoyeah.user.entity.UserEntity;
 import com.hamoyeah.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -24,13 +25,24 @@ public class FavService {
 
     // 즐겨찾기 등록
     public FavEntity register(String email, FavDto favDto){
-        UserEntity user=userRepository.findByEmail(email).get();
+        Optional<UserEntity> optionalUser=userRepository.findByEmail(email);
+        if(optionalUser.isEmpty()){
+            return null;
+        }
+        UserEntity user=optionalUser.get();
         ContentsEntity content=null;
         ShopEntity shop=null;
         if(favDto.getContentId()!=null){
-            content=contentsRepository.findById(favDto.getContentId()).get();
-        } else if(favDto.getShopId()!=null){
-            shop=shopRepository.findById(favDto.getShopId()).get();
+            Optional<ContentsEntity> optionalContents=contentsRepository.findById(favDto.getContentId());
+            if (optionalContents.isPresent()){
+                content=optionalContents.get();
+            }
+        }
+        if(favDto.getShopId()!=null){
+            Optional<ShopEntity> optionalShop=shopRepository.findById(favDto.getShopId());
+            if(optionalShop.isPresent()){
+                shop=optionalShop.get();
+            }
         }
         FavEntity entity= FavEntity.builder()
                 .userEntity(user)
@@ -41,6 +53,7 @@ public class FavService {
     }
 
     // 즐겨찾기 삭제
+    @Transactional
     public FavEntity delete(String email, Integer favId){
         Optional<FavEntity> optionalFav=favRepository.findById(favId);
         if(optionalFav.isPresent()){
