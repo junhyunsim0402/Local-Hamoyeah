@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './DetailModal.css'; // 아래 CSS 참고
 
 function DetailModal({ isOpen, data, onClose, onAuthClick }) {
@@ -7,6 +7,14 @@ function DetailModal({ isOpen, data, onClose, onAuthClick }) {
   // 현재 상세 보기 중인 장소 데이터
   const [detailItem, setDetailItem] = useState(null);
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
+
+  const scrollContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+  }, [viewMode, detailItem]);
 
   // 모달이 새로 열릴 때마다 초기 상태 설정
   useEffect(() => {
@@ -54,7 +62,7 @@ function DetailModal({ isOpen, data, onClose, onAuthClick }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="place-modal-content" onClick={(e) => e.stopPropagation()}>
+      <div ref={scrollContainerRef} className="place-modal-content" onClick={(e) => e.stopPropagation()}>
         {/* 상단 헤더: 제목 및 닫기 버튼 */}
         <header className="modal-header">
           {viewMode === 'DETAIL' && data.isMultiple && (
