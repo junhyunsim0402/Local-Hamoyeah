@@ -30,13 +30,9 @@ public class UserController {
         }
     }
 
-
     // 마이페이지
     @GetMapping("/myinfo")
     public ResponseEntity<?> myinfo(@RequestHeader("Authorization") String token ){
-        // @RequestHeader : http 요청의 header 정보 매핑
-        // @RequestHeader("Authorization") String token 매개변수로 받는다
-        //  만약에 헤더가 없거나 토큰이 없으면 비로그인
         if (token == null || !token.startsWith("Bearer")){
             return ResponseEntity.ok(false);
         }

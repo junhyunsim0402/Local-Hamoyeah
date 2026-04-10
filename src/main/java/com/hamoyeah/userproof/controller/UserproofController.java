@@ -57,11 +57,11 @@ public class UserproofController {
             if(email==null){
                 return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
             }
-            Optional<UserEntity> userOpt1= userRepository.findByEmail(email);
-            if (!userOpt1.isPresent()) {
+            Optional<UserEntity> optionalUser1= userRepository.findByEmail(email);
+            if (!optionalUser1.isPresent()) {
                 return ResponseEntity.status(401).body("사용자를 찾을 수 없습니다.");
             }
-            UserEntity user = userOpt1.get();
+            UserEntity user = optionalUser1.get();
             if(!user.isAdmin()){
                 return ResponseEntity.status(403).body("관리자 권한이 없습니다.");
             }
@@ -84,11 +84,11 @@ public class UserproofController {
             if(email==null){
                 return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
             }
-            Optional<UserEntity> userOpt2 = userRepository.findByEmail(email);
-            if (userOpt2.isEmpty()) {
+            Optional<UserEntity> optionalUser2 = userRepository.findByEmail(email);
+            if (optionalUser2.isEmpty()) {
                 return ResponseEntity.status(401).body("사용자를 찾을 수 없습니다.");
             }
-            UserEntity user = userOpt2.get();
+            UserEntity user = optionalUser2.get();
             if(!user.isAdmin()){
                 return ResponseEntity.status(403).body("관리자 권한이 없습니다.");
             }
@@ -111,11 +111,11 @@ public class UserproofController {
             if(email==null) {
                 return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
             }
-            Optional<UserEntity> userOpt3 = userRepository.findByEmail(email);
-            if (userOpt3.isEmpty()) {
+            Optional<UserEntity> optionalUser3 = userRepository.findByEmail(email);
+            if (optionalUser3.isEmpty()) {
                 return ResponseEntity.status(401).body("존재하지 않는 사용자입니다.");
             }
-            UserEntity user = userOpt3.get();
+            UserEntity user = optionalUser3.get();
             if(!user.isAdmin()){
                 return ResponseEntity.status(403).body("관리자 권한이 없습니다.");
             }

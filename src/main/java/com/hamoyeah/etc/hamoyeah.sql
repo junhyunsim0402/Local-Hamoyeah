@@ -75,6 +75,20 @@ CREATE TABLE userproof(
     CONSTRAINT fk_userproof_admin
     FOREIGN KEY (admin_id) REFERENCES user(user_id)
 );
+
+CREATE TABLE fav(
+    fav_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    content_id INT NOT NULL,
+    shop_id INT NOT NULL,
+    CONSTRAINT fk_fav_user
+    FOREIGN KEY (user_id) REFERENCES user(user_id),
+    CONSTRAINT fk_fav_contents
+    FOREIGN KEY (content_id) REFERENCES contents(content_id),
+    CONSTRAINT fk_fav_shop
+    FOREIGN KEY (shop_id) REFERENCES shop(shop_id),
+);
+
 INSERT INTO category (content_type, content_category) VALUES
 (1,1), -- 콘텐츠 - 관광지
 (1,2), -- 콘텐츠 - 축제
@@ -173,3 +187,10 @@ INSERT INTO userproof (user_id, content_id, image_url, status, created_at, admin
 INSERT INTO userproof (user_id, content_id, image_url, status, created_at, admin_id, reject_reason, reviewed_at) VALUES
 (3, 2, 'https://example.com/p2.jpg', '반려', '2026-03-25 11:30:00', 10, '사진이 흐릿하여 확인할 수 없습니다.', '2026-03-25 15:20:00'),
 (3, 5, 'https://example.com/p6.jpg', '반려', '2026-03-27 15:00:00', 10, '해당 장소가 아닌 것으로 보입니다.', '2026-03-27 18:10:00');
+
+INSERT INTO fav(user_id, content_id, shop_id) VALUES
+(1,1,null),
+(2,2,null),
+(3,null,null),
+(4,null,null),
+(5,null,null);
