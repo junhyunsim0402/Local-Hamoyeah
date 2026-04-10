@@ -62,6 +62,7 @@ public class DistanceCalculator {
                     contents.put("lat",item.getLatitude());
                     contents.put("lng",item.getLongitude());
                     contents.put("contentDes",item.getContentDes());
+                    contents.put("imgUrl", item.getImgUrl());
                     result.add(contents);   // 컨텐츠 아이디/제목, 위도 경도 저장
                 }
             } catch (Exception e) { System.out.println("e = " + e); }
