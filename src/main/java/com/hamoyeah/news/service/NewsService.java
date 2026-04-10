@@ -3,6 +3,7 @@ package com.hamoyeah.news.service;
 import com.hamoyeah.news.dto.NewsDto;
 import com.hamoyeah.news.entity.NewsCategory;
 import io.github.bonigarcia.wdm.WebDriverManager;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -19,11 +20,14 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j  // 에러가 났을 때 알려주는 어노테이션
 public class NewsService {
 
+    private final Map<String,List<NewsDto>> cache=new ConcurrentHashMap<>();    // 뉴스 캐시
     private static final int MAX_NEWS = 10; // 카테고리당 최대 뉴스 수
     private static final String BASE_URL = "https://www.jinjutv.com/news/articleList.html"; // 셀레니움 URL
 
@@ -37,11 +41,8 @@ public class NewsService {
         return new ChromeDriver(options);
     }   // 크롬 브라우저(뉴스 창) 설치/설정 끝
 
-    public List<NewsDto> getNewsByCategory(int contentType, int contentCategory) {  // 카테고리로 찾은 뉴스 함수
-        NewsCategory newsCategory = NewsCategory.from(contentType, contentCategory);
-        if (newsCategory == null) { return List.of(); }
-
-        List<NewsDto> result = new ArrayList<>();   // 결과를 담을 리스트
+    public List<NewsDto> fetchNews(NewsCategory newsCategory) {  // 카테고리로 찾은 뉴스 함수
+        List<NewsDto> result=new ArrayList<>();
         WebDriver driver=createDriver();    // 크롬 브라우저 객체
 
         try{
@@ -54,7 +55,7 @@ public class NewsService {
                 driver.get(url);    // url 전달
 
                 try {
-                    new WebDriverWait(driver, Duration.ofSeconds(10))    // 렌더링 5초 기다림
+                    new WebDriverWait(driver, Duration.ofSeconds(5))    // 렌더링 5초 기다림
                             .until(ExpectedConditions.presenceOfElementLocated( // 리스트 페이지 나올때까지 대기
                                     By.cssSelector("ul.type2 > li")));  // 뉴스 리스트
                 }catch (Exception e){
@@ -82,12 +83,35 @@ public class NewsService {
                             .url("https://www.jinjutv.com" + titleEl.attr("href"))
                             .date(dateEl != null ? dateEl.text() : "")
                             .build());
-
-                    System.out.println("result = " + result);
                 }
             }
         }catch (Exception e) { log.error("RSS 크롤링 실패: {}", e.getMessage()); }
         finally { driver.quit(); }
         return result;
     }   // 카테고리로 찾은 뉴스 함수 끝
+
+    // 캐시 확인 후 없으면 fetchNews 호출
+    public List<NewsDto> getNewsByCategory(int contentType, int contentCategory) {
+        NewsCategory newsCategory = NewsCategory.from(contentType, contentCategory);
+        if (newsCategory == null) return List.of();
+
+        String cacheKey = contentType + "_" + contentCategory;
+        if (cache.containsKey(cacheKey)) {
+            return cache.get(cacheKey);
+        }
+
+        List<NewsDto> result = fetchNews(newsCategory);
+        cache.put(cacheKey, result);
+        return result;
+    }   // 뉴스 함수 끝
+
+    @PostConstruct  // 서버 시작 시 자동 실행
+    public void refreshAllNewsCache() {
+        for (NewsCategory category : NewsCategory.values()) {
+            String cacheKey = category.getContentType() + "_" + category.getContentCategory();
+            List<NewsDto> result = fetchNews(category);
+            cache.put(cacheKey, result);
+        }
+        log.info("뉴스 캐시 갱신 완료");
+    }
 }

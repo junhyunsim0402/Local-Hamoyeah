@@ -5,9 +5,11 @@ import Kakaomap from '../components/KakaoMap'
 import AuthModal from '../components/AuthModal';
 import MyPageModal from '../components/MyPageModal';
 import ScorePanel from '../components/ScorePanel';
+import NewsPanel from '../components/NewsPanel';
 
 function MainPage() {
   const [viewType, setViewType] = useState('noise');
+  const [newsCategory, setNewsCategory] = useState({ contentType: 1, contentCategory: 1 }); // 뉴스카테고리 기본값 : 관광
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authData, setAuthData] = useState({ id: null, type: '', title: '' });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -18,7 +20,6 @@ function MainPage() {
   const [isPanelOpen, setIsPanelOpen] = useState(false);  // 정주여건 패널 열림/닫힘
   const [scoreData, setScoreData] = useState(null); // 정주여건 점수 데이터
   const [toastVisible, setToastVisible] = useState(false); // 토스트 바 표시 여부
-
 
   const handleScoreReady = (data) => {
     setScoreData(data); // 정주여건 점수 저장
@@ -79,10 +80,10 @@ function MainPage() {
             정주여건
           </button>
           <button
-            className={`toggle-btn ${viewType === 'shop' ? 'active' : ''}`}
-            onClick={() => setViewType('shop')}
+            className={`toggle-btn ${viewType === 'news' ? 'active' : ''}`}
+            onClick={() => setViewType('news')}
           >
-            지역 탐방
+            진주시 뉴스
           </button>
         </div>
       </header>
@@ -91,27 +92,47 @@ function MainPage() {
       <main className="map-section">
         {/* 3. 카테고리 선택 영역 */}
         <div className="category-select-wrap">
-          <select value={shopCategory} onChange={(e) => setShopCategory(e.target.value)}>
-            <option value="0">가맹점 전체</option>
-            <option value="FOOD">음식점</option>
-            <option value="CAFE">카페/디저트</option>
-            <option value="STORE">편의점/마트</option>
-            <option value="MEDICAL">의료/약국</option>
-            <option value="LIFE">생활/미용</option>
-            <option value="ETC">기타</option>
-            <option value="NONE">선택 안함</option>
-          </select>
+          {viewType === 'noise' ? (
+            // 정주여건 탭일 때 기존 select
+            <>
+              <select value={shopCategory} onChange={(e) => setShopCategory(e.target.value)}>
+                <option value="0">가맹점 전체</option>
+                <option value="FOOD">음식점</option>
+                <option value="CAFE">카페/디저트</option>
+                <option value="STORE">편의점/마트</option>
+                <option value="MEDICAL">의료/약국</option>
+                <option value="LIFE">생활/미용</option>
+                <option value="ETC">기타</option>
+                <option value="NONE">선택 안함</option>
+              </select>
 
-          <select value={contentCategory} onChange={(e) => setContentCategory(e.target.value)}>
-            <option value="0">관광/문화 전체</option>
-            <option value="1">관광</option>
-            <option value="2">축제</option>
-            <option value="3">문화재</option>
-            <option value="4">공공 체육시설</option>
-            <option value="5">건축 미술</option>
-            <option value="6">공공 미술</option>
-            <option value="NONE">선택 안함</option>
-          </select>
+              <select value={contentCategory} onChange={(e) => setContentCategory(e.target.value)}>
+                <option value="0">관광/문화 전체</option>
+                <option value="1">관광</option>
+                <option value="2">축제</option>
+                <option value="3">문화재</option>
+                <option value="4">공공 체육시설</option>
+                <option value="5">건축 미술</option>
+                <option value="6">공공 미술</option>
+                <option value="NONE">선택 안함</option>
+              </select>
+            </>
+          ) : (
+            // 진주시 뉴스 탭일 때 뉴스 카테고리 select
+            <select
+              onChange={(e) => {
+                const [type, category] = e.target.value.split(',');
+                setNewsCategory({ contentType: Number(type), contentCategory: Number(category) });
+              }}
+            >
+              <option value="1,1">관광지</option>
+              <option value="1,2">축제</option>
+              <option value="1,3">문화재</option>
+              <option value="2,1">운동시설</option>
+              <option value="3,1">공공미술</option>
+              <option value="3,2">건축물미술</option>
+            </select>
+          )}
         </div>
         {/* 토스트 바 */}
         {toastVisible && (
@@ -125,18 +146,18 @@ function MainPage() {
             </button>
           </div>
         )}
-        <div className="map-placeholder">
-          {viewType === 'noise' ? '🔊 정주여건 로딩 중...' : '🛍️ 지역탐방 로딩 중...'}
-
-        </div>
-        <Kakaomap
-          viewType={viewType}
-          onAuthBtnClick={openAuthModal}
-          shopCategory={shopCategory}
-          contentCategory={contentCategory}
-          onScoreReady={handleScoreReady}
-          onMarkerClick={() => setToastVisible(false)}
-        />
+        {viewType === 'news' ? (
+          <NewsPanel newsCategory={newsCategory} />
+        ) : (
+          <Kakaomap
+            viewType={viewType}
+            onAuthBtnClick={openAuthModal}
+            shopCategory={shopCategory}
+            contentCategory={contentCategory}
+            onScoreReady={handleScoreReady}
+            onMarkerClick={() => setToastVisible(false)}
+          />
+        )}
       </main>
       <AuthModal
         isOpen={isAuthModalOpen}
@@ -162,5 +183,4 @@ function MainPage() {
     </div>
   );
 }
-
 export default MainPage;

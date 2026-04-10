@@ -1,6 +1,7 @@
 package com.hamoyeah.util.scheduler;
 
 import com.hamoyeah.contents.service.ContentsService;
+import com.hamoyeah.news.service.NewsService;
 import com.hamoyeah.safety.service.SafetyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 public class DataUpdateScheduler {
     private final ContentsService contentsService;
     private final SafetyService safetyService;
+    private final NewsService newsService;
 
     @Scheduled(cron = "0 0 3 * * MON")
     public void contentUpdate(){
@@ -45,5 +47,11 @@ public class DataUpdateScheduler {
 
     }
 
+    @Scheduled(cron = "0 0 9 * * *")  // 매일 오전 9시
+    public void newsUpdate(){
+        System.out.println("뉴스 캐시 갱신 시작");
+        newsService.refreshAllNewsCache();
+        System.out.println("뉴스 캐시 갱신 완료");
+    }
 
 }
