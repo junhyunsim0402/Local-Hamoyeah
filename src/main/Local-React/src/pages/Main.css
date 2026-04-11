@@ -64,6 +64,16 @@
   background-color: #f8f9fa;
 }
 
+.menu-explain {
+  padding: 12px 15px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #444;
+  cursor: pointer;
+  text-align: left;
+  border-top: 1px solid #f1f3f5;
+}
+
 .menu-item.logout {
   color: #ff6b6b; /* 로그아웃은 빨간색! */
   border-top: 1px solid #f1f3f5;

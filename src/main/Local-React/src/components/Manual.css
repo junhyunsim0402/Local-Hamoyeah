@@ -1,0 +1,69 @@
+.manual-page{
+    display: flex;
+    flex-direction: column;
+    height:100%;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #fff;
+    position: relative;
+}
+
+.manual-page p{
+    margin: 5px 0;
+    font-size: 0.9rem;
+}
+
+.manual-close{
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    font-weight: bold;
+    color: #999;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    z-index: 10; 
+}
+
+.start-ment {
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 900;
+    margin: 15px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #eee;
+}
+
+.start-ment>.first-ment{
+    font-size: 1.3rem;
+}
+
+.manual1, .manual2, .manual3{
+    height: 150px;
+    width: auto;
+    object-fit: contain;
+    margin-bottom: 5px;
+    margin-top: 20px;
+}
+
+.search-section, .verify-section, .point-section{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 0;
+    border-radius: 20px;
+    margin: 15px;
+    margin-bottom: 5px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}

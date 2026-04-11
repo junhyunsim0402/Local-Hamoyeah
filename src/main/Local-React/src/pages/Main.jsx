@@ -186,6 +186,11 @@ function MainPage() {
               <div className="menu-item" onClick={handleOpenMyPage}>
                 👤 마이페이지
               </div>
+              <div className="menu-explain" onClick={() => {
+                window.location.href = '/manual';
+              }}>
+                📝 설명서
+              </div>
               <div className="menu-item logout" onClick={() => {
                 localStorage.removeItem('token');
                 window.location.href = '/login';

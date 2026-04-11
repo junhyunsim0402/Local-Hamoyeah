@@ -7,6 +7,7 @@ import com.hamoyeah.userproof.dto.UserProofDto;
 import com.hamoyeah.userproof.entity.UserproofEntity;
 import com.hamoyeah.userproof.service.UserproofService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -57,11 +58,11 @@ public class UserproofController {
             if(email==null){
                 return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
             }
-            Optional<UserEntity> optionalUser1= userRepository.findByEmail(email);
-            if (!optionalUser1.isPresent()) {
+            Optional<UserEntity> optionalUser = userRepository.findByEmail(email);
+            if (!optionalUser.isPresent()) {
                 return ResponseEntity.status(401).body("사용자를 찾을 수 없습니다.");
             }
-            UserEntity user = optionalUser1.get();
+            UserEntity user = optionalUser.get();
             if(!user.isAdmin()){
                 return ResponseEntity.status(403).body("관리자 권한이 없습니다.");
             }
@@ -84,11 +85,11 @@ public class UserproofController {
             if(email==null){
                 return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
             }
-            Optional<UserEntity> optionalUser2 = userRepository.findByEmail(email);
-            if (optionalUser2.isEmpty()) {
+            Optional<UserEntity> optionalUser = userRepository.findByEmail(email);
+            if (optionalUser.isEmpty()) {
                 return ResponseEntity.status(401).body("사용자를 찾을 수 없습니다.");
             }
-            UserEntity user = optionalUser2.get();
+            UserEntity user = optionalUser.get();
             if(!user.isAdmin()){
                 return ResponseEntity.status(403).body("관리자 권한이 없습니다.");
             }
@@ -111,11 +112,11 @@ public class UserproofController {
             if(email==null) {
                 return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
             }
-            Optional<UserEntity> optionalUser3 = userRepository.findByEmail(email);
-            if (optionalUser3.isEmpty()) {
+            Optional<UserEntity> optionalUser = userRepository.findByEmail(email);
+            if (optionalUser.isEmpty()) {
                 return ResponseEntity.status(401).body("존재하지 않는 사용자입니다.");
             }
-            UserEntity user = optionalUser3.get();
+            UserEntity user = optionalUser.get();
             if(!user.isAdmin()){
                 return ResponseEntity.status(403).body("관리자 권한이 없습니다.");
             }
@@ -130,12 +131,28 @@ public class UserproofController {
     @GetMapping("/usermylist")
     public ResponseEntity<?> usermylist(@RequestHeader("Authorization")String token){
         if(token==null||!token.startsWith("Bearer ")){
-            return ResponseEntity.ok(false);
+            return ResponseEntity.status(401).body("토큰이 유효하지 않습니다.");
         }
         token=token.replace("Bearer ","");
-        String userEmail=userService.getClaim(token);
+        String email =userService.getClaim(token);
 
-        if(userEmail==null) return ResponseEntity.ok(false);
-        return ResponseEntity.ok(userproofService.usermylist(userEmail));
+        if(email ==null) return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
+        return ResponseEntity.ok(userproofService.usermylist(email));
+    }
+
+    // 각 장소에서 인증 승인된 갯수
+    @GetMapping("/verifycount")
+    public ResponseEntity<?> verifycount(
+            @RequestHeader(value = "Authorization") String token,
+            @RequestParam(required = false) Integer contentId,
+            @RequestParam(required = false) Integer shopId) {
+        if(token==null||!token.startsWith("Bearer ")){
+            return ResponseEntity.status(401).body("토큰이 유효하지 않습니다.");
+        }
+        token=token.replace("Bearer ","");
+        String email =userService.getClaim(token);
+        if(email ==null) return ResponseEntity.status(401).body("인증 정보가 만료되었습니다.");
+        long count = userproofService.verifycount(contentId, shopId);
+        return ResponseEntity.ok(count);
     }
 }
