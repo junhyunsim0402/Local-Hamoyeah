@@ -63,98 +63,130 @@ function MainPage() {
     setIsPanelOpen(false); // 정주여건 패널 성공
   };  // 정주여건 패널 점수 함수
 
-  const handleMarkerClick = useCallback((data) => {
+  const handleMarkerClick = useCallback(async (data) => {
     setToastVisible(false);
+    const token = localStorage.getItem('token');
 
-    
+    const items = data.items || []; 
+    const enrichedItems = items.map(item => {
+      const isShop = !!item.shopId;
+      const itemId = isShop ? item.shopId : item.contentsId;
+      const found = userFavsRef.current.find(f => 
+        isShop ? String(f.shopId) === String(itemId) : String(f.contentId) === String(itemId)
+      );
+      return { ...item, isFavorite: !!found, favId: found?.favId || null };
+    });
+
     const place = data.selectedPlace; 
     if (!place) return;
 
     const isShop = !!place.shopId;
     const targetId = isShop ? place.shopId : place.contentsId;
 
-    console.log("현재 클릭한 장소 ID:", targetId);
-    console.log("내 즐겨찾기 목록:", userFavsRef.current);
-
     
-    const existingFav = userFavsRef.current.find(f => {
-      if (isShop) {
+    const currentFav = userFavsRef.current.find(f => 
+      isShop ? String(f.shopId) === String(targetId) : String(f.contentId) === String(targetId)
+    );
+
+    try {
+      const params = isShop ? `shopId=${targetId}` : `contentId=${targetId}`;
+      const [resFav, resProof] = await Promise.all([
+      axios.get(`http://localhost:8080/fav/count?${params}`),
+      axios.get(`http://localhost:8080/userproof/verifycount?${params}`, {
+        headers: { Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}` } // 토큰 형식 맞추기!
+      })
+    ]);
+
+      const enrichedData = {
+        ...data,
+        items: enrichedItems,
         
-        return f.shopId && String(f.shopId) === String(targetId);
-      } else {
-        
-        return f.contentId && String(f.contentId) === String(targetId);
-      }
-    });
+        isFavorite: !!currentFav,
+        favId: currentFav?.favId || null,
+        selectedPlace: {
+          ...place,
+          favCount: resFav.data,
+          proofCount: resProof.data,
+          isFavorite: !!currentFav,
+          favId: currentFav?.favId || null
+        },
+        targetId: data.targetId 
+      };
 
-    console.log("즐겨찾기 매칭 결과:", existingFav);
-
-    
-    const enrichedData = {
-      ...data,
-      isFavorite: !!existingFav,
-      favId: existingFav?.favId || null
-    };
-
-    setSelectedPlaceInfo(enrichedData);
-    setIsDetailModalOpen(true);
+      setSelectedPlaceInfo(enrichedData);
+      setIsDetailModalOpen(true);
+    } catch (err) {
+      console.error("데이터 로드 실패:", err);
+      setSelectedPlaceInfo({ 
+          ...data, 
+          items: enrichedItems,
+          isFavorite: !!currentFav,
+          favId: currentFav?.favId || null,
+          selectedPlace: { ...place, favCount: 0 } 
+      });
+      setIsDetailModalOpen(true);
+    }
   }, []);
 
   const handleFavoriteToggle = async (favInfo) => {
-  const token = localStorage.getItem('token');
-  const { id, type, isFavorite, favId } = favInfo;
+    const token = localStorage.getItem('token');
+    const { id, type, isFavorite, favId } = favInfo;
 
-  try {
-    
-    if (isFavorite) {
-      await axios.delete(`http://localhost:8080/fav?favId=${favId}`, { headers: { Authorization: token } });
-    } else {
-      const postData = type === 'SHOP' ? { shopId: id } : { contentId: id };
-      await axios.post("http://localhost:8080/fav", postData, { headers: { Authorization: token } });
-    }
+    try {
+      if (isFavorite) {
+        await axios.delete(`http://localhost:8080/fav?favId=${favId}`, { headers: { Authorization: token } });
+      } else {
+        const postData = type === 'SHOP' ? { shopId: id } : { contentId: id };
+        await axios.post("http://localhost:8080/fav", postData, { headers: { Authorization: token } });
+      }
 
-    
-    const resFavs = await axios.get("http://localhost:8080/fav", { headers: { Authorization: token } });
-    const params = type === 'SHOP' ? `shopId=${id}` : `contentId=${id}`;
-    const resCount = await axios.get(`http://localhost:8080/fav/count?${params}`);
-    const latestCount = resCount.data;
+      const resFavs = await axios.get("http://localhost:8080/fav", { headers: { Authorization: token } });
+      const params = type === 'SHOP' ? `shopId=${id}` : `contentId=${id}`;
+      const resCount = await axios.get(`http://localhost:8080/fav/count?${params}`);
+      const latestCount = resCount.data;
 
-    setUserFavs(resFavs.data);
-    userFavsRef.current = resFavs.data;
+      setUserFavs(resFavs.data);
+      userFavsRef.current = resFavs.data;
 
-    
-    setSelectedPlaceInfo(prev => {
-      const isShop = type === 'SHOP';
-      
-      
-      const updatedItems = prev.items?.map(item => {
-        const itemId = isShop ? item.shopId : item.contentsId;
-        if (String(itemId) === String(id)) {
-          return { ...item, favCount: latestCount };
-        }
-        return item;
+      setSelectedPlaceInfo(prev => {
+        const isShop = type === 'SHOP';
+        const newEntry = resFavs.data.find(f => 
+          isShop ? String(f.shopId) === String(id) : String(f.contentId) === String(id)
+        );
+
+        
+        const updatedItems = prev.items?.map(item => {
+          const itemId = isShop ? item.shopId : item.contentsId;
+          if (String(itemId) === String(id)) {
+            return { 
+              ...item, 
+              isFavorite: !isFavorite, 
+              favId: newEntry ? newEntry.favId : null, 
+              favCount: latestCount 
+            };
+          }
+          return item;
+        });
+
+        
+        const toggledItem = updatedItems?.find(item => {
+          const itemId = isShop ? item.shopId : item.contentsId;
+          return String(itemId) === String(id);
+        });
+
+        return {
+          ...prev,
+          items: updatedItems, 
+          isFavorite: toggledItem?.isFavorite,
+          favId: toggledItem?.favId,
+          selectedPlace: toggledItem 
+        };
       });
 
-      const newEntry = resFavs.data.find(f => 
-        isShop ? String(f.shopId) === String(id) : String(f.contentId) === String(id)
-      );
-
-      return {
-        ...prev,
-        isFavorite: !isFavorite,
-        favId: newEntry ? newEntry.favId : null,
-        items: updatedItems, 
-        selectedPlace: {
-          ...prev.selectedPlace,
-          favCount: latestCount 
-        }
-      };
-    });
-
-    console.log(`DB 동기화 완료: ${latestCount}개`);
-  } catch (err) {
-    console.error("처리 실패:", err);
-  }
+      console.log(`DB 동기화 완료: ${latestCount}개`);
+    } catch (err) {
+      console.error("처리 실패:", err);
+    }
 };
 
   const openAuthModal = (data) => {

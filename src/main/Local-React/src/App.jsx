@@ -33,9 +33,6 @@ function App() {
           <span className="footer-text">© 2026 하모예. All rights reserved.</span>
         </footer>
       </div>
-      <div>
-        <Manual/>
-      </div>
     </>
   );
 }
