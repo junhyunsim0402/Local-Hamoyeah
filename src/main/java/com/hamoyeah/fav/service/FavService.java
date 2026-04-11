@@ -13,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,10 +28,22 @@ public class FavService {
     // 즐겨찾기 등록
     public FavEntity register(String email, FavDto favDto){
         Optional<UserEntity> optionalUser=userRepository.findByEmail(email);
-        if(optionalUser.isEmpty()){
-            return null;
-        }
+        if(optionalUser.isEmpty()){return null;}
+
         UserEntity user=optionalUser.get();
+
+        if (favDto.getContentId() != null) {
+            // 이미 해당 유저가 이 컨텐츠를 즐겨찾기 했는지 확인
+            Optional<FavEntity> existing = favRepository.findByUserEntity_EmailAndContentsEntity_ContentId(email, favDto.getContentId());
+            if (existing.isPresent()) return existing.get(); // 이미 있으면 그냥 반환
+        }
+
+        if (favDto.getShopId() != null) {
+            // 이미 해당 유저가 이 상점을 즐겨찾기 했는지 확인
+            Optional<FavEntity> existing = favRepository.findByUserEntity_EmailAndShopEntity_ShopId(email, favDto.getShopId());
+            if (existing.isPresent()) return existing.get(); // 이미 있으면 그냥 반환
+        }
+
         ContentsEntity content=null;
         ShopEntity shop=null;
 
@@ -78,5 +92,13 @@ public class FavService {
             return favRepository.countByShopEntity_ShopId(favDto.getShopId());
         }
         return 0;
+    }
+
+    // 사용자가 즐거찾기한 것들 가져오기
+    public List<FavDto> getUserFavorites(String email) {
+        return favRepository.findByUserEntity_Email(email)
+                .stream()
+                .map(FavEntity::toDto)
+                .collect(Collectors.toList());
     }
 }

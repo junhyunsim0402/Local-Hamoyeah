@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './Main.css';
 import logo from '../assets/logo.png';
 import Kakaomap from '../components/KakaoMap'
@@ -7,8 +7,10 @@ import MyPageModal from '../components/MyPageModal';
 import ScorePanel from '../components/ScorePanel';
 import NewsPanel from '../components/NewsPanel';
 import DetailModal from '../components/DetailModal';
+import axios from 'axios';
 
 function MainPage() {
+
   const [viewType, setViewType] = useState('noise');
   const [newsCategory, setNewsCategory] = useState({ contentType: 1, contentCategory: 1 }); // 뉴스카테고리 기본값 : 관광
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -22,8 +24,38 @@ function MainPage() {
   const [scoreData, setScoreData] = useState(null); // 정주여건 점수 데이터
   const [toastVisible, setToastVisible] = useState(false); // 토스트 바 표시 여부
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false); // 상세 모달 열림 여부
-const [selectedPlaceInfo, setSelectedPlaceInfo] = useState(null);  // 클릭된 장소의 정보
+  const [selectedPlaceInfo, setSelectedPlaceInfo] = useState(null);  // 클릭된 장소의 정보
+  const [userFavs, setUserFavs] = useState([]); // 내 즐겨찾기 목록 저장소
+  const userFavsRef = useRef([]);
+  const [isFavLoaded, setIsFavLoaded] = useState(false);
 
+  const fetchUserFavs = useCallback(async () => {
+    const token = localStorage.getItem('token'); 
+    if (!token) return;
+
+    try {
+      const res = await axios.get("http://localhost:8080/fav", {
+        headers: { Authorization: token }
+      });
+      
+      // ⭐ 상태 업데이트와 동시에 Ref도 즉시 업데이트! (가장 중요)
+      setUserFavs(res.data);
+      userFavsRef.current = res.data; 
+      
+      console.log("즐겨찾기 목록 로드 및 Ref 저장 완료:", res.data);
+      setIsFavLoaded(true);
+    } catch (err) {
+      console.error("즐겨찾기 목록 로드 실패:", err);
+      setIsFavLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    userFavsRef.current = userFavs;
+  }, [userFavs]);
+  useEffect(() => {
+    fetchUserFavs();
+  }, [fetchUserFavs]);
 
   const handleScoreReady = (data) => {
     setScoreData(data); // 정주여건 점수 저장
@@ -31,11 +63,99 @@ const [selectedPlaceInfo, setSelectedPlaceInfo] = useState(null);  // 클릭된 
     setIsPanelOpen(false); // 정주여건 패널 성공
   };  // 정주여건 패널 점수 함수
 
-  const handleMarkerClick = (data) => {
+  const handleMarkerClick = useCallback((data) => {
     setToastVisible(false);
-    setSelectedPlaceInfo(data);
+
+    
+    const place = data.selectedPlace; 
+    if (!place) return;
+
+    const isShop = !!place.shopId;
+    const targetId = isShop ? place.shopId : place.contentsId;
+
+    console.log("현재 클릭한 장소 ID:", targetId);
+    console.log("내 즐겨찾기 목록:", userFavsRef.current);
+
+    
+    const existingFav = userFavsRef.current.find(f => {
+      if (isShop) {
+        
+        return f.shopId && String(f.shopId) === String(targetId);
+      } else {
+        
+        return f.contentId && String(f.contentId) === String(targetId);
+      }
+    });
+
+    console.log("즐겨찾기 매칭 결과:", existingFav);
+
+    
+    const enrichedData = {
+      ...data,
+      isFavorite: !!existingFav,
+      favId: existingFav?.favId || null
+    };
+
+    setSelectedPlaceInfo(enrichedData);
     setIsDetailModalOpen(true);
-  };
+  }, []);
+
+  const handleFavoriteToggle = async (favInfo) => {
+  const token = localStorage.getItem('token');
+  const { id, type, isFavorite, favId } = favInfo;
+
+  try {
+    
+    if (isFavorite) {
+      await axios.delete(`http://localhost:8080/fav?favId=${favId}`, { headers: { Authorization: token } });
+    } else {
+      const postData = type === 'SHOP' ? { shopId: id } : { contentId: id };
+      await axios.post("http://localhost:8080/fav", postData, { headers: { Authorization: token } });
+    }
+
+    
+    const resFavs = await axios.get("http://localhost:8080/fav", { headers: { Authorization: token } });
+    const params = type === 'SHOP' ? `shopId=${id}` : `contentId=${id}`;
+    const resCount = await axios.get(`http://localhost:8080/fav/count?${params}`);
+    const latestCount = resCount.data;
+
+    setUserFavs(resFavs.data);
+    userFavsRef.current = resFavs.data;
+
+    
+    setSelectedPlaceInfo(prev => {
+      const isShop = type === 'SHOP';
+      
+      
+      const updatedItems = prev.items?.map(item => {
+        const itemId = isShop ? item.shopId : item.contentsId;
+        if (String(itemId) === String(id)) {
+          return { ...item, favCount: latestCount };
+        }
+        return item;
+      });
+
+      const newEntry = resFavs.data.find(f => 
+        isShop ? String(f.shopId) === String(id) : String(f.contentId) === String(id)
+      );
+
+      return {
+        ...prev,
+        isFavorite: !isFavorite,
+        favId: newEntry ? newEntry.favId : null,
+        items: updatedItems, 
+        selectedPlace: {
+          ...prev.selectedPlace,
+          favCount: latestCount 
+        }
+      };
+    });
+
+    console.log(`DB 동기화 완료: ${latestCount}개`);
+  } catch (err) {
+    console.error("처리 실패:", err);
+  }
+};
 
   const openAuthModal = (data) => {
     setAuthData(data);
@@ -156,14 +276,20 @@ const [selectedPlaceInfo, setSelectedPlaceInfo] = useState(null);  // 클릭된 
         {viewType === 'news' ? (
           <NewsPanel newsCategory={newsCategory} />
         ) : (
-          <Kakaomap
-            viewType={viewType}
-            onAuthBtnClick={openAuthModal}
-            shopCategory={shopCategory}
-            contentCategory={contentCategory}
-            onScoreReady={handleScoreReady}
-            onMarkerClick={handleMarkerClick}
-          />
+          isFavLoaded ? (
+            <Kakaomap
+              viewType={viewType}
+              onAuthBtnClick={openAuthModal}
+              shopCategory={shopCategory}
+              contentCategory={contentCategory}
+              onScoreReady={handleScoreReady}
+              onMarkerClick={handleMarkerClick}
+            />
+          ) : (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', background: '#f0f0f0' }}>
+              <p>📍 정보를 불러오는 중입니다...</p>
+            </div>
+          )
         )}
       </main>
       <AuthModal
@@ -193,6 +319,7 @@ const [selectedPlaceInfo, setSelectedPlaceInfo] = useState(null);  // 클릭된 
           data={selectedPlaceInfo}
           onClose={() => setIsDetailModalOpen(false)}
           onAuthClick={openAuthModal}
+          onFavoriteClick={handleFavoriteToggle}
         />
       )}
     </div>

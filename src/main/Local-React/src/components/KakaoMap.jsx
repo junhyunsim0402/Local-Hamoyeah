@@ -20,7 +20,10 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
     const authContentsRef = useRef([]);         // 인증 가능 목록 저장용
     const shopCategoryRef = useRef('0');
     const contentCategoryRef = useRef('0');
-
+    const onMarkerClickRef = useRef(onMarkerClick);
+    useEffect(() => {
+        onMarkerClickRef.current = onMarkerClick;
+    }, [onMarkerClick]);
     const groupNearbyContents = (contents) => {
         return contents.reduce((acc, item) => {
             const latFixed = parseFloat(item.lat).toFixed(4); // 약 11m 반경 그룹화
@@ -91,11 +94,11 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                 (auth.contentsId && auth.contentsId === firstItem.contentsId) ||
                 (auth.shopId && auth.shopId === firstItem.shopId)
             );
-            if (onMarkerClick) {
-                onMarkerClick({
-                    isMultiple: isMultiple, // 여러 개 뭉쳐있는지 여부
-                    items: items,           // 뭉쳐있다면 그 리스트 전체
-                    selectedPlace: firstItem, // 하나라면 그 장소 정보
+            if (onMarkerClickRef.current) {
+                onMarkerClickRef.current({
+                    isMultiple: isMultiple,
+                    items: items,
+                    selectedPlace: firstItem,
                     targetType: firstItem.shopId ? 'SHOP' : 'CONTENT',
                     targetId: firstItem.shopId ?? firstItem.contentsId,
                     isAuthable
