@@ -6,6 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FavRepository extends JpaRepository<FavEntity, Integer> {
-    Integer countByContentsEntity_ContentId(Integer contentId);
-    Integer countByShopEntity_ShopId(Integer shopId);
 }

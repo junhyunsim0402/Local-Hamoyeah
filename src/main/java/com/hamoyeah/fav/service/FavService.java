@@ -68,15 +68,4 @@ public class FavService {
             } else{return null;}
         } else{return null;}
     }
-
-    // 즐겨찾기 갯수
-    public Integer favCount(FavDto favDto){
-        if(favDto.getContentId()!=null){
-            return favRepository.countByContentsEntity_ContentId(favDto.getContentId());
-        }
-        if(favDto.getShopId()!=null){
-            return favRepository.countByShopEntity_ShopId(favDto.getShopId());
-        }
-        return 0;
-    }
 }

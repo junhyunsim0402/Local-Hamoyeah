@@ -58,18 +58,4 @@ public class FavController {
             return ResponseEntity.status(500).body("즐겨찾기 삭제에 실패하였습니다.");
         }
     }
-
-    // 즐겨찾기 갯수
-    @GetMapping("/count")
-    public ResponseEntity<?> favCount(
-            @RequestHeader(value="Authorization", required = false) String bearerToken,
-            @RequestParam(required = false) Integer contentId,
-            @RequestParam(required = false) Integer shopId){
-        FavDto favDto=FavDto.builder()
-                .contentId(contentId)
-                .shopId(shopId)
-                .build();
-        Integer count= favService.favCount(favDto);
-        return ResponseEntity.ok(count);
-    }
 }

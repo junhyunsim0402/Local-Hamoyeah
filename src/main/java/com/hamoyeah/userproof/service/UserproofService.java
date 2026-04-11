@@ -11,7 +11,6 @@ import com.hamoyeah.userproof.entity.UserproofEntity;
 import com.hamoyeah.userproof.repository.UserproofRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class UserproofService {
-    @Autowired
     private final UserproofRepository userproofRepository;
     private final UserRepository userRepository;
     private final ContentsRepository contentsRepository;
@@ -96,5 +94,15 @@ public class UserproofService {
         return entities.stream()
                 .map(UserproofEntity::toDto)
                 .collect(Collectors.toList());
+    }
+
+    // 각 장소에서 인증 승인된 갯수
+    public Integer verifycount(Integer contentId, Integer shopId){
+        Integer count=0;
+        if(contentId!=null){
+            count=userproofRepository.countByContentsEntity_ContentIdAndStatus(contentId, "승인");
+        } else if(shopId!=null){
+            count=userproofRepository.countByShopEntity_ShopIdAndStatus(shopId, "승인");
+        } return (count!=null)?count:0;
     }
 }

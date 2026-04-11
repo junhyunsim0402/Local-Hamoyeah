@@ -21,4 +21,6 @@ public interface UserproofRepository extends JpaRepository<UserproofEntity, Inte
             "LEFT JOIN FETCH p.shopEntity " +
             "ORDER BY p.createdAt DESC")
     List<UserproofEntity> findAllWithDetails();
+    Integer countByContentsEntity_ContentIdAndStatus(Integer contentId, String status);
+    Integer countByShopEntity_ShopIdAndStatus(Integer shopId, String status);
 }
