@@ -6,7 +6,8 @@ function DetailModal({ isOpen, data, onClose, onAuthClick, onFavoriteClick }) {
   const [viewMode, setViewMode] = useState('DETAIL');
   const [selectedId, setSelectedId] = useState(null);
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
-
+  const [youtubeVideos, setYoutubeVideos] = useState([]);
+  const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
   const scrollContainerRef = useRef(null);
   const lastTargetIdRef = useRef(null);
 
@@ -24,11 +25,38 @@ function DetailModal({ isOpen, data, onClose, onAuthClick, onFavoriteClick }) {
     return data.selectedPlace;
   })();
 
+  const fetchYoutubeVideos = async (query) => {
+    try {
+      const res = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+        params: {
+          part: 'snippet',
+          q: `진주 ${query}`,
+          maxResults: 3,      
+          type: 'video',
+          key: YOUTUBE_API_KEY,
+        }
+      });
+      setYoutubeVideos(res.data.items);
+    } catch (err) {
+      console.error("유튜브 로드 실패:", err);
+    }
+  };
+
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
   }, [viewMode, activeItem]);
+
+  useEffect(() => {
+    const contentType = Number(activeItem?.categoryId); 
+
+    if (isOpen && [1, 2, 3].includes(contentType) && activeItem?.contentsTitle) {
+      fetchYoutubeVideos(activeItem.contentsTitle);
+    } else {
+      setYoutubeVideos([]);
+    }
+  }, [activeItem, isOpen]);
 
  useEffect(() => {
   if (!isOpen) {
@@ -169,6 +197,46 @@ function DetailModal({ isOpen, data, onClose, onAuthClick, onFavoriteClick }) {
               <div className="detail-description">
                 <p>{activeItem?.contentDes || activeItem?.rawCategory || "이 장소에 대한 설명이 아직 없습니다."}</p>
               </div>
+
+              {youtubeVideos.length > 0 && (
+                <div className="youtube-section" style={{ marginTop: '20px', padding: '0 15px' }}>
+                  <h3 style={{ fontSize: '1rem', marginBottom: '10px', color: '#333' }}>📺 관련 유튜브 영상</h3>
+                  <div className="youtube-list" style={{ 
+                    display: 'flex', 
+                    gap: '12px', 
+                    overflowX: 'auto', 
+                    paddingBottom: '10px',
+                    WebkitOverflowScrolling: 'touch' // 모바일 부드러운 스크롤
+                  }}>
+                    {youtubeVideos.map((video, idx) => (
+                      <a 
+                        key={idx} 
+                        href={`https://www.youtube.com/watch?v=${video.id.videoId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ textDecoration: 'none', color: 'inherit', minWidth: '160px', width: '160px' }}
+                      >
+                        <img 
+                          src={video.snippet.thumbnails.medium.url} 
+                          alt={video.snippet.title} 
+                          style={{ width: '100%', borderRadius: '8px', aspectRatio: '16/9', objectFit: 'cover' }} 
+                        />
+                        <p style={{ 
+                          fontSize: '0.8rem', 
+                          marginTop: '6px', 
+                          lineHeight: '1.3',
+                          display: '-webkit-box', 
+                          WebkitLineClamp: 2, 
+                          WebkitBoxOrient: 'vertical', 
+                          overflow: 'hidden' 
+                        }}>
+                          {video.snippet.title}
+                        </p>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="detail-stats">
                 <div className="stat-box">
