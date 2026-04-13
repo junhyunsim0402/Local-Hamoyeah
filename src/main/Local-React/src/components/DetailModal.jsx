@@ -10,6 +10,7 @@ function DetailModal({ isOpen, data, onClose, onAuthClick, onFavoriteClick }) {
   const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
   const scrollContainerRef = useRef(null);
   const lastTargetIdRef = useRef(null);
+  const lastSearchedIdRef = useRef(null);
 
   const activeItem = (() => {
     if (!data.isMultiple && data.selectedPlace) {
@@ -34,6 +35,10 @@ function DetailModal({ isOpen, data, onClose, onAuthClick, onFavoriteClick }) {
           maxResults: 3,      
           type: 'video',
           key: YOUTUBE_API_KEY,
+          safeSearch: 'strict', 
+          relevanceLanguage: 'ko',
+          regionCode: 'KR',
+          order: 'relevance',
         }
       });
       setYoutubeVideos(res.data.items);
@@ -49,12 +54,17 @@ function DetailModal({ isOpen, data, onClose, onAuthClick, onFavoriteClick }) {
   }, [viewMode, activeItem]);
 
   useEffect(() => {
-    const contentType = Number(activeItem?.categoryId); 
+    const contentType = Number(activeItem?.categoryId);
+    const currentId = activeItem?.contentsId || activeItem?.shopId;
 
     if (isOpen && [1, 2, 3].includes(contentType) && activeItem?.contentsTitle) {
-      fetchYoutubeVideos(activeItem.contentsTitle);
-    } else {
+      if (lastSearchedIdRef.current !== currentId) {
+        fetchYoutubeVideos(activeItem.contentsTitle);
+        lastSearchedIdRef.current = currentId; 
+      }
+    } else if (!isOpen) {
       setYoutubeVideos([]);
+      lastSearchedIdRef.current = null;
     }
   }, [activeItem, isOpen]);
 
