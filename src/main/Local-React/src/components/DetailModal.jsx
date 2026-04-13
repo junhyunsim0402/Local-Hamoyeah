@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './DetailModal.css';
 import axios from 'axios';
-
+const YOUTUBE_KEYS = [
+    import.meta.env.VITE_YOUTUBE_API_KEY_1,
+    import.meta.env.VITE_YOUTUBE_API_KEY_2,
+    import.meta.env.VITE_YOUTUBE_API_KEY_3,
+  ].filter(key => key);
 function DetailModal({ isOpen, data, onClose, onAuthClick, onFavoriteClick }) {
   const [viewMode, setViewMode] = useState('DETAIL');
   const [selectedId, setSelectedId] = useState(null);
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const [youtubeVideos, setYoutubeVideos] = useState([]);
-  const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
+  const keyIndexRef = useRef(0);
   const scrollContainerRef = useRef(null);
   const lastTargetIdRef = useRef(null);
   const lastSearchedIdRef = useRef(null);
@@ -27,24 +31,42 @@ function DetailModal({ isOpen, data, onClose, onAuthClick, onFavoriteClick }) {
   })();
 
   const fetchYoutubeVideos = async (query) => {
-    try {
-      const res = await axios.get('https://www.googleapis.com/youtube/v3/search', {
-        params: {
-          part: 'snippet',
-          q: `진주 ${query}`,
-          maxResults: 3,      
-          type: 'video',
-          key: YOUTUBE_API_KEY,
-          safeSearch: 'strict', 
-          relevanceLanguage: 'ko',
-          regionCode: 'KR',
-          order: 'relevance',
+    let attempts = 0;
+    while (attempts < YOUTUBE_KEYS.length) {
+      const currentKey = YOUTUBE_KEYS[keyIndexRef.current];
+      
+      try {
+        const res = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+          params: {
+            part: 'snippet',
+            q: `진주 ${query}`,
+            maxResults: 3,
+            type: 'video',
+            key: currentKey,
+            safeSearch: 'strict',
+            relevanceLanguage: 'ko',
+            regionCode: 'KR',
+            order: 'relevance'
+          }
+        });
+        
+        setYoutubeVideos(res.data.items);
+        return; 
+
+      } catch (err) {
+        
+        if (err.response?.status === 403) {
+          console.warn(`키 ${keyIndexRef.current + 1}번 소진! 다음 키로 교체합니다.`);
+          
+          keyIndexRef.current = (keyIndexRef.current + 1) % YOUTUBE_KEYS.length;
+          attempts++;
+        } else {
+          console.error("유튜브 로드 실패:", err);
+          break;
         }
-      });
-      setYoutubeVideos(res.data.items);
-    } catch (err) {
-      console.error("유튜브 로드 실패:", err);
+      }
     }
+    console.error("모든 유튜브 API 키의 할당량이 소진");
   };
 
   useEffect(() => {
