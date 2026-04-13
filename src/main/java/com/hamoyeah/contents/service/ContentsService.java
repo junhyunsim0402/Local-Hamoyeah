@@ -168,8 +168,15 @@ public class ContentsService {
             geocodingService.fillCoordinates(entity);
 
             contentsRepository.save(entity);
-            try { Thread.sleep(50); } catch (InterruptedException e) { }
+        }else {
+            // 기존 데이터 imgUrl만 업데이트
+            contentsRepository.findByContentTitle(title).ifPresent(entity -> {
+                entity.setImgUrl(String.valueOf(item.get("images")));
+                contentsRepository.save(entity);
+            });
         }
+        try { Thread.sleep(50); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+
     }
     /*
      * 문자열 형태의 좌표 데이터를 안전하게 Double로 변환하는 메서드

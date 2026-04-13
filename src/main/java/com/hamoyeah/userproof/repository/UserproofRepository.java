@@ -23,4 +23,6 @@ public interface UserproofRepository extends JpaRepository<UserproofEntity, Inte
     List<UserproofEntity> findAllWithDetails();
     Integer countByContentsEntity_ContentIdAndStatus(Integer contentId, String status);
     Integer countByShopEntity_ShopIdAndStatus(Integer shopId, String status);
+
+    List<UserproofEntity> findByStatusAndContentsEntityIsNotNull(String status);
 }

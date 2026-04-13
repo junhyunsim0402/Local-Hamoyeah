@@ -8,6 +8,7 @@ import ScorePanel from '../components/ScorePanel';
 import NewsPanel from '../components/NewsPanel';
 import DetailModal from '../components/DetailModal';
 import axios from 'axios';
+import RecommendBanner from '../components/RecommendBanner';
 
 function MainPage() {
 
@@ -25,23 +26,25 @@ function MainPage() {
   const [toastVisible, setToastVisible] = useState(false); // 토스트 바 표시 여부
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false); // 상세 모달 열림 여부
   const [selectedPlaceInfo, setSelectedPlaceInfo] = useState(null);  // 클릭된 장소의 정보
+  const [isRecommendOpen, setIsRecommendOpen] = useState(false);  // 진주 추천 창 여부
+  const [moveToLocation, setMoveToLocation] = useState(null);   // 추천 content 클릭 여부
   const [userFavs, setUserFavs] = useState([]); // 내 즐겨찾기 목록 저장소
   const userFavsRef = useRef([]);
   const [isFavLoaded, setIsFavLoaded] = useState(false);
 
   const fetchUserFavs = useCallback(async () => {
-    const token = localStorage.getItem('token'); 
+    const token = localStorage.getItem('token');
     if (!token) return;
 
     try {
       const res = await axios.get("http://localhost:8080/fav", {
         headers: { Authorization: token }
       });
-      
+
       // ⭐ 상태 업데이트와 동시에 Ref도 즉시 업데이트! (가장 중요)
       setUserFavs(res.data);
-      userFavsRef.current = res.data; 
-      
+      userFavsRef.current = res.data;
+
       console.log("즐겨찾기 목록 로드 및 Ref 저장 완료:", res.data);
       setIsFavLoaded(true);
     } catch (err) {
@@ -67,24 +70,24 @@ function MainPage() {
     setToastVisible(false);
     const token = localStorage.getItem('token');
 
-    const items = data.items || []; 
+    const items = data.items || [];
     const enrichedItems = items.map(item => {
       const isShop = !!item.shopId;
       const itemId = isShop ? item.shopId : item.contentsId;
-      const found = userFavsRef.current.find(f => 
+      const found = userFavsRef.current.find(f =>
         isShop ? String(f.shopId) === String(itemId) : String(f.contentId) === String(itemId)
       );
       return { ...item, isFavorite: !!found, favId: found?.favId || null };
     });
 
-    const place = data.selectedPlace; 
+    const place = data.selectedPlace;
     if (!place) return;
 
     const isShop = !!place.shopId;
     const targetId = isShop ? place.shopId : place.contentsId;
 
-    
-    const currentFav = userFavsRef.current.find(f => 
+
+    const currentFav = userFavsRef.current.find(f =>
       isShop ? String(f.shopId) === String(targetId) : String(f.contentId) === String(targetId)
     );
 
@@ -100,7 +103,7 @@ function MainPage() {
       const enrichedData = {
         ...data,
         items: enrichedItems,
-        
+
         isFavorite: !!currentFav,
         favId: currentFav?.favId || null,
         selectedPlace: {
@@ -110,19 +113,19 @@ function MainPage() {
           isFavorite: !!currentFav,
           favId: currentFav?.favId || null
         },
-        targetId: data.targetId 
+        targetId: data.targetId
       };
 
       setSelectedPlaceInfo(enrichedData);
       setIsDetailModalOpen(true);
     } catch (err) {
       console.error("데이터 로드 실패:", err);
-      setSelectedPlaceInfo({ 
-          ...data, 
+      setSelectedPlaceInfo({
+          ...data,
           items: enrichedItems,
           isFavorite: !!currentFav,
           favId: currentFav?.favId || null,
-          selectedPlace: { ...place, favCount: 0 } 
+          selectedPlace: { ...place, favCount: 0 }
       });
       setIsDetailModalOpen(true);
     }
@@ -150,25 +153,25 @@ function MainPage() {
 
       setSelectedPlaceInfo(prev => {
         const isShop = type === 'SHOP';
-        const newEntry = resFavs.data.find(f => 
+        const newEntry = resFavs.data.find(f =>
           isShop ? String(f.shopId) === String(id) : String(f.contentId) === String(id)
         );
 
-        
+
         const updatedItems = prev.items?.map(item => {
           const itemId = isShop ? item.shopId : item.contentsId;
           if (String(itemId) === String(id)) {
-            return { 
-              ...item, 
-              isFavorite: !isFavorite, 
-              favId: newEntry ? newEntry.favId : null, 
-              favCount: latestCount 
+            return {
+              ...item,
+              isFavorite: !isFavorite,
+              favId: newEntry ? newEntry.favId : null,
+              favCount: latestCount
             };
           }
           return item;
         });
 
-        
+
         const toggledItem = updatedItems?.find(item => {
           const itemId = isShop ? item.shopId : item.contentsId;
           return String(itemId) === String(id);
@@ -176,10 +179,10 @@ function MainPage() {
 
         return {
           ...prev,
-          items: updatedItems, 
+          items: updatedItems,
           isFavorite: toggledItem?.isFavorite,
           favId: toggledItem?.favId,
-          selectedPlace: toggledItem 
+          selectedPlace: toggledItem
         };
       });
 
@@ -200,6 +203,11 @@ function MainPage() {
 
     setIsMyPageOpen(true);
   };
+
+  const handleRecommendClick = (item) => {
+    setIsRecommendOpen(false);
+    setMoveToLocation({ lat: item.lat, lng: item.lng });
+};
 
   return (
     <div className="main-page">
@@ -314,14 +322,24 @@ function MainPage() {
           <NewsPanel newsCategory={newsCategory} />
         ) : (
           isFavLoaded ? (
-            <Kakaomap
-              viewType={viewType}
-              onAuthBtnClick={openAuthModal}
-              shopCategory={shopCategory}
-              contentCategory={contentCategory}
-              onScoreReady={handleScoreReady}
-              onMarkerClick={handleMarkerClick}
-            />
+            <>
+              <button
+                className="recommend-btn"
+                onClick={() => setIsRecommendOpen(!isRecommendOpen)}
+              >
+                🏆 {isRecommendOpen ? '추천 닫기' : '오늘의 추천'}
+              </button>
+              {isRecommendOpen && <RecommendBanner onContentClick={handleRecommendClick} />}
+              <Kakaomap
+                viewType={viewType}
+                onAuthBtnClick={openAuthModal}
+                shopCategory={shopCategory}
+                contentCategory={contentCategory}
+                onScoreReady={handleScoreReady}
+                onMarkerClick={handleMarkerClick}
+                moveToLocation={moveToLocation}
+              />
+            </>
           ) : (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', background: '#f0f0f0' }}>
               <p>📍 정보를 불러오는 중입니다...</p>
