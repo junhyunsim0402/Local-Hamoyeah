@@ -7,7 +7,9 @@ import com.hamoyeah.contents.repository.ShopRepository;
 import com.hamoyeah.user.entity.UserEntity;
 import com.hamoyeah.user.repository.UserRepository;
 import com.hamoyeah.userproof.dto.UserProofDto;
+import com.hamoyeah.userproof.entity.PointEntity;
 import com.hamoyeah.userproof.entity.UserproofEntity;
+import com.hamoyeah.userproof.repository.PointRepository;
 import com.hamoyeah.userproof.repository.UserproofRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class UserproofService {
     private final ContentsRepository contentsRepository;
     private final ShopRepository shopRepository;
     private final FileService fileService;
+    private final PointRepository pointRepository;
 
     // 유저 사진 등록 기능
     public UserproofEntity verify(String email, UserProofDto userProofDto) {
@@ -63,8 +66,23 @@ public class UserproofService {
             } proof.setStatus("반려");
             proof.setRejectReason(userProofDto.getRejectReason());
         } else if("승인".equals(userProofDto.getStatus())){
+            if ("승인".equals(proof.getStatus())) {
+                throw new IllegalArgumentException("이미 승인 처리된 내역입니다.");
+            }
             proof.setStatus("승인");
             proof.setRejectReason(null);
+
+            // 포인트 지급 로직
+            UserEntity user = proof.getUserEntity();
+            user.setTotalPoints(user.getTotalPoints()+80);
+            PointEntity pointLog = PointEntity.builder()
+                    .userEntity(user)
+                    .userproofEntity(proof)
+                    .paidPoint(80)
+                    .build();
+            pointRepository.save(pointLog);
+
+
         } else {
             throw new IllegalArgumentException("'승인' 또는 '반려'만 가능합니다.");
         }

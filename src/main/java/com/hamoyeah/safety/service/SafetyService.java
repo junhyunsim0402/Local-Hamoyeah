@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -42,6 +43,9 @@ public class SafetyService {
     private final ShopRepository shopRepository;
     private final ObjectMapper xmlMapper = new XmlMapper();
     private final WebClient webClient = WebClient.builder()
+            .uriBuilderFactory(new DefaultUriBuilderFactory() {{
+                setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
+            }})
             .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
             .build();
     @Value("${api.service.key}")
@@ -79,6 +83,7 @@ public class SafetyService {
         int streetLampScore = (int) plusResult.get("streetLampScore");
 
         // 5. 대기질 API
+        syncAir();
         List<AirpollutionEntity> airDataList=airRepository.findAll().stream()
                 .collect(java.util.stream.Collectors.toList()); // 대기질관련 api정보 가져오기
 
@@ -171,8 +176,8 @@ public class SafetyService {
                     .streetLampScore(streetLampScore)
                     .streetLampCount(lampCount)
                     .airScore(pm10Score+pm25Score)
-                    .pm10(pm10Score)
-                    .pm25(pm25Score)
+                    .pm10(pm10)
+                    .pm25(pm25)
                     // .contents(contentsList)  // 모든정보가 필요하면 쓰기
                     .build();
         }
@@ -283,14 +288,16 @@ public class SafetyService {
     public boolean syncAir(){
         for(AirStation station : AirStation.values()){
             try{
+                String encodedStationName = java.net.URLEncoder.encode(station.getName(), "UTF-8");
+
                 String xmlRaw = webClient.get()
                         .uri(uriBuilder -> uriBuilder
                                 .scheme("https")
                                 .host("apis.data.go.kr")
                                 .path("B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty")
-                                .queryParam("serviceKey", serviceKey)
+                                .queryParam("serviceKey", serviceKey) // 이미 인코딩된 키 그대로 전달
                                 .queryParam("returnType", "xml")
-                                .queryParam("stationName", station.getName())
+                                .queryParam("stationName", encodedStationName) // 수동 인코딩된 값 전달
                                 .queryParam("dataTerm", "daily")
                                 .queryParam("ver", "1.3")
                                 .build())
