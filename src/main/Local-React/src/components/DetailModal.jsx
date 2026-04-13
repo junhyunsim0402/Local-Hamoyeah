@@ -34,6 +34,10 @@ function DetailModal({ isOpen, data, onClose, onAuthClick, onFavoriteClick }) {
           maxResults: 3,      
           type: 'video',
           key: YOUTUBE_API_KEY,
+          safeSearch: 'strict', 
+          relevanceLanguage: 'ko',
+          regionCode: 'KR',
+          order: 'relevance',
         }
       });
       setYoutubeVideos(res.data.items);
