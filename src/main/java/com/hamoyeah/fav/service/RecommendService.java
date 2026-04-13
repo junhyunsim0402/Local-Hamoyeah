@@ -33,6 +33,7 @@ public class RecommendService {
         List<Map<String, Object>> scoreList = new ArrayList<>();
 
         for (ContentsEntity content : allContents) {
+            if (content.getImgUrl() == null || content.getImgUrl().isEmpty()) continue;
             Integer contentId = content.getContentId();
             long proofCount = proofCountMap.getOrDefault(contentId, 0L);
             long favCount = favRepository.countByContentsEntity_ContentId(contentId);
@@ -45,6 +46,8 @@ public class RecommendService {
             item.put("contentTitle", content.getContentTitle());
             item.put("imgUrl", content.getImgUrl());
             item.put("totalScore", totalScore);
+            item.put("lat", content.getLatitude());
+            item.put("lng", content.getLongitude());
             scoreList.add(item);
         }
 

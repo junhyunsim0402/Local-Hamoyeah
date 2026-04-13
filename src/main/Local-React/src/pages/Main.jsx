@@ -7,6 +7,7 @@ import MyPageModal from '../components/MyPageModal';
 import ScorePanel from '../components/ScorePanel';
 import NewsPanel from '../components/NewsPanel';
 import DetailModal from '../components/DetailModal';
+import RecommendBanner from '../components/RecommendBanner';
 
 function MainPage() {
   const [viewType, setViewType] = useState('noise');
@@ -22,7 +23,9 @@ function MainPage() {
   const [scoreData, setScoreData] = useState(null); // 정주여건 점수 데이터
   const [toastVisible, setToastVisible] = useState(false); // 토스트 바 표시 여부
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false); // 상세 모달 열림 여부
-const [selectedPlaceInfo, setSelectedPlaceInfo] = useState(null);  // 클릭된 장소의 정보
+  const [selectedPlaceInfo, setSelectedPlaceInfo] = useState(null);  // 클릭된 장소의 정보
+  const [isRecommendOpen, setIsRecommendOpen] = useState(false);  // 진주 추천 창 여부
+  const [moveToLocation, setMoveToLocation] = useState(null);   // 추천 content 클릭 여부
 
 
   const handleScoreReady = (data) => {
@@ -48,6 +51,11 @@ const [selectedPlaceInfo, setSelectedPlaceInfo] = useState(null);  // 클릭된 
 
     setIsMyPageOpen(true);
   };
+
+  const handleRecommendClick = (item) => {
+    setIsRecommendOpen(false);
+    setMoveToLocation({ lat: item.lat, lng: item.lng });
+};
 
   return (
     <div className="main-page">
@@ -156,14 +164,24 @@ const [selectedPlaceInfo, setSelectedPlaceInfo] = useState(null);  // 클릭된 
         {viewType === 'news' ? (
           <NewsPanel newsCategory={newsCategory} />
         ) : (
-          <Kakaomap
-            viewType={viewType}
-            onAuthBtnClick={openAuthModal}
-            shopCategory={shopCategory}
-            contentCategory={contentCategory}
-            onScoreReady={handleScoreReady}
-            onMarkerClick={handleMarkerClick}
-          />
+          <>
+            <button
+              className="recommend-btn"
+              onClick={() => setIsRecommendOpen(!isRecommendOpen)}
+            >
+              🏆 {isRecommendOpen ? '추천 닫기' : '오늘의 추천'}
+            </button>
+            {isRecommendOpen && <RecommendBanner onContentClick={handleRecommendClick} />}
+            <Kakaomap
+              viewType={viewType}
+              onAuthBtnClick={openAuthModal}
+              shopCategory={shopCategory}
+              contentCategory={contentCategory}
+              onScoreReady={handleScoreReady}
+              onMarkerClick={handleMarkerClick}
+              moveToLocation={moveToLocation}
+            />
+          </>
         )}
       </main>
       <AuthModal

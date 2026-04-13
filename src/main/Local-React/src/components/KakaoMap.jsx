@@ -12,7 +12,7 @@ import cultureIcon from '../assets/culture.png';
 import peopleIcon from '../assets/people.png';
 import groupIcon from '../assets/group.png';
 // 함수 시작
-function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onScoreReady, onMarkerClick }) {       // 함수 시작
+function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onScoreReady, onMarkerClick, moveToLocation }) {       // 함수 시작
     const mapRef = useRef(null);        // 지도를 그릴 div를 나중에 찾기 위한 변수, 처음엔 비어있음(null)
     const mapInstanceRef = useRef(null);        // map 객체 저장용
     const clustererRef = useRef(null);          // clusterer 저장용
@@ -20,6 +20,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
     const authContentsRef = useRef([]);         // 인증 가능 목록 저장용
     const shopCategoryRef = useRef('0');
     const contentCategoryRef = useRef('0');
+    const moveToLocationRef = useRef(null);
 
     const groupNearbyContents = (contents) => {
         return contents.reduce((acc, item) => {
@@ -155,7 +156,6 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
         }
     };
 
-
     useEffect(() => {       // 함수 시작
         const script = document.createElement("script");        // scipt를 만들고
         script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_KEY}&autoload=false&libraries=clusterer`;
@@ -249,7 +249,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                             });
                             const data = await response.json();
 
-                            if(onScoreReady) onScoreReady(data);
+                            if (onScoreReady) onScoreReady(data);
                             console.log("결과", data);
                             console.log("클릭 위치 갱신 완료:", lat, lng);
 
@@ -309,7 +309,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                                 body: JSON.stringify({ lat, lng, radius: 500 }),
                             });
                             const data = await response.json();
-                            if(onScoreReady) onScoreReady(data);
+                            if (onScoreReady) onScoreReady(data);
 
                             console.log("클릭 위치 갱신 완료:", lat, lng);
                         });
@@ -335,6 +335,25 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
         fetchAndRenderMarkers(lat, lng, map, clusterer);
 
     }, [shopCategory, contentCategory]);
+
+    // moveToLocation ref 업데이트
+    useEffect(() => {
+        moveToLocationRef.current = moveToLocation;
+    }, [moveToLocation]);
+
+    // interval로 지도 이동 감지
+    useEffect(() => {
+        const moveInterval = setInterval(() => {
+            if (moveToLocationRef.current && mapInstanceRef.current) {
+                const { lat, lng } = moveToLocationRef.current;
+                const moveLatLng = new window.kakao.maps.LatLng(lat, lng);
+                mapInstanceRef.current.setCenter(moveLatLng);
+                mapInstanceRef.current.setLevel(3);
+                moveToLocationRef.current = null;
+            }
+        }, 100);
+        return () => clearInterval(moveInterval);
+    }, []);
 
     return <div ref={mapRef} style={{ width: "100%", height: "100%", position: "absolute" }} />;
 }
