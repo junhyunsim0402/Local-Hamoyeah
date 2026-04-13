@@ -11,7 +11,11 @@
   justify-content: center; /* 로고를 중앙으로 */
   align-items: center;
   padding: 15px 20px;
-  position: relative; /* 설정 버튼의 절대 위치 기준 */
+  position: sticky; /* 설정 버튼의 절대 위치 기준 */
+  top: 0;
+  z-index:1001 ;
+  background-color: white;
+
 }
 
 .project-logo {
@@ -84,6 +88,10 @@
   padding: 10px 20px 20px 20px;
   display: flex;
   justify-content: center;
+  position: sticky;
+  top: 62px;
+  background-color: white;
+  z-index: 1000;
 }
 
 
