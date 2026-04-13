@@ -31,7 +31,7 @@
 .app-banner {
   display: none;
 }
-@media screen and (min-width: 1500px) {
+@media screen and (min-width: 900px) {
   #root {
     display: flex;
     justify-content: center;
@@ -47,6 +47,7 @@
     height: 100vh;
     background-color: #ffffff;
     border-left: 1px solid #eeeeee;
+    margin-left: 25px;
   }
 }
 /* 하단 흰색 여백 영역 */
