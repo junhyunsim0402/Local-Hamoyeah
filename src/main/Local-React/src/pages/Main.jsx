@@ -253,7 +253,7 @@ function MainPage() {
       </header>
 
       {/* 4. 하단: 지도 영역 */}
-      <main className="map-section">
+      <main className={`map-section ${viewType === 'news' ? 'news-mode' : ''}`}>
         {/* 3. 카테고리 선택 영역 */}
         <div className="category-select-wrap">
           {viewType === 'noise' ? (
@@ -311,7 +311,9 @@ function MainPage() {
           </div>
         )}
         {viewType === 'news' ? (
-          <NewsPanel newsCategory={newsCategory} />
+          <div className="news-container">
+            <NewsPanel newsCategory={newsCategory} />
+          </div>
         ) : (
           isFavLoaded ? (
             <Kakaomap
