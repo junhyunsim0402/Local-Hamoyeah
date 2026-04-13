@@ -66,6 +66,7 @@
 .login-logo {
   height: 55px; /* 로고 크기는 적절히 조절하세요 */
   object-fit: contain;
+  margin-right: 300px;
 }
 
 /* 중앙 입력 폼 영역 (가장 중요 ⭐) */

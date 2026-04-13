@@ -1,8 +1,8 @@
 .manual-page{
     display: flex;
     flex-direction: column;
-    height:100%;
-    padding: 20px;
+    height:100vh;
+    padding: 10px 20px;
     box-sizing: border-box;
     background-color: #fff;
     position: relative;
@@ -10,7 +10,7 @@
 
 .manual-page p{
     margin: 5px 0;
-    font-size: 0.9rem;
+    font-size: 0.75rem;
 }
 
 .manual-close{
@@ -36,7 +36,7 @@
     text-align: center;
     font-size: 0.9rem;
     font-weight: 900;
-    margin: 15px;
+    margin: 15px 0px;
     margin-bottom: 15px;
     padding-bottom: 8px;
     border-bottom: 2px solid #eee;
@@ -64,6 +64,5 @@
     min-height: 0;
     border-radius: 20px;
     margin: 15px;
-    margin-bottom: 5px;
     box-shadow: 0 6px 16px rgba(0,0,0,0.2);
 }
