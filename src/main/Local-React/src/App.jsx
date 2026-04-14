@@ -18,7 +18,7 @@ function App() {
         {/* 2. 주소에 따라 바뀌는 메인 콘텐츠 영역 */}
         <div className="app-content">
           <Routes>
-            <Route path="/" element={<Navigate to="/main" />} />
+            <Route path="/" element={<Navigate to="/login" />} />
             <Route path="/manual" element={<Manual/>} />
             <Route path="/banner" element={<Banner/>} />
             <Route path='/admin' element={<AdminPage/>} />
