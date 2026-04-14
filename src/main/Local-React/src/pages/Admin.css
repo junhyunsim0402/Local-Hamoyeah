@@ -9,6 +9,7 @@
   flex-direction: column;
   align-items: center; 
   overflow: visible;
+  box-sizing: border-box;
 }
 
 .admin-title {
