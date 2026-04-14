@@ -176,13 +176,15 @@ function MainPage() {
           const itemId = isShop ? item.shopId : item.contentsId;
           return String(itemId) === String(id);
         });
-
+        const isCurrentPlace = String(prev.selectedPlace?.shopId || prev.selectedPlace?.contentsId) === String(id);
         return {
           ...prev,
           items: updatedItems,
           isFavorite: toggledItem?.isFavorite,
           favId: toggledItem?.favId,
-          selectedPlace: toggledItem
+          selectedPlace: isCurrentPlace 
+          ? { ...prev.selectedPlace, ...toggledItem } 
+          : prev.selectedPlace
         };
       });
 
