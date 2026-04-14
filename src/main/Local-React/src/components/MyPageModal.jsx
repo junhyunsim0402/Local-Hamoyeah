@@ -65,7 +65,7 @@ function MyPageModal({ isOpen, onClose }) {
                                 <h3>📋 최근 인증 내역</h3>
                                 <div className="activity-list" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                                     {userProofs.length > 0 ? (
-                                        [...userProofs].reverse.map((proof, index) => (
+                                        [...userProofs].reverse().map((proof, index) => (
                                             <ProofCard 
                                                 key={proof.proofId} 
                                                 proof={proof} 
