@@ -51,10 +51,9 @@ public class DistanceCalculator {
         List<Map<String,Object>> result=new ArrayList<>();
         for(ContentsEntity item : contentsApiData) {
             try {
-                if(item.getLatitude() == null || item.getLongitude() == null ||
-                        item.getLatitude() == 0.0 || item.getLongitude() == 0.0) continue;  // 위도/경도 데이터가 없을시 무시
+                if(item.getLatitude() == null || item.getLongitude() == null ) continue;  // 위도/경도 데이터가 없을시 무시
                 double dist=getDistanceInMeters(userLat,userLng,item.getLatitude(),item.getLongitude());
-                if(dist<=radius){
+                if(!Double.isNaN(dist) && dist<=radius){
                     Map<String,Object> contents=new HashMap<>();    // 반경안에 있는 contents를 담을 Map
                     contents.put("contentsId",item.getContentId());
                     contents.put("contentsTitle",item.getContentTitle());
@@ -74,11 +73,10 @@ public class DistanceCalculator {
         List<Map<String,Object>> result=new ArrayList<>();
         for(ShopEntity item : shopApiData) {
             try {
-                if(item.getLatitude() == null || item.getLongitude() == null ||
-                        item.getLatitude() == 0.0 || item.getLongitude() == 0.0) continue;  // 위도/경도 데이터가 없을시 무시
+                if(item.getLatitude() == null || item.getLongitude() == null ) continue;  // 위도/경도 데이터가 없을시 무시
 
                 double dist=getDistanceInMeters(userLat,userLng,item.getLatitude(),item.getLongitude());
-                if(dist<=radius){
+                if(!Double.isNaN(dist) && dist<=radius){
                     Map<String,Object> contents=new HashMap<>();    // 반경안에 있는 contents를 담을 Map
                     contents.put("shopId",item.getShopId());
                     contents.put("shopTitle",item.getName());
