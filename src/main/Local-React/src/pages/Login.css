@@ -35,14 +35,13 @@
   z-index: 1;
 }
 .logo-section {
-  position: fixed; 
+ position: relative !important; /* 강제로 absolute/fixed 해제 */
+  margin: 0 auto !important;
+  left: auto !important; /* left: 50% 잔상 제거 */
+  transform: none !important; /* transform 잔상 제거 */
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  
-  /* 너비와 높이 설정 */
   width: 100%;
-  max-width: 501px; 
+  max-width: 320px; 
   height: 160px;
   display: flex;
   justify-content: center;
@@ -64,14 +63,13 @@
 
 
 .login-logo {
-  height: 55px; /* 로고 크기는 적절히 조절하세요 */
+  height: 55px; 
   object-fit: contain;
-  margin-right: 300px;
 }
 
 /* 중앙 입력 폼 영역 (가장 중요 ⭐) */
 .login-form {
-    margin-top: 220px;
+    margin-top: 120px;
     padding: 0px;
     display: flex;
     gap: 15px; /* 입력 그룹과 로그인 버튼 사이 간격 */

@@ -38,26 +38,26 @@
 }
 
 .logo-section {
-  position: fixed; 
+ position: relative;
+  margin: 0 auto;    
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;           
+  transform: none;   
   
-  /* 너비와 높이 설정 */
   width: 100%;
   max-width: 501px; 
   height: 160px;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 100; 
+  z-index: 100;
   
 }
 
 .join-logo { height: 55px; object-fit: contain; }
 
 .join-form {
-    margin-top: 180px;
+  margin-top: 40px;
   padding: 0px;
   display: flex;
   flex-direction: column; /* 회원가입은 버튼을 아래로 두는 게 깔끔해요 */
