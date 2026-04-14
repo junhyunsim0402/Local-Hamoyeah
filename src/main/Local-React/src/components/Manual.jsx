@@ -8,7 +8,7 @@ function Manual() {
   const navigate=useNavigate();
   const manualClose=()=>{
     
-    navigate('/');
+    navigate('/main');
   };
   
   return (
