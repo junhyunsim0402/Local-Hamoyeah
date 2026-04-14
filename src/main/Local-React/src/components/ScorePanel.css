@@ -1,20 +1,18 @@
 .score-panel {
-  position: fixed;
+  position: absolute;
   bottom: -100%;
-  left: 50%;
+  left: 10px;
+  right: 10px;
   height: 55vh;
-  width: calc(min(100%, 430px) - 20px);
   background: #ffffff;
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-  transform: translateX(-50%);
   transition: bottom 0.35s cubic-bezier(0.32, 0.72, 0, 1);
   z-index: 200;
   padding: 0 16px 24px;
   overflow-y: auto;
   box-sizing: border-box;
 }
-
 .score-panel.open {
   bottom: 40px;
 }

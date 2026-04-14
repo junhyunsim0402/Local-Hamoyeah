@@ -1,6 +1,6 @@
 .recommend-banner {
-    position: fixed;
-    bottom: 140px;    /* 80px → 140px */
+    position: absolute;
+    bottom: 140px;
     left: 50%;
     transform: translateX(-50%);
     background: white;
@@ -51,7 +51,7 @@
   position: absolute;
   bottom: 80px;
   right: 10px;
-  z-index: 200;    /* 100 → 200 */
+  z-index: 200;
   background: white;
   border: none;
   border-radius: 20px;

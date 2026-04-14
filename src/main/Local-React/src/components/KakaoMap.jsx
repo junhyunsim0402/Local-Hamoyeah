@@ -167,8 +167,10 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
             window.kakao.maps.load(() => {  // 맵을 띄움
                 navigator.geolocation.getCurrentPosition(   // 브라우저의 GPS 기능 실행, 사용자한테 위치 권한 팝업 띄움
                     (position) => { // GPS 성공시 실행
-                        const lat = 35.1798;   // 진주시청으로 고정
-                        const lng = 128.1076;  // 진주시청으로 고정
+                        const lat = 35.18955630084144;  // 진주성 위도
+                        const lng = 128.0800105117963; // 진주성 경도
+                        // const lat = 35.1798;   // 진주시청으로 고정
+                        // const lng = 128.1076;  // 진주시청으로 고정
                         // const lat = position.coords.latitude;   // GPS로 받은 사용자 위치(위도)
                         // const lng = position.coords.longitude;  // GPS로 받은 사용자 위치(경도)
                         const currentlat = lat;
@@ -253,7 +255,7 @@ function KakaoMap({ viewType, shopCategory, contentCategory, onAuthBtnClick, onS
                             });
                             const data = await response.json();
 
-                            if(onScoreReady) onScoreReady(data);
+                            if (onScoreReady) onScoreReady(data);
                             console.log("결과", data);
                             console.log("클릭 위치 갱신 완료:", lat, lng);
 

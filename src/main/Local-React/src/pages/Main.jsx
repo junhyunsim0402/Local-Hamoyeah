@@ -94,11 +94,11 @@ function MainPage() {
     try {
       const params = isShop ? `shopId=${targetId}` : `contentId=${targetId}`;
       const [resFav, resProof] = await Promise.all([
-      axios.get(`http://localhost:8080/fav/count?${params}`),
-      axios.get(`http://localhost:8080/userproof/verifycount?${params}`, {
-        headers: { Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}` } // 토큰 형식 맞추기!
-      })
-    ]);
+        axios.get(`http://localhost:8080/fav/count?${params}`),
+        axios.get(`http://localhost:8080/userproof/verifycount?${params}`, {
+          headers: { Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}` } // 토큰 형식 맞추기!
+        })
+      ]);
 
       const enrichedData = {
         ...data,
@@ -121,11 +121,11 @@ function MainPage() {
     } catch (err) {
       console.error("데이터 로드 실패:", err);
       setSelectedPlaceInfo({
-          ...data,
-          items: enrichedItems,
-          isFavorite: !!currentFav,
-          favId: currentFav?.favId || null,
-          selectedPlace: { ...place, favCount: 0 }
+        ...data,
+        items: enrichedItems,
+        isFavorite: !!currentFav,
+        favId: currentFav?.favId || null,
+        selectedPlace: { ...place, favCount: 0 }
       });
       setIsDetailModalOpen(true);
     }
@@ -190,7 +190,7 @@ function MainPage() {
     } catch (err) {
       console.error("처리 실패:", err);
     }
-};
+  };
 
   const openAuthModal = (data) => {
     setAuthData(data);
@@ -207,7 +207,7 @@ function MainPage() {
   const handleRecommendClick = (item) => {
     setIsRecommendOpen(false);
     setMoveToLocation({ lat: item.lat, lng: item.lng });
-};
+  };
 
   return (
     <div className="main-page">
@@ -348,6 +348,11 @@ function MainPage() {
             </div>
           )
         )}
+        <ScorePanel
+          isOpen={isPanelOpen}
+          onClose={() => setIsPanelOpen(false)}
+          scoreData={scoreData}
+        />
       </main>
       <AuthModal
         isOpen={isAuthModalOpen}
@@ -364,11 +369,6 @@ function MainPage() {
         isOpen={isMyPageOpen}
         onClose={() => setIsMyPageOpen(false)}
         userInfo={userInfo}
-      />
-      <ScorePanel
-        isOpen={isPanelOpen}
-        onClose={() => setIsPanelOpen(false)}
-        scoreData={scoreData}
       />
       {isDetailModalOpen && (
         <DetailModal
