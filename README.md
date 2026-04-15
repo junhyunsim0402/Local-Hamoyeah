@@ -44,13 +44,13 @@
 ---
 
 ### 🔗 시연영상 링크
-* **📺 시연 영상**: [YouTube 바로가기](https://youtu.be/jPJutScdcl8)
+* **📺 시연 영상**: [HAMOYEAH YouTube](https://youtu.be/jPJutScdcl8)
 
 ---
 
 ### ✒️ 참고 링크
-* **Backend Storage** ⚙️: [Spring Repository 바로가기](https://github.com/junhyunsim0402/Local-Hamoyeah/tree/master/src/main/java/com/hamoyeah)
-* **Frontend Storage** 💻: [React Repository 바로가기](https://github.com/junhyunsim0402/Local-Hamoyeah/tree/master/src/main/Local-React)
+* **Backend Storage** ⚙️: [Spring Repository](https://github.com/junhyunsim0402/Local-Hamoyeah/tree/master/src/main/java/com/hamoyeah)
+* **Frontend Storage** 💻: [React Repository](https://github.com/junhyunsim0402/Local-Hamoyeah/tree/master/src/main/Local-React)
 * **API Specification** 📑: [HAMOYEAH API 명세서](https://docs.google.com/spreadsheets/d/18ewr-AbsRdrsjKntVJDg3tYz8f3xOkE-Ilts73WR58E/edit?pli=1&gid=1076597901#gid=1076597901)
 * **UI/UX Design** 🎨: [Figma 디자인 가이드](https://www.figma.com/design/ykytXpqxeJmlI6x5JfAZDA/Untitled?node-id=134-72&t=Ubgw9TzkKTU2ZfLG-0)
 * **Presentation** 📊: [프로젝트 발표 PPT](https://www.canva.com/design/DAHGslkdexg/hx-l-gpcpvRui_aTWgTIfw/edit)
