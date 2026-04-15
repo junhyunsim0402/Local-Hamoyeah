@@ -39,7 +39,7 @@
 ---
 
 ### 📝 서비스 아키텍처
-![서비스 아키텍처](https://github.com/junhyunsim0402/Local-Hamoyeah/blob/master/HAMOYEAH%20%EC%84%9C%EB%B9%84%EC%8A%A4%20%EC%95%84%ED%82%A4%ED%85%8D%EC%B3%90.png?raw=true)
+![서비스 아키텍처](https://github.com/junhyunsim0402/Local-Hamoyeah/blob/master/%EC%84%9C%EB%B9%84%EC%8A%A4%20%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98.png)
 
 ---
 
